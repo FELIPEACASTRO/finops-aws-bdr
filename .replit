@@ -17,6 +17,10 @@ author = "agent"
 task = "workflow.run"
 args = "Run Tests"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Run with AWS"
+
 [[workflows.workflow]]
 name = "Run Tests"
 author = "agent"
@@ -24,6 +28,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python run_local_demo.py 2"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Run with AWS"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python run_with_aws.py"
 
 [workflows.workflow.metadata]
 outputType = "console"
