@@ -66,6 +66,11 @@ class AWSServiceType(Enum):
     EKS = "eks"
     OPENSEARCH = "opensearch"
     WORKSPACES = "workspaces"
+    FSX = "fsx"
+    DOCUMENTDB = "docdb"
+    NEPTUNE = "neptune"
+    TIMESTREAM_WRITE = "timestream-write"
+    TIMESTREAM_QUERY = "timestream-query"
 
 
 @dataclass
@@ -847,6 +852,50 @@ class ServiceFactory:
         
         return self._services['workspaces']
     
+    def get_fsx_service(self):
+        """Obtém instância do FSxService"""
+        if 'fsx' in self._mocks:
+            return self._mocks['fsx']
+        
+        if 'fsx' not in self._services:
+            from ..services.fsx_service import FSxService
+            self._services['fsx'] = FSxService(self.client_factory)
+        
+        return self._services['fsx']
+    
+    def get_documentdb_service(self):
+        """Obtém instância do DocumentDBService"""
+        if 'documentdb' in self._mocks:
+            return self._mocks['documentdb']
+        
+        if 'documentdb' not in self._services:
+            from ..services.documentdb_service import DocumentDBService
+            self._services['documentdb'] = DocumentDBService(self.client_factory)
+        
+        return self._services['documentdb']
+    
+    def get_neptune_service(self):
+        """Obtém instância do NeptuneService"""
+        if 'neptune' in self._mocks:
+            return self._mocks['neptune']
+        
+        if 'neptune' not in self._services:
+            from ..services.neptune_service import NeptuneService
+            self._services['neptune'] = NeptuneService(self.client_factory)
+        
+        return self._services['neptune']
+    
+    def get_timestream_service(self):
+        """Obtém instância do TimestreamService"""
+        if 'timestream' in self._mocks:
+            return self._mocks['timestream']
+        
+        if 'timestream' not in self._services:
+            from ..services.timestream_service import TimestreamService
+            self._services['timestream'] = TimestreamService(self.client_factory)
+        
+        return self._services['timestream']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -883,7 +932,11 @@ class ServiceFactory:
             'eks': self.get_eks_service(),
             'aurora': self.get_aurora_service(),
             'opensearch': self.get_opensearch_service(),
-            'workspaces': self.get_workspaces_service()
+            'workspaces': self.get_workspaces_service(),
+            'fsx': self.get_fsx_service(),
+            'documentdb': self.get_documentdb_service(),
+            'neptune': self.get_neptune_service(),
+            'timestream': self.get_timestream_service()
         }
     
     def clear_cache(self):

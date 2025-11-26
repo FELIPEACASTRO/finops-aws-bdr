@@ -12,9 +12,9 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 
 ## Project Status
 
-- **Test Suite**: 318+ tests passing
-- **Services Implemented**: 26 AWS services (of 253 total target)
-- **Current Phase**: FASE 2.4 - High-Cost Non-Serverless Services (COMPLETED)
+- **Test Suite**: 357+ tests passing
+- **Services Implemented**: 30 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.5 - High-Cost Storage & Database Services (COMPLETED)
 - **Documentation**: README.md completamente atualizado (extremamente didático)
 
 ## System Architecture
@@ -31,7 +31,7 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **Extensible Service Layer:** Employs `BaseAWSService` as an abstract base class for all AWS service integrations, standardizing interfaces for `get_resources()`, `get_costs()`, `get_metrics()`, and `get_recommendations()`.
 - **Testing Strategy:** Comprehensive unit testing with Pytest, utilizing `moto` for mocking AWS services to ensure consistent and safe testing.
 
-## AWS Services Implemented (26 of 253)
+## AWS Services Implemented (30 of 253)
 
 ### Storage Services
 - **S3Service** - Object Storage analysis (buckets, costs, lifecycle, recommendations)
@@ -61,12 +61,18 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **GlueService** - ETL analysis (jobs, crawlers, data catalog)
 - **MSKService** - Kafka Streaming analysis (clusters, brokers, storage, throughput)
 - **OpenSearchService** - Search/Analytics (domains, nodes, UltraWarm, encryption)
+- **TimestreamService** - Time series database (databases, tables, scheduled queries)
 
 ### Container & Compute Services (NEW)
 - **EKSService** - Kubernetes analysis (clusters, node groups, Fargate profiles, addons)
 
 ### Database Services (Extended)
 - **AuroraService** - Aurora analysis (MySQL/PostgreSQL clusters, Serverless v2, instances)
+- **DocumentDBService** - DocumentDB analysis (MongoDB compatible clusters, instances)
+- **NeptuneService** - Neptune analysis (graph database clusters, instances)
+
+### Storage Services (Extended)
+- **FSxService** - FSx analysis (Lustre, Windows, ONTAP, OpenZFS file systems)
 
 ### Desktop Services (NEW)
 - **WorkSpacesService** - Virtual desktop analysis (workspaces, directories, bundles, billing)
@@ -149,12 +155,24 @@ finops-aws/
 - Added 34 new unit tests for Phase 2.4 services
 - Total: 318+ tests passing
 
-### Service Files (26 total)
+### FASE 2.5 - High-Cost Storage & Database Services (COMPLETED)
+- Added **FSxService** for Amazon FSx analysis (Lustre, Windows, ONTAP, OpenZFS)
+- Added **DocumentDBService** for Amazon DocumentDB analysis (MongoDB compatible)
+- Added **NeptuneService** for Amazon Neptune analysis (graph database)
+- Added **TimestreamService** for Amazon Timestream analysis (time series database)
+- Updated `AWSServiceType` enum with 5 new types (FSX, DOCUMENTDB, NEPTUNE, TIMESTREAM_WRITE, TIMESTREAM_QUERY)
+- Updated `ServiceFactory` with getters for all 4 new services
+- Added 39 new unit tests for Phase 2.5 services
+- Total: 357+ tests passing
+
+### Service Files (30 total)
 **Core Services:** `cost_service.py`, `metrics_service.py`, `optimizer_service.py`, `rds_service.py`
 **Storage:** `s3_service.py`, `ebs_service.py`, `efs_service.py`
-**Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`, `aurora_service.py`
+**Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`, `aurora_service.py`, `documentdb_service.py`, `neptune_service.py`
 **Compute:** `ec2_finops_service.py`, `lambda_finops_service.py`, `ecs_service.py`, `emr_service.py`, `sagemaker_service.py`, `eks_service.py`
 **Networking:** `vpc_network_service.py`, `cloudfront_service.py`, `elb_service.py`, `route53_service.py`
-**Streaming/Analytics:** `kinesis_service.py`, `msk_service.py`, `glue_service.py`, `opensearch_service.py`
+**Streaming/Analytics:** `kinesis_service.py`, `msk_service.py`, `glue_service.py`, `opensearch_service.py`, `timestream_service.py`
 **Desktop:** `workspaces_service.py`
 **Integration:** `sns_sqs_service.py`, `backup_service.py`, `secrets_manager_service.py`
+**Graph/Document DB:** `neptune_service.py`, `documentdb_service.py`
+**File Systems:** `fsx_service.py`

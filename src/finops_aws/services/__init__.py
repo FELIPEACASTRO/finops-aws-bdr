@@ -34,6 +34,12 @@ FASE 2.4: Serviços Não-Serverless de Alto Custo
 - AuroraService: Análise de Amazon Aurora (MySQL/PostgreSQL gerenciado)
 - OpenSearchService: Análise de Amazon OpenSearch (Elasticsearch gerenciado)
 - WorkSpacesService: Análise de Amazon WorkSpaces (Desktop virtual)
+
+FASE 2.5: Serviços de Alto Custo de Armazenamento e Banco de Dados
+- FSxService: Análise de Amazon FSx (Lustre, Windows, ONTAP, OpenZFS)
+- DocumentDBService: Análise de Amazon DocumentDB (MongoDB compatível)
+- NeptuneService: Análise de Amazon Neptune (Graph database)
+- TimestreamService: Análise de Amazon Timestream (Time series database)
 """
 
 from .cost_service import CostService
@@ -71,6 +77,10 @@ from .eks_service import EKSService, EKSCluster, EKSNodeGroup, EKSFargateProfile
 from .aurora_service import AuroraService, AuroraCluster, AuroraInstance
 from .opensearch_service import OpenSearchService, OpenSearchDomain
 from .workspaces_service import WorkSpacesService, WorkSpace, WorkSpacesDirectory, WorkSpacesBundle
+from .fsx_service import FSxService, FSxFileSystem, FSxVolume, FSxBackup
+from .documentdb_service import DocumentDBService, DocumentDBCluster, DocumentDBInstance, DocumentDBClusterSnapshot
+from .neptune_service import NeptuneService, NeptuneCluster, NeptuneInstance
+from .timestream_service import TimestreamService, TimestreamDatabase, TimestreamTable, TimestreamScheduledQuery
 
 __all__ = [
     'CostService',
@@ -152,5 +162,20 @@ __all__ = [
     'WorkSpacesService',
     'WorkSpace',
     'WorkSpacesDirectory',
-    'WorkSpacesBundle'
+    'WorkSpacesBundle',
+    'FSxService',
+    'FSxFileSystem',
+    'FSxVolume',
+    'FSxBackup',
+    'DocumentDBService',
+    'DocumentDBCluster',
+    'DocumentDBInstance',
+    'DocumentDBClusterSnapshot',
+    'NeptuneService',
+    'NeptuneCluster',
+    'NeptuneInstance',
+    'TimestreamService',
+    'TimestreamDatabase',
+    'TimestreamTable',
+    'TimestreamScheduledQuery'
 ]
