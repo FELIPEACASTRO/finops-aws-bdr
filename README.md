@@ -1,34 +1,43 @@
-# FinOps AWS BDR - Solução Avançada de Otimização de Custos AWS
+# FinOps AWS BDR - Solução Empresarial de Otimização de Custos AWS
 
-Uma solução **serverless empresarial** em Python para análise inteligente de custos, monitoramento de uso e recomendações de otimização na AWS. Implementada com **arquitetura limpa**, **padrões de design robustos** e **observabilidade completa**.
+Uma solução **serverless empresarial** em Python para análise inteligente de custos, monitoramento de uso e recomendações de otimização na AWS. Implementada com **Clean Architecture**, **Domain-Driven Design (DDD)**, **padrões SOLID** e **observabilidade completa**.
 
 ## 🎯 Visão Geral da Solução
 
-Esta solução FinOps (Financial Operations) utiliza **AWS Lambda** como núcleo de processamento para automatizar a coleta, análise e consolidação de dados financeiros e operacionais da AWS, fornecendo:
+Esta solução FinOps (Financial Operations) utiliza **AWS Lambda** como núcleo de processamento para automatizar a coleta, análise e consolidação de dados financeiros e operacionais da AWS. A arquitetura segue princípios de **Clean Architecture** e **DDD**, garantindo alta manutenibilidade, testabilidade e extensibilidade.
 
-### 📊 **Análise Financeira Inteligente**
-- **Custos Multi-Período**: Análise detalhada de custos por serviço AWS (7, 15 e 30 dias)
-- **Análise de Tendências**: Identificação automática de padrões de crescimento/redução de custos
-- **Distribuição de Gastos**: Categorização e percentuais de custos por serviço
-- **Top Services**: Ranking dos serviços mais caros com análise de impacto financeiro
+### 🏗️ **Arquitetura Técnica**
+- **Clean Architecture**: Separação clara de responsabilidades em 4 camadas
+- **Domain-Driven Design**: Entities, Value Objects, Domain Services e Repository Pattern
+- **SOLID Principles**: Código extensível, testável e manutenível
+- **Strategy Pattern**: Análises plugáveis e configuráveis
+- **Async/Await**: Processamento paralelo para melhor performance
 
-### 📈 **Monitoramento Operacional**
-- **Métricas de Performance**: Coleta de métricas de CPU, memória, invocações e erros
-- **Análise de Utilização**: Identificação de recursos subutilizados ou sobrecarregados
-- **Health Checks**: Monitoramento de saúde de recursos EC2 e Lambda
-- **Alertas Proativos**: Detecção de anomalias de uso e performance
+### 📊 **Capacidades Funcionais**
 
-### 🎯 **Otimização Baseada em IA**
-- **AWS Compute Optimizer**: Integração nativa com recomendações da AWS
-- **Right-Sizing**: Sugestões de redimensionamento com cálculo de economia
-- **ROI Analysis**: Análise de retorno sobre investimento para otimizações
-- **Action Plans**: Planos de ação priorizados por impacto financeiro
+#### 💰 **Análise Financeira Inteligente**
+- **Multi-Period Cost Analysis**: Custos detalhados por serviço AWS (7, 15 e 30 dias)
+- **Trend Analysis Engine**: Detecção automática de padrões INCREASING/DECREASING/STABLE
+- **Cost Distribution**: Categorização e percentuais por serviço com análise de impacto
+- **Top Services Ranking**: Classificação dinâmica dos serviços mais caros
 
-### 📋 **Relatórios Executivos**
-- **Executive Dashboard**: Resumos executivos com KPIs principais
-- **Savings Opportunities**: Oportunidades de economia categorizadas
-- **Cost Optimization Roadmap**: Roadmap de otimização com timeline
-- **Compliance Reports**: Relatórios para auditoria e compliance
+#### 📈 **Monitoramento Operacional Avançado**
+- **EC2 Performance Analytics**: CPU utilization, resource efficiency, instance profiling
+- **Lambda Operational Insights**: Invocations, duration, errors, throttles com reliability scoring
+- **Custom Metrics Collection**: Multi-source data com validação e cache inteligente
+- **Real-time Processing**: Processamento em tempo real com retry automático
+
+#### 🤖 **Otimização Baseada em Machine Learning**
+- **AWS Compute Optimizer Integration**: Recomendações nativas com confidence scoring
+- **Intelligent Right-Sizing**: EC2, Lambda, EBS e Auto Scaling optimization
+- **ROI Analysis Engine**: Cálculo preciso de economia vs custo de implementação
+- **Finding Classification**: OVER_PROVISIONED, UNDER_PROVISIONED, OPTIMIZED, NOT_OPTIMIZED
+
+#### 📊 **Relatórios Executivos e Analytics**
+- **Executive Summary Dashboard**: KPIs principais com visualizações gráficas
+- **Detailed Analytics Reports**: Análise por serviço, utilização e performance benchmarks
+- **Optimization Roadmap**: Plano de implementação em fases com timeline
+- **Compliance Reports**: Relatórios para auditoria e governance
 
 ## 🏗️ Arquitetura da Solução
 
@@ -94,7 +103,7 @@ Esta solução FinOps (Financial Operations) utiliza **AWS Lambda** como núcleo
 │  │                 │  │                 │  │                 │  │   SDK   │ │
 │  │ • EC2 Client    │  │ • Metrics API   │  │ • Cost API      │  │ • Retry │ │
 │  │ • Lambda Client │  │ • Log Groups    │  │ • Usage API     │  │ • Auth  │ │
-│  │ • STS Client    │  │ • Dashboards    │  │ • Billing API   │  │ • Error │ │
+│  │ • Compute Opt   │  │ • Dashboards    │  │ • Billing API   │  │ • Error │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
@@ -120,12 +129,12 @@ Esta solução FinOps (Financial Operations) utiliza **AWS Lambda** como núcleo
 │                         (Use Cases & Orchestration)                        │
 │                                                                             │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────┐ │
-│  │   Use Cases     │  │      DTOs       │  │   Strategies    │  │ Service │ │
-│  │                 │  │                 │  │                 │  │ Layer   │ │
-│  │ • Analyze Costs │  │ • Cost Analysis │  │ • Cost Strategy │  │ • Cost  │ │
-│  │ • Collect Usage │  │ • Usage Report  │  │ • Usage Strategy│  │ • Metric│ │
-│  │ • Generate Recs │  │ • Optimization  │  │ • Optim Strategy│  │ • Optim │ │
-│  │ • Create Report │  │ • Executive Sum │  │ • Report Builder│  │ • Report│ │
+│  │   Use Cases     │  │      DTOs       │  │   Strategies    │  │ Async   │ │
+│  │                 │  │                 │  │                 │  │ Proc    │ │
+│  │ • Analyze Costs │  │ • Cost Analysis │  │ • Top Services  │  │ • Gather│ │
+│  │ • Collect Usage │  │ • Usage Report  │  │ • Trend Analysis│  │ • Parallel│ │
+│  │ • Generate Recs │  │ • Optimization  │  │ • Distribution  │  │ • Cache │ │
+│  │ • Create Report │  │ • Executive Sum │  │ • ROI Analysis  │  │ • Retry │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
                                         ▲
@@ -301,64 +310,64 @@ finops-aws-bdr/
 ├── src/finops_aws/
 │   ├── domain/                    # 🏛️ DOMAIN LAYER (Core Business Logic)
 │   │   ├── entities/
-│   │   │   └── cost_entity.py            # Rich domain entities
+│   │   │   └── cost_entity.py            # Rich domain entities with business logic
 │   │   ├── value_objects/
 │   │   │   ├── money.py                  # Money value object with precision
 │   │   │   ├── time_period.py            # Time period abstraction
 │   │   │   └── service_name.py           # AWS service name with categories
 │   │   ├── repositories/
-│   │   │   └── cost_repository.py        # Repository interfaces
+│   │   │   └── cost_repository.py        # Repository interfaces (contracts)
 │   │   └── services/
 │   │       └── domain_services.py        # Domain business rules
 │   │
-│   ├── application/               # 🎯 APPLICATION LAYER (Use Cases)
+│   ├── application/               # 🎯 APPLICATION LAYER (Use Cases & Orchestration)
 │   │   ├── use_cases/
-│   │   │   └── analyze_costs_use_case.py # Main business use case
+│   │   │   └── analyze_costs_use_case.py # Strategy Pattern + Async processing
 │   │   ├── dto/
 │   │   │   └── cost_analysis_dto.py      # Data transfer objects
 │   │   └── interfaces/
 │   │       └── logger_interface.py       # Application interfaces
 │   │
-│   ├── infrastructure/            # 🔧 INFRASTRUCTURE LAYER (External Concerns)
+│   ├── infrastructure/            # 🔧 INFRASTRUCTURE LAYER (External Systems)
 │   │   └── services/
-│   │       ├── aws_cost_repository.py    # AWS Cost Explorer implementation
+│   │       ├── aws_cost_repository.py    # Cost Explorer implementation
 │   │       └── aws_metrics_service.py    # CloudWatch implementation
 │   │
-│   ├── interfaces/                # 🌐 INTERFACE LAYER (Controllers)
-│   │   └── lambda_handler.py             # AWS Lambda entry point
+│   ├── interfaces/                # 🌐 INTERFACE LAYER (Entry Points)
+│   │   └── lambda_handler.py             # AWS Lambda handler with error handling
 │   │
-│   ├── services/                  # 📊 LEGACY SERVICES (Refactoring in progress)
-│   │   ├── cost_service.py               # Cost Explorer service
-│   │   ├── metrics_service.py            # CloudWatch metrics service
-│   │   └── optimizer_service.py          # Compute Optimizer service
+│   ├── services/                  # 📊 CURRENT SERVICE LAYER (Legacy - being refactored)
+│   │   ├── cost_service.py               # Cost Explorer service with retry logic
+│   │   ├── metrics_service.py            # CloudWatch metrics with caching
+│   │   └── optimizer_service.py          # Compute Optimizer with ML recommendations
 │   │
-│   ├── models/                    # 📋 DATA MODELS (DTOs)
-│   │   └── finops_models.py              # Data transfer models
+│   ├── models/                    # 📋 DATA MODELS (DTOs & Dataclasses)
+│   │   └── finops_models.py              # Typed data models with validation
 │   │
 │   └── utils/                     # 🛠️ SHARED UTILITIES
-│       ├── logger.py                     # Structured JSON logging
-│       └── aws_helpers.py                # AWS SDK helpers with retry logic
+│       ├── logger.py                     # Structured JSON logging with context
+│       └── aws_helpers.py                # AWS SDK helpers with exponential backoff
 │
 ├── tests/                         # 🧪 COMPREHENSIVE TEST SUITE
-│   ├── unit/                             # Unit tests with mocking
-│   │   ├── test_cost_service.py
-│   │   ├── test_metrics_service.py
-│   │   └── test_optimizer_service.py
-│   ├── integration/                      # Integration tests (future)
-│   └── fixtures/                         # Test data fixtures
+│   ├── unit/                             # Unit tests with moto mocking
+│   │   ├── test_cost_service.py          # Cost service tests
+│   │   ├── test_metrics_service.py       # Metrics service tests
+│   │   └── test_optimizer_service.py     # Optimizer service tests
+│   ├── integration/                      # Integration tests (planned)
+│   └── fixtures/                         # Test data fixtures (planned)
 │
 ├── infrastructure/                # 🏗️ INFRASTRUCTURE AS CODE
-│   └── cloudformation-template.yaml     # Complete AWS stack definition
+│   └── cloudformation-template.yaml     # Complete AWS stack with IAM, Lambda, API Gateway
 │
-├── example_events/                # 📝 SAMPLE DATA
+├── example_events/                # 📝 SAMPLE DATA & TESTING
 │   ├── api_gateway_event.json           # API Gateway test event
-│   └── scheduled_event.json             # EventBridge test event
+│   └── scheduled_event.json             # EventBridge scheduled event
 │
 ├── deploy.sh                      # 🚀 AUTOMATED DEPLOYMENT SCRIPT
-├── requirements.txt               # 📦 Python dependencies
+├── requirements.txt               # 📦 Python dependencies (boto3, pytest, etc.)
 ├── pytest.ini                    # 🧪 Test configuration
 ├── .env.example                   # 🔐 Environment variables template
-└── README.md                      # 📖 This documentation
+└── README.md                      # 📖 Complete documentation
 ```
 
 ### Arquitetura em Camadas
