@@ -80,7 +80,6 @@ class RDSService:
         except Exception:
             return False
     
-    @log_api_call
     def get_rds_instances(self) -> List[RDSInstance]:
         """
         Obtém lista de todas as instâncias RDS
@@ -112,7 +111,6 @@ class RDSService:
             handle_aws_error(e, "get_rds_instances")
             return []
     
-    @log_api_call
     def get_rds_costs(self, period_days: int = 30) -> Dict[str, Any]:
         """
         Obtém custos detalhados do RDS
@@ -190,7 +188,6 @@ class RDSService:
             handle_aws_error(e, "get_rds_costs")
             return {}
     
-    @log_api_call
     def get_rds_metrics(self, instance_id: str, period_days: int = 7) -> Dict[str, Any]:
         """
         Obtém métricas detalhadas de uma instância RDS

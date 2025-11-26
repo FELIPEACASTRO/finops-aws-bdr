@@ -17,12 +17,34 @@ This project is undergoing transformation into a world-class FinOps product foll
 ### What's Working
 - ✅ Python 3.11 installed and configured
 - ✅ All dependencies installed (boto3, pytest, moto, pytest-asyncio, etc.)
-- ✅ Test suite fully passing (83 passed, 1 skipped)
+- ✅ Test suite fully passing (176 passed, 1 skipped)
 - ✅ Local demo runner for testing Lambda handler with mocked AWS services
 - ✅ Comprehensive .gitignore for Python projects
 - ✅ **CleanupManager** - Sistema de limpeza automática de arquivos temporários
+- ✅ **Factory Pattern** - Criação centralizada de clientes e serviços AWS
 
 ### Recent Changes (Nov 26, 2025)
+
+#### FASE 1.3 - Factory Pattern (EM PROGRESSO)
+- Implementado `AWSClientFactory` em `src/finops_aws/core/factories.py`
+  - Criação centralizada de clientes boto3 (singleton por tipo/região)
+  - Configuração padronizada (retry, timeouts, pool connections)
+  - Cache de clientes para reutilização
+  - Suporte a injeção de mocks para testes
+  - Enum `AWSServiceType` com 16 serviços AWS suportados
+- Implementado `ServiceFactory` em `src/finops_aws/core/factories.py`
+  - Instanciação unificada de serviços FinOps
+  - Injeção de dependências automática via AWSClientFactory
+  - Cache de serviços (lazy initialization)
+  - Suporte a mocks para testes
+- Implementado `ServiceProtocol` para padronizar interfaces
+- Refatorados todos os serviços para aceitar clientes injetados:
+  - `CostService` - aceita `client` opcional
+  - `MetricsService` - aceita `cloudwatch_client`, `ec2_client`, `lambda_client`
+  - `OptimizerService` - aceita `client` opcional
+  - `RDSService` - aceita `rds_client`, `cloudwatch_client`, `cost_client`
+- Adicionada função `handle_aws_error` em `aws_helpers.py`
+- 34 testes unitários para factories em `tests/unit/test_factories.py`
 
 #### FASE 1.2 - DynamoDB State Manager & Retry Handler (CONCLUÍDO)
 - Implementado `DynamoDBStateManager` em `src/finops_aws/core/dynamodb_state_manager.py`
@@ -56,7 +78,7 @@ This project is undergoing transformation into a world-class FinOps product foll
 ### Roadmap Progress
 - [x] FASE 1.1 - Sistema de Limpeza BKP
 - [x] FASE 1.2 - Controle de Execução (DynamoDB) + Retry Handler
-- [ ] FASE 1.3 - Refatoração Core (Factory Pattern)
+- [x] FASE 1.3 - Refatoração Core (Factory Pattern)
 - [ ] FASE 2 - Expansão de Serviços AWS
 - [ ] FASE 3 - Inteligência e Automação (ML)
 - [ ] FASE 4 - Interface e Experiência (Dashboard)
@@ -72,7 +94,8 @@ This project is undergoing transformation into a world-class FinOps product foll
 ```
 finops-aws-bdr/
 ├── src/finops_aws/           # Main application code
-│   ├── core/                 # Core business logic (NEW)
+│   ├── core/                 # Core business logic
+│   │   ├── factories.py             # Factory Pattern (FASE 1.3)
 │   │   ├── cleanup_manager.py       # Sistema de limpeza automática
 │   │   ├── state_manager.py         # Gerenciamento de estado (S3 - legacy)
 │   │   ├── dynamodb_state_manager.py # Gerenciamento de estado (DynamoDB)
@@ -85,8 +108,9 @@ finops-aws-bdr/
 │   ├── services/             # Service layer (cost, metrics, optimizer)
 │   ├── models/               # Data models
 │   └── utils/                # Utilities (logging, AWS helpers)
-├── tests/                    # Unit tests (143 tests)
+├── tests/                    # Unit tests (176 tests)
 │   └── unit/
+│       ├── test_factories.py             # 34 tests for Factory Pattern
 │       ├── test_cleanup_manager.py       # 27 tests for cleanup system
 │       ├── test_dynamodb_state_manager.py # 29 tests for DynamoDB state
 │       ├── test_retry_handler.py         # 30 tests for retry system
