@@ -71,6 +71,11 @@ class AWSServiceType(Enum):
     NEPTUNE = "neptune"
     TIMESTREAM_WRITE = "timestream-write"
     TIMESTREAM_QUERY = "timestream-query"
+    BATCH = "batch"
+    STEPFUNCTIONS = "stepfunctions"
+    APIGATEWAY = "apigateway"
+    APIGATEWAYV2 = "apigatewayv2"
+    TRANSFER = "transfer"
 
 
 @dataclass
@@ -896,6 +901,50 @@ class ServiceFactory:
         
         return self._services['timestream']
     
+    def get_batch_service(self):
+        """Obtém instância do BatchService"""
+        if 'batch' in self._mocks:
+            return self._mocks['batch']
+        
+        if 'batch' not in self._services:
+            from ..services.batch_service import BatchService
+            self._services['batch'] = BatchService(self.client_factory)
+        
+        return self._services['batch']
+    
+    def get_stepfunctions_service(self):
+        """Obtém instância do StepFunctionsService"""
+        if 'stepfunctions' in self._mocks:
+            return self._mocks['stepfunctions']
+        
+        if 'stepfunctions' not in self._services:
+            from ..services.stepfunctions_service import StepFunctionsService
+            self._services['stepfunctions'] = StepFunctionsService(self.client_factory)
+        
+        return self._services['stepfunctions']
+    
+    def get_apigateway_service(self):
+        """Obtém instância do APIGatewayService"""
+        if 'apigateway' in self._mocks:
+            return self._mocks['apigateway']
+        
+        if 'apigateway' not in self._services:
+            from ..services.apigateway_service import APIGatewayService
+            self._services['apigateway'] = APIGatewayService(self.client_factory)
+        
+        return self._services['apigateway']
+    
+    def get_transfer_service(self):
+        """Obtém instância do TransferFamilyService"""
+        if 'transfer' in self._mocks:
+            return self._mocks['transfer']
+        
+        if 'transfer' not in self._services:
+            from ..services.transfer_service import TransferFamilyService
+            self._services['transfer'] = TransferFamilyService(self.client_factory)
+        
+        return self._services['transfer']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -936,7 +985,11 @@ class ServiceFactory:
             'fsx': self.get_fsx_service(),
             'documentdb': self.get_documentdb_service(),
             'neptune': self.get_neptune_service(),
-            'timestream': self.get_timestream_service()
+            'timestream': self.get_timestream_service(),
+            'batch': self.get_batch_service(),
+            'stepfunctions': self.get_stepfunctions_service(),
+            'apigateway': self.get_apigateway_service(),
+            'transfer': self.get_transfer_service()
         }
     
     def clear_cache(self):

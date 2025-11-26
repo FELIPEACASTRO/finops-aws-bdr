@@ -40,6 +40,12 @@ FASE 2.5: Serviços de Alto Custo de Armazenamento e Banco de Dados
 - DocumentDBService: Análise de Amazon DocumentDB (MongoDB compatível)
 - NeptuneService: Análise de Amazon Neptune (Graph database)
 - TimestreamService: Análise de Amazon Timestream (Time series database)
+
+FASE 2.6: Serviços de Computação e Aplicação
+- BatchService: Análise de AWS Batch (computação em lote)
+- StepFunctionsService: Análise de Step Functions (orquestração de workflows)
+- APIGatewayService: Análise de API Gateway (REST, HTTP, WebSocket)
+- TransferFamilyService: Análise de AWS Transfer Family (SFTP/FTPS/FTP)
 """
 
 from .cost_service import CostService
@@ -81,6 +87,10 @@ from .fsx_service import FSxService, FSxFileSystem, FSxVolume, FSxBackup
 from .documentdb_service import DocumentDBService, DocumentDBCluster, DocumentDBInstance, DocumentDBClusterSnapshot
 from .neptune_service import NeptuneService, NeptuneCluster, NeptuneInstance
 from .timestream_service import TimestreamService, TimestreamDatabase, TimestreamTable, TimestreamScheduledQuery
+from .batch_service import BatchService, BatchComputeEnvironment, BatchJobQueue, BatchJobDefinition
+from .stepfunctions_service import StepFunctionsService, StateMachine, StateMachineExecution, Activity
+from .apigateway_service import APIGatewayService, RestAPI, HttpAPI, APIStage, UsagePlan
+from .transfer_service import TransferFamilyService, TransferServer, TransferUser, TransferConnector
 
 __all__ = [
     'CostService',
@@ -177,5 +187,22 @@ __all__ = [
     'TimestreamService',
     'TimestreamDatabase',
     'TimestreamTable',
-    'TimestreamScheduledQuery'
+    'TimestreamScheduledQuery',
+    'BatchService',
+    'BatchComputeEnvironment',
+    'BatchJobQueue',
+    'BatchJobDefinition',
+    'StepFunctionsService',
+    'StateMachine',
+    'StateMachineExecution',
+    'Activity',
+    'APIGatewayService',
+    'RestAPI',
+    'HttpAPI',
+    'APIStage',
+    'UsagePlan',
+    'TransferFamilyService',
+    'TransferServer',
+    'TransferUser',
+    'TransferConnector'
 ]

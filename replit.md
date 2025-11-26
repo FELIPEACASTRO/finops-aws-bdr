@@ -12,9 +12,9 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 
 ## Project Status
 
-- **Test Suite**: 357+ tests passing
-- **Services Implemented**: 30 AWS services (of 253 total target)
-- **Current Phase**: FASE 2.5 - High-Cost Storage & Database Services (COMPLETED)
+- **Test Suite**: 405+ tests passing
+- **Services Implemented**: 34 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.6 - Compute & Application Services (COMPLETED)
 - **Documentation**: README.md completamente atualizado (extremamente didático)
 
 ## System Architecture
@@ -31,7 +31,7 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **Extensible Service Layer:** Employs `BaseAWSService` as an abstract base class for all AWS service integrations, standardizing interfaces for `get_resources()`, `get_costs()`, `get_metrics()`, and `get_recommendations()`.
 - **Testing Strategy:** Comprehensive unit testing with Pytest, utilizing `moto` for mocking AWS services to ensure consistent and safe testing.
 
-## AWS Services Implemented (30 of 253)
+## AWS Services Implemented (34 of 253)
 
 ### Storage Services
 - **S3Service** - Object Storage analysis (buckets, costs, lifecycle, recommendations)
@@ -76,6 +76,12 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 
 ### Desktop Services (NEW)
 - **WorkSpacesService** - Virtual desktop analysis (workspaces, directories, bundles, billing)
+
+### Compute & Application Services (NEW)
+- **BatchService** - Batch computing analysis (compute environments, job queues, job definitions)
+- **StepFunctionsService** - Workflow orchestration analysis (state machines, executions, activities)
+- **APIGatewayService** - API analysis (REST APIs, HTTP APIs, WebSocket APIs, stages)
+- **TransferFamilyService** - File transfer analysis (SFTP/FTPS/FTP servers, users, connectors)
 
 ### Integration Services
 - **SNSSQSService** - Messaging analysis (SNS topics, SQS queues)
@@ -165,7 +171,17 @@ finops-aws/
 - Added 39 new unit tests for Phase 2.5 services
 - Total: 357+ tests passing
 
-### Service Files (30 total)
+### FASE 2.6 - Compute & Application Services (COMPLETED)
+- Added **BatchService** for AWS Batch analysis (compute environments, job queues, definitions)
+- Added **StepFunctionsService** for AWS Step Functions analysis (state machines, executions)
+- Added **APIGatewayService** for AWS API Gateway analysis (REST, HTTP, WebSocket APIs)
+- Added **TransferFamilyService** for AWS Transfer Family analysis (SFTP/FTPS/FTP servers)
+- Updated `AWSServiceType` enum with 5 new types (BATCH, STEPFUNCTIONS, APIGATEWAY, APIGATEWAYV2, TRANSFER)
+- Updated `ServiceFactory` with getters for all 4 new services
+- Added 48 new unit tests for Phase 2.6 services
+- Total: 405+ tests passing
+
+### Service Files (34 total)
 **Core Services:** `cost_service.py`, `metrics_service.py`, `optimizer_service.py`, `rds_service.py`
 **Storage:** `s3_service.py`, `ebs_service.py`, `efs_service.py`
 **Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`, `aurora_service.py`, `documentdb_service.py`, `neptune_service.py`
@@ -176,3 +192,4 @@ finops-aws/
 **Integration:** `sns_sqs_service.py`, `backup_service.py`, `secrets_manager_service.py`
 **Graph/Document DB:** `neptune_service.py`, `documentdb_service.py`
 **File Systems:** `fsx_service.py`
+**Compute/Application:** `batch_service.py`, `stepfunctions_service.py`, `apigateway_service.py`, `transfer_service.py`
