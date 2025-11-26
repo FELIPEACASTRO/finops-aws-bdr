@@ -30,6 +30,10 @@ FASE 2.3: Serviços de Alta Prioridade
 
 FASE 2.4: Serviços Não-Serverless de Alto Custo
 - MSKService: Análise de Amazon MSK (Kafka gerenciado)
+- EKSService: Análise de Amazon EKS (Kubernetes gerenciado)
+- AuroraService: Análise de Amazon Aurora (MySQL/PostgreSQL gerenciado)
+- OpenSearchService: Análise de Amazon OpenSearch (Elasticsearch gerenciado)
+- WorkSpacesService: Análise de Amazon WorkSpaces (Desktop virtual)
 """
 
 from .cost_service import CostService
@@ -63,6 +67,10 @@ from .backup_service import BackupService, BackupVault, BackupPlan
 from .sns_sqs_service import SNSSQSService, SNSTopic, SQSQueue
 from .secrets_manager_service import SecretsManagerService, Secret
 from .msk_service import MSKService, MSKCluster, MSKConfiguration
+from .eks_service import EKSService, EKSCluster, EKSNodeGroup, EKSFargateProfile, EKSAddon
+from .aurora_service import AuroraService, AuroraCluster, AuroraInstance
+from .opensearch_service import OpenSearchService, OpenSearchDomain
+from .workspaces_service import WorkSpacesService, WorkSpace, WorkSpacesDirectory, WorkSpacesBundle
 
 __all__ = [
     'CostService',
@@ -130,5 +138,19 @@ __all__ = [
     'Secret',
     'MSKService',
     'MSKCluster',
-    'MSKConfiguration'
+    'MSKConfiguration',
+    'EKSService',
+    'EKSCluster',
+    'EKSNodeGroup',
+    'EKSFargateProfile',
+    'EKSAddon',
+    'AuroraService',
+    'AuroraCluster',
+    'AuroraInstance',
+    'OpenSearchService',
+    'OpenSearchDomain',
+    'WorkSpacesService',
+    'WorkSpace',
+    'WorkSpacesDirectory',
+    'WorkSpacesBundle'
 ]

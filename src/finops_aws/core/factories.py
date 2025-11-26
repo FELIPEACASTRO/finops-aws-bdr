@@ -63,6 +63,9 @@ class AWSServiceType(Enum):
     SECRETS_MANAGER = "secretsmanager"
     PRICING = "pricing"
     MSK = "kafka"
+    EKS = "eks"
+    OPENSEARCH = "opensearch"
+    WORKSPACES = "workspaces"
 
 
 @dataclass
@@ -800,6 +803,50 @@ class ServiceFactory:
         
         return self._services['msk']
     
+    def get_eks_service(self):
+        """Obtém instância do EKSService"""
+        if 'eks' in self._mocks:
+            return self._mocks['eks']
+        
+        if 'eks' not in self._services:
+            from ..services.eks_service import EKSService
+            self._services['eks'] = EKSService(self.client_factory)
+        
+        return self._services['eks']
+    
+    def get_aurora_service(self):
+        """Obtém instância do AuroraService"""
+        if 'aurora' in self._mocks:
+            return self._mocks['aurora']
+        
+        if 'aurora' not in self._services:
+            from ..services.aurora_service import AuroraService
+            self._services['aurora'] = AuroraService(self.client_factory)
+        
+        return self._services['aurora']
+    
+    def get_opensearch_service(self):
+        """Obtém instância do OpenSearchService"""
+        if 'opensearch' in self._mocks:
+            return self._mocks['opensearch']
+        
+        if 'opensearch' not in self._services:
+            from ..services.opensearch_service import OpenSearchService
+            self._services['opensearch'] = OpenSearchService(self.client_factory)
+        
+        return self._services['opensearch']
+    
+    def get_workspaces_service(self):
+        """Obtém instância do WorkSpacesService"""
+        if 'workspaces' in self._mocks:
+            return self._mocks['workspaces']
+        
+        if 'workspaces' not in self._services:
+            from ..services.workspaces_service import WorkSpacesService
+            self._services['workspaces'] = WorkSpacesService(self.client_factory)
+        
+        return self._services['workspaces']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -832,7 +879,11 @@ class ServiceFactory:
             'backup': self.get_backup_service(),
             'sns_sqs': self.get_sns_sqs_service(),
             'secrets_manager': self.get_secrets_manager_service(),
-            'msk': self.get_msk_service()
+            'msk': self.get_msk_service(),
+            'eks': self.get_eks_service(),
+            'aurora': self.get_aurora_service(),
+            'opensearch': self.get_opensearch_service(),
+            'workspaces': self.get_workspaces_service()
         }
     
     def clear_cache(self):

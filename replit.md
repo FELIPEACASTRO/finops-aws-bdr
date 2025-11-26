@@ -12,9 +12,9 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 
 ## Project Status
 
-- **Test Suite**: 284 tests passing
-- **Services Implemented**: 22 AWS services (of 253 total target)
-- **Current Phase**: FASE 2.4 - High-Cost Non-Serverless Services (IN PROGRESS)
+- **Test Suite**: 318+ tests passing
+- **Services Implemented**: 26 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.4 - High-Cost Non-Serverless Services (COMPLETED)
 - **Documentation**: README.md completamente atualizado (extremamente didático)
 
 ## System Architecture
@@ -31,7 +31,7 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **Extensible Service Layer:** Employs `BaseAWSService` as an abstract base class for all AWS service integrations, standardizing interfaces for `get_resources()`, `get_costs()`, `get_metrics()`, and `get_recommendations()`.
 - **Testing Strategy:** Comprehensive unit testing with Pytest, utilizing `moto` for mocking AWS services to ensure consistent and safe testing.
 
-## AWS Services Implemented (22 of 253)
+## AWS Services Implemented (26 of 253)
 
 ### Storage Services
 - **S3Service** - Object Storage analysis (buckets, costs, lifecycle, recommendations)
@@ -60,6 +60,16 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **KinesisService** - Streaming analysis (data streams, shards, retention)
 - **GlueService** - ETL analysis (jobs, crawlers, data catalog)
 - **MSKService** - Kafka Streaming analysis (clusters, brokers, storage, throughput)
+- **OpenSearchService** - Search/Analytics (domains, nodes, UltraWarm, encryption)
+
+### Container & Compute Services (NEW)
+- **EKSService** - Kubernetes analysis (clusters, node groups, Fargate profiles, addons)
+
+### Database Services (Extended)
+- **AuroraService** - Aurora analysis (MySQL/PostgreSQL clusters, Serverless v2, instances)
+
+### Desktop Services (NEW)
+- **WorkSpacesService** - Virtual desktop analysis (workspaces, directories, bundles, billing)
 
 ### Integration Services
 - **SNSSQSService** - Messaging analysis (SNS topics, SQS queues)
@@ -128,21 +138,23 @@ finops-aws/
 - Fixed critical export gap in `services/__init__.py` (all 14 services + 15+ dataclasses)
 - Added 37 new unit tests for priority services
 
-### FASE 2.4 - Non-Serverless High-Cost Services (IN PROGRESS)
+### FASE 2.4 - Non-Serverless High-Cost Services (COMPLETED)
 - Added **MSKService** for Amazon Managed Streaming for Apache Kafka analysis
-- MSK clusters (provisioned and serverless), brokers, storage, encryption analysis
-- Recommendations: rightsizing, security (encryption), serverless migration candidates
-- Updated `AWSServiceType` enum with MSK type
-- Updated `ServiceFactory` with `get_msk_service()` getter
-- Added 13 new unit tests for MSK service
-- Total: 284 tests passing
+- Added **EKSService** for Amazon Elastic Kubernetes Service analysis
+- Added **AuroraService** for Amazon Aurora MySQL/PostgreSQL analysis
+- Added **OpenSearchService** for Amazon OpenSearch Service analysis
+- Added **WorkSpacesService** for Amazon WorkSpaces analysis
+- Updated `AWSServiceType` enum with 4 new types (EKS, OPENSEARCH, WORKSPACES, and MSK)
+- Updated `ServiceFactory` with getters for all 4 new services
+- Added 34 new unit tests for Phase 2.4 services
+- Total: 318+ tests passing
 
-### Service Files (22 total)
+### Service Files (26 total)
 **Core Services:** `cost_service.py`, `metrics_service.py`, `optimizer_service.py`, `rds_service.py`
 **Storage:** `s3_service.py`, `ebs_service.py`, `efs_service.py`
-**Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`
-**Compute:** `ec2_finops_service.py`, `lambda_finops_service.py`, `ecs_service.py`, `emr_service.py`, `sagemaker_service.py`
+**Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`, `aurora_service.py`
+**Compute:** `ec2_finops_service.py`, `lambda_finops_service.py`, `ecs_service.py`, `emr_service.py`, `sagemaker_service.py`, `eks_service.py`
 **Networking:** `vpc_network_service.py`, `cloudfront_service.py`, `elb_service.py`, `route53_service.py`
-**Streaming:** `kinesis_service.py`, `msk_service.py`
-**ETL/Analytics:** `glue_service.py`
+**Streaming/Analytics:** `kinesis_service.py`, `msk_service.py`, `glue_service.py`, `opensearch_service.py`
+**Desktop:** `workspaces_service.py`
 **Integration:** `sns_sqs_service.py`, `backup_service.py`, `secrets_manager_service.py`
