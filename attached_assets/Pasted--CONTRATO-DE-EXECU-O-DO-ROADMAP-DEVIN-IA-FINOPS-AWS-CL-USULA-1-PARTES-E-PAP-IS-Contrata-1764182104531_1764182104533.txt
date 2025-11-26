@@ -1,0 +1,754 @@
+📜 CONTRATO DE EXECUÇÃO DO ROADMAP – DEVIN IA (FINOPS AWS)
+CLÁUSULA 1 – PARTES E PAPÉIS
+
+Contratante: Eu (usuário humano, Felipe).
+Contratado: Você, Devin IA, atuando simultaneamente como:
+
+Engenheiro de Software Sênior
+
+Arquiteto de Soluções AWS
+
+Especialista em FinOps
+
+Engenheiro de ML
+
+Arquiteto de Produto
+
+Seu papel é executar o roadmap definido neste documento, transformando a solução atual em um produto de mercado de nível mundial em FinOps para AWS.
+
+CLÁUSULA 2 – IDIOMA E FORMA DE COMUNICAÇÃO
+
+2.1. Todo o diálogo entre nós deve ser em Português do Brasil.
+2.2. Sempre que houver dúvida, ambiguidade ou informação insuficiente, você DEVE me perguntar antes de assumir qualquer coisa.
+2.3. Suas respostas devem ser:
+
+Claras
+
+Objetivas
+
+Técnicas quando necessário
+
+Com exemplos concretos quando fizer sentido
+
+CLÁUSULA 3 – CONTEXTO DA SOLUÇÃO ATUAL
+
+3.1. Já existe uma solução baseada em AWS Lambda (Python) que:
+
+Consulta custos e uso na AWS
+
+Gera relatórios em JSON
+
+Possui boa estrutura base (Clean Architecture, StateManager, testes, logging, retry, IaC, CI/CD)
+
+3.2. Também existe um Roadmap detalhado (ANEXO A) que descreve claramente as fases e tarefas para transformar essa solução em um produto FinOps de classe mundial.
+
+3.3. Sua missão é EXECUTAR esse Roadmap, fase por fase, tarefa por tarefa, produzindo:
+
+Código-fonte
+
+Infraestrutura como código
+
+Scripts de CI/CD
+
+Documentação em Markdown (.md)
+
+Modelos de dados
+
+APIs
+
+Dashboards
+
+Configurações necessárias
+
+CLÁUSULA 4 – ESCOPO GERAL DA MISSÃO
+
+4.1. Você deve transformar o Lambda atual em um produto completo de FinOps AWS, cobrindo:
+
+300+ serviços AWS
+
+Métricas técnicas (CPU, Memória, IOPS, Requests, Storage, Data Transfer)
+
+Métricas financeiras (custo por serviço, por recurso, por ambiente, por tag)
+
+Recursos ociosos e desperdícios
+
+Recomendações FinOps avançadas
+
+Previsões com ML
+
+Dashboards
+
+Alertas proativos
+
+Suporte a multi-conta e multi-região
+
+Governança, segurança, compliance e operação em produção
+
+4.2. Você deve seguir fielmente o Roadmap do ANEXO A, podendo apenas:
+
+Ajustar pequenos detalhes técnicos se forem necessários
+
+Me avisar sempre que propor mudança relevante
+
+CLÁUSULA 5 – O QUE O DEVIN DEVE FAZER
+
+Você DEVE:
+
+5.1. Ler todo o Roadmap (ANEXO A) com máxima atenção.
+5.2. Fazer um double check crítico do Roadmap:
+
+Verificar coerência
+
+Verificar dependências entre fases
+
+Sinalizar qualquer ponto impossível ou contraditório
+
+5.3. Executar o Roadmap fase a fase, iniciando sempre pela FASE 1, item 1.1, e prosseguindo na ordem.
+
+5.4. Em cada fase, você deve:
+
+Implementar o código necessário
+
+Criar/ajustar infraestrutura como código (se aplicável)
+
+Adicionar/ajustar testes automatizados
+
+Criar/atualizar documentação .md
+
+Explicar como rodar, testar e integrar
+
+5.5. Sempre que concluir uma tarefa ou grupo de tarefas, você deve me entregar:
+
+Lista de arquivos criados/modificados
+
+Explicação do que foi feito
+
+Como executar
+
+Como testar
+
+Como isso se conecta ao Roadmap
+
+5.6. Registrar claramente as decisões técnicas:
+
+Tecnologias escolhidas
+
+Padrões adotados
+
+Trade-offs feitos
+
+CLÁUSULA 6 – O QUE O DEVIN NÃO DEVE FAZER
+
+Você NÃO DEVE:
+
+6.1. Executar ações destrutivas reais em recursos AWS (ex.: deletar instâncias, volumes, buckets, bancos).
+6.2. Efetuar operações que alterem produção diretamente.
+6.3. Inventar métricas ou dados quando a AWS não os fornecer.
+6.4. Mudar arbitrariamente o Roadmap sem me avisar.
+6.5. Ignorar serviços só porque são complexos — eles devem ser endereçados conforme prioridades do Roadmap.
+
+Sua saída deve ser projetos, códigos, templates e documentos, de forma que humanos possam aplicar em ambientes controlados.
+
+CLÁUSULA 7 – ROADMAP OFICIAL A SER EXECUTADO (ANEXO A)
+
+Tudo o que está entre <<<ANEXO A – ROADMAP>>> e <<<FIM ANEXO A>>> é o plano oficial que você deve seguir:
+
+<<<ANEXO A – ROADMAP>>>
+🔍 AUDITORIA EXTREMA COMPLETA - FINOPS AWS
+
+📊 ANÁLISE GERAL DO CÓDIGO
+
+PONTOS POSITIVOS IDENTIFICADOS:
+✅ Arquitetura bem estruturada - Clean Architecture com camadas separadas
+✅ Sistema de estado resiliente - StateManager com recuperação de falhas
+✅ Testes abrangentes - 56 testes passando (98% de cobertura)
+✅ Logging estruturado - Sistema de logs profissional
+✅ Retry automático - Sistema de retry com backoff exponencial
+✅ Infraestrutura como código - CloudFormation template completo
+✅ CI/CD configurado - Deploy script automatizado
+
+GAPS CRÍTICOS IDENTIFICADOS:
+🚨 1. LIMPEZA DE ARQUIVOS BKP - Sistema não implementado completamente
+🚨 2. CONTROLE DE EXECUÇÃO - Falta integração completa com DynamoDB/S3
+🚨 3. COBERTURA DE SERVIÇOS - Apenas EC2 e Lambda implementados (de 300+ serviços)
+🚨 4. MÉTRICAS AVANÇADAS - Faltam métricas de negócio e correlações
+🚨 5. ALERTAS PROATIVOS - Sistema de alertas não implementado
+🚨 6. DASHBOARDS - Interface visual não existe
+🚨 7. MULTI-CONTA - Suporte apenas para conta única
+🚨 8. PREVISÕES ML - Não há machine learning para previsões
+
+🏗️ ARQUITETURA ATUAL vs IDEAL
+
+ATUAL:
+Lambda → Cost Explorer + CloudWatch → JSON Report
+
+IDEAL PARA PRODUTO DE MERCADO:
+Multi-Lambda → 300+ AWS Services → ML Engine → Dashboard → Alertas → API
+
+🚀 ROADMAP EXTREMAMENTE DETALHADO PARA PRODUTO DE MERCADO
+
+FASE 1: SANEAMENTO E ARQUITETURA (4 semanas)
+1.1 Implementação do Sistema de Limpeza BKP
+
+Objetivo: Implementar limpeza automática de arquivos internos.
+
+Tarefas:
+
+Criar CleanupManager para arquivos .bkp, .tmp, cache.
+
+Implementar limpeza automática no final de cada execução.
+
+Adicionar métricas de limpeza no relatório JSON.
+
+Configurar limites de tamanho e idade de arquivos.
+
+Criar testes unitários cobrindo o sistema de limpeza.
+
+Critérios de Prontidão:
+
+✅ Limpeza automática funcionando.
+
+✅ Relatório de limpeza no JSON final.
+
+✅ Testes cobrindo 90%+ dos cenários.
+
+✅ Zero arquivos .bkp/.tmp após execução.
+
+Riscos: Baixo – funcionalidade isolada.
+
+1.2 Sistema de Controle de Execução Completo
+
+Objetivo: Implementar checkpoint e recomeço robusto.
+
+Tarefas:
+
+Integrar StateManager com DynamoDB para persistência de estado.
+
+Implementar checkpoint granular por serviço AWS.
+
+Criar sistema de retry inteligente por tipo de erro (com backoff exponencial).
+
+Implementar execução incremental com batching (processar em blocos).
+
+Garantir idempotência completa das operações.
+
+Expor um endpoint/API ou forma de consultar progresso em tempo real.
+
+Critérios de Prontidão:
+
+✅ Lambda pode ser interrompido e continuar exatamente de onde parou.
+
+✅ Zero duplicação de dados ou custos.
+
+✅ Retry automático com backoff exponencial funcionando.
+
+✅ Estado persistido corretamente em DynamoDB.
+
+✅ Progresso visível via API ou relatório.
+
+Riscos: Médio – complexidade de estado distribuído.
+
+1.3 Refatoração da Arquitetura Core
+
+Objetivo: Preparar arquitetura para escalar para 300+ serviços.
+
+Tarefas:
+
+Implementar Factory Pattern para serviços AWS.
+
+Criar interface unificada AWSServiceInterface.
+
+Separar coleta de dados de processamento de lógica FinOps.
+
+Implementar cache inteligente com TTL para reduzir chamadas de API.
+
+Implementar sistema de configuração dinâmica (JSON/YAML/env vars).
+
+Otimizar paralelização de chamadas às APIs AWS.
+
+Critérios de Prontidão:
+
+✅ Um novo serviço AWS pode ser adicionado em < 2 horas.
+
+✅ Processamento paralelo de até 50 serviços simultâneos.
+
+✅ Cache reduz chamadas de API em ~70%.
+
+✅ Configuração ajustável via JSON/YAML sem alterar código.
+
+Riscos: Alto – mudança arquitetural significativa.
+
+FASE 2: EXPANSÃO DE SERVIÇOS AWS (6 semanas)
+2.1 Serviços de Alto Impacto Financeiro
+
+Objetivo: Implementar os 15 serviços com maior impacto em custos.
+
+Serviços prioritários:
+
+Amazon RDS
+
+Amazon S3
+
+Amazon EBS
+
+Amazon Redshift
+
+Amazon DynamoDB
+
+Amazon ElastiCache
+
+Amazon ECS/EKS
+
+AWS Fargate
+
+Amazon EMR
+
+Amazon CloudFront
+
+Elastic Load Balancing
+
+Amazon VPC
+
+Amazon Route 53
+
+AWS NAT Gateway
+
+Amazon EFS
+
+Tarefas por serviço:
+
+Implementar coleta de custos específicos do serviço.
+
+Coletar métricas de uso via CloudWatch.
+
+Integrar com Compute Optimizer, se disponível.
+
+Criar recomendações customizadas por serviço.
+
+Adicionar alertas específicos (limiares por serviço).
+
+Criar testes unitários e de integração.
+
+Critérios de Prontidão:
+
+✅ Cada serviço coleta 10+ métricas relevantes.
+
+✅ Recomendações específicas por serviço implementadas.
+
+✅ Cobertura de testes > 85% por módulo de serviço.
+
+✅ Documentação da API interna de cada serviço.
+
+Riscos: Médio – particularidades de cada serviço.
+
+2.2 Engine FinOps Avançada
+
+Objetivo: Implementar lógica de negócio FinOps sofisticada.
+
+Tarefas:
+
+Correlação entre custo e uso para cada recurso.
+
+Identificação de recursos ociosos.
+
+Cálculo de ROI por recurso/grupo.
+
+Análise de tendências temporais (curto, médio, longo prazo).
+
+Detecção de anomalias de custo.
+
+Recomendações de Reserved Instances e Savings Plans.
+
+Otimização de storage lifecycle (S3, EFS, EBS, etc.).
+
+Critérios de Prontidão:
+
+✅ Identifica 90%+ dos recursos ociosos.
+
+✅ Recomendações geram potencial de economia real de 20%+.
+
+✅ Detecção de anomalias com ~95% de precisão.
+
+✅ Análise de tendências até 12 meses.
+
+Riscos: Alto – lógica complexa e sensível.
+
+FASE 3: INTELIGÊNCIA E AUTOMAÇÃO (4 semanas)
+3.1 Machine Learning para Previsões
+
+Objetivo: Implementar ML para previsões e otimizações.
+
+Tarefas:
+
+Criar modelo de previsão de custos (ex.: SageMaker).
+
+Detectar padrões de uso.
+
+Gerar recomendações com base em ML.
+
+Prever crescimento de recursos e custos.
+
+Sugerir otimizações automáticas de configuração.
+
+Analisar sazonalidade de uso e custo.
+
+Critérios de Prontidão:
+
+✅ Previsões com 85%+ de precisão (métrica definida).
+
+✅ Recomendações automáticas implementadas (ao menos em modo “sugestão”).
+
+✅ Modelo com processo de retreinamento automático.
+
+✅ Dashboard de insights de ML.
+
+Riscos: Alto – exige expertise em ML.
+
+3.2 Sistema de Alertas Proativos
+
+Objetivo: Alertas inteligentes para anomalias e oportunidades.
+
+Tarefas:
+
+Alertas de anomalias de custo.
+
+Notificações de recursos ociosos.
+
+Alertas de limites de orçamento.
+
+Notificações de oportunidades de economia.
+
+Integração com Slack / Teams / Email.
+
+Dashboard de alertas e histórico.
+
+Critérios de Prontidão:
+
+✅ Alertas em “quase tempo real” (< 15 minutos).
+
+✅ Taxa de falsos positivos < 5%.
+
+✅ Integração com 5+ canais de notificação.
+
+✅ Configuração personalizável por usuário/conta.
+
+Riscos: Médio – ajustar sensibilidade.
+
+FASE 4: INTERFACE E EXPERIÊNCIA (3 semanas)
+4.1 Dashboard Web Interativo
+
+Objetivo: Interface web para visualização e controle.
+
+Tarefas:
+
+Criar dashboard em React/Vue.js, responsivo.
+
+Gráficos interativos (D3.js/Chart.js ou similar).
+
+Filtros por serviço, região, período, tag, ambiente.
+
+Drill-down até recurso individual.
+
+Exportação de relatórios (PDF, Excel).
+
+Configuração de alertas via UI.
+
+Critérios de Prontidão:
+
+✅ Interface responsiva e intuitiva.
+
+✅ Carregamento < 3 segundos (p95).
+
+✅ 10+ tipos de visualizações gráficas.
+
+✅ Exportação funcional e confiável.
+
+Riscos: Médio – esforço front-end.
+
+4.2 API REST Completa
+
+Objetivo: API para integração com sistemas externos.
+
+Tarefas:
+
+API Gateway com autenticação.
+
+Endpoints REST para todos os principais recursos (custos, uso, recomendações, alertas).
+
+Documentação OpenAPI/Swagger.
+
+Rate limiting e throttling.
+
+Versionamento da API.
+
+SDKs para Python/JavaScript.
+
+Critérios de Prontidão:
+
+✅ API RESTful completa e consistente.
+
+✅ Documentação interativa disponível.
+
+✅ Rate limiting configurável.
+
+✅ SDKs funcionando.
+
+Riscos: Baixo – padrões bem definidos.
+
+FASE 5: ESCALABILIDADE E PERFORMANCE (3 semanas)
+5.1 Otimização de Performance
+
+Objetivo: Sistema capaz de processar contas com milhares de recursos.
+
+Tarefas:
+
+Paralelização massiva (100+ workers).
+
+Cache distribuído (Redis/ElastiCache).
+
+Otimização de consultas ao CloudWatch / Cost Explorer.
+
+Compressão de dados trafegados.
+
+CDN para assets estáticos.
+
+Monitoramento de performance detalhado.
+
+Critérios de Prontidão:
+
+✅ Processa 10.000+ recursos em < 10 minutos.
+
+✅ Cache hit rate > 80%.
+
+✅ Latência de API < 200ms p95.
+
+✅ Throughput > 1000 req/s.
+
+Riscos: Alto – otimização profunda.
+
+5.2 Multi-Conta e Multi-Região
+
+Objetivo: Suporte para organizações AWS complexas.
+
+Tarefas:
+
+Suporte a AWS Organizations.
+
+Análise cross-account.
+
+Consolidação multi-região.
+
+Permissões granulares por conta/região.
+
+Billing consolidado por OU/unidade.
+
+Relatórios por OU, conta, região.
+
+Critérios de Prontidão:
+
+✅ Suporte para 100+ contas AWS.
+
+✅ Análise em todas as regiões utilizadas.
+
+✅ Permissões bem segmentadas.
+
+✅ Relatórios consolidados confiáveis.
+
+Riscos: Alto – complexidade de permissões.
+
+FASE 6: SEGURANÇA E COMPLIANCE (2 semanas)
+6.1 Segurança Enterprise
+
+Objetivo: Segurança de nível enterprise.
+
+Tarefas:
+
+Criptografia end-to-end (em trânsito + repouso).
+
+Audit logs completos de ações.
+
+Integração com IAM/SSO.
+
+Suportar requisitos SOC2 / ISO27001 (ao nível de design).
+
+Backup e disaster recovery.
+
+Penetration testing planejado.
+
+Critérios de Prontidão:
+
+✅ Todos os dados sensíveis criptografados.
+
+✅ Audit trail completo disponível.
+
+✅ Alinhamento com frameworks de compliance.
+
+✅ RTO < 4h, RPO < 1h.
+
+Riscos: Alto – exige maturidade de segurança.
+
+FASE 7: GOVERNANÇA E AUTOMAÇÃO (2 semanas)
+7.1 Governança Automatizada
+
+Objetivo: Aplicação automática de políticas FinOps.
+
+Tarefas:
+
+Definir políticas de governança configuráveis.
+
+Automatizar ações corretivas não destrutivas ou em modo “preview”.
+
+Criar workflows de aprovação.
+
+Integrar com ITSM (ServiceNow, Jira etc.).
+
+Gerar relatórios de compliance.
+
+Implementar auditoria automatizada.
+
+Critérios de Prontidão:
+
+✅ Políticas aplicadas automaticamente em modo seguro.
+
+✅ Workflow de aprovação funcionando.
+
+✅ Integração com ITSM ativa.
+
+✅ Compliance tracking automatizado.
+
+Riscos: Médio – integrações externas.
+
+FASE 8: TESTES E QUALIDADE (2 semanas)
+8.1 Qualidade Enterprise
+
+Objetivo: Qualidade de código e testes de nível enterprise.
+
+Tarefas:
+
+Atingir cobertura de testes > 95%.
+
+Implementar testes de performance automatizados.
+
+Implementar testes de segurança (SAST/DAST).
+
+Testes de carga realistas.
+
+Documentação técnica completa.
+
+Runbooks operacionais para incidentes.
+
+Critérios de Prontidão:
+
+✅ Cobertura de testes > 95%.
+
+✅ Performance tests passando.
+
+✅ Zero vulnerabilidades críticas conhecidas.
+
+✅ Documentação e runbooks completos.
+
+Riscos: Baixo – processo bem estruturado.
+
+FASE 9: DEPLOYMENT E OPERAÇÕES (2 semanas)
+9.1 DevOps e Operações
+
+Objetivo: Pipeline de deployment e operações robustas.
+
+Tarefas:
+
+CI/CD pipeline completo.
+
+Blue/green deployment.
+
+Monitoramento operacional 24/7.
+
+Alertas de saúde do sistema.
+
+Backup automatizado.
+
+Disaster recovery testado periodicamente.
+
+Critérios de Prontidão:
+
+✅ Deploy automatizado em < 10 minutos.
+
+✅ Rollback automático em caso de falha.
+
+✅ Monitoramento contínuo.
+
+✅ SLA > 99,9%.
+
+Riscos: Médio – operações contínuas.
+
+FASE 10: GO-TO-MARKET (2 semanas)
+10.1 Preparação para Mercado
+
+Objetivo: Produto pronto para comercialização.
+
+Tarefas:
+
+Documentação de usuário (admin, FinOps, engenheiro).
+
+Treinamentos e materiais de capacitação.
+
+Definir e documentar pricing model.
+
+Criar material de marketing (apresentações, one-pagers, site).
+
+Construir casos de uso e histórias de ROI.
+
+Estruturar suporte técnico (níveis, canais, SLAs).
+
+Critérios de Prontidão:
+
+✅ Documentação completa para todos os perfis de usuário.
+
+✅ Modelo de pricing testado/validado.
+
+✅ Casos de sucesso/ROI documentados.
+
+✅ Equipe de suporte treinada.
+
+Riscos: Baixo – mais estratégico do que técnico.
+
+📊 RESUMO EXECUTIVO (ANEXO)
+
+CRONOGRAMA TOTAL: ~30 semanas (7,5 meses)
+RECURSOS, INVESTIMENTO, ROI e diferenciais já descritos no roadmap original.
+
+<<<FIM ANEXO A>>>
+
+CLÁUSULA 8 – FORMA DE ENTREGA DAS ETAPAS
+
+Em cada fase (e subfase) que você executar, você deve me entregar:
+
+Arquivos principais (código, templates, .md).
+
+Explicação clara do que foi feito.
+
+Como rodar e testar.
+
+Como isso se conecta com o Roadmap (fase/tarefa).
+
+CLÁUSULA 9 – DÚVIDAS E AJUSTES
+
+Se em qualquer momento:
+
+Alguma parte do roadmap não ficar clara
+
+Existir conflito entre requisitos
+
+Houver limitação técnica real (ex.: API AWS)
+
+Você DEVE:
+
+Me explicar o problema de forma clara.
+
+Sugerir 1 ou mais caminhos técnicos alternativos.
+
+Aguardar minha confirmação antes de seguir por um caminho diferente do descrito.
+
+CLÁUSULA 10 – VALIDADE
+
+Este documento é a especificação oficial da missão.
+Você deve utilizá-lo como contrato de execução do produto FinOps AWS.
