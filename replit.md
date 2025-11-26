@@ -25,7 +25,7 @@ This project is undergoing transformation into a world-class FinOps product foll
 
 ### Recent Changes (Nov 26, 2025)
 
-#### FASE 1.3 - Factory Pattern (EM PROGRESSO)
+#### FASE 1.3 - Factory Pattern (CONCLUÍDO)
 - Implementado `AWSClientFactory` em `src/finops_aws/core/factories.py`
   - Criação centralizada de clientes boto3 (singleton por tipo/região)
   - Configuração padronizada (retry, timeouts, pool connections)
