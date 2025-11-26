@@ -2,267 +2,7 @@
 
 ## Overview
 
-**FinOps AWS BDR** is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations. Built with Clean Architecture and Domain-Driven Design (DDD) principles, this Python application is designed to run as an AWS Lambda function.
-
-### Project Type
-- **Primary Platform**: AWS Lambda (Serverless)
-- **Language**: Python 3.11
-- **Architecture**: Clean Architecture + Domain-Driven Design
-- **Testing**: Pytest with mocked AWS services (moto)
-
-## Current State
-
-This project is undergoing transformation into a world-class FinOps product following a 10-phase roadmap.
-
-### What's Working
-- ✅ Python 3.11 installed and configured
-- ✅ All dependencies installed (boto3, pytest, moto, pytest-asyncio, etc.)
-- ✅ Test suite fully passing (231 passed, 1 skipped)
-- ✅ Local demo runner for testing Lambda handler with mocked AWS services
-- ✅ Comprehensive .gitignore for Python projects
-- ✅ **CleanupManager** - Sistema de limpeza automática de arquivos temporários
-- ✅ **Factory Pattern** - Criação centralizada de clientes e serviços AWS
-- ✅ **BaseAWSService** - Classe base abstrata para todos os serviços AWS
-- ✅ **S3Service** - Análise de Object Storage (buckets, custos, recomendações)
-- ✅ **EBSService** - Análise de Block Storage (volumes, snapshots, custos)
-- ✅ **DynamoDBFinOpsService** - Análise de NoSQL (tabelas, capacidade, custos)
-- ✅ **EFSService** - Análise de File Storage (file systems, lifecycle, mount targets)
-- ✅ **ElastiCacheService** - Análise de Cache (clusters Redis/Memcached, replication groups)
-- ✅ **ECSContainerService** - Análise de Containers (clusters, serviços, tasks, Fargate)
-
-### Recent Changes (Nov 26, 2025)
-
-#### FASE 2 - Expansão de Serviços AWS (EM PROGRESSO - 9 serviços implementados)
-- Implementado `BaseAWSService` em `src/finops_aws/services/base_service.py`
-  - Classe base abstrata para todos os serviços AWS
-  - Interface padrão: `get_resources()`, `get_costs()`, `get_metrics()`, `get_recommendations()`
-  - DataClasses: `ServiceCost`, `ServiceMetrics`, `ServiceRecommendation`
-  - Métodos compartilhados para CloudWatch metrics e análise de tendências
-- Implementado `S3Service` em `src/finops_aws/services/s3_service.py`
-  - Listagem de buckets com detalhes (região, versioning, encryption, lifecycle)
-  - Recomendações: lifecycle policies, version cleanup, security, encryption
-  - Análise de storage classes e potencial de otimização
-- Implementado `EBSService` em `src/finops_aws/services/ebs_service.py`
-  - Listagem de volumes e snapshots
-  - Recomendações: gp2→gp3 upgrade, volumes não anexados, snapshots antigos
-  - Análise de utilização de volumes
-- Implementado `DynamoDBFinOpsService` em `src/finops_aws/services/dynamodb_finops_service.py`
-  - Listagem de tabelas com detalhes (billing mode, TTL, PITR, GSI)
-  - Recomendações: On-Demand vs Provisioned, PITR, TTL, table class
-  - Análise de capacidade provisionada vs consumida
-- Implementado `EFSService` em `src/finops_aws/services/efs_service.py`
-  - Listagem de file systems (performance mode, throughput mode, encryption)
-  - Recomendações: lifecycle policies, throughput mode optimization
-  - Análise de mount targets e conectividade
-- Implementado `ElastiCacheService` em `src/finops_aws/services/elasticache_service.py`
-  - Listagem de clusters Redis/Memcached e replication groups
-  - Recomendações: criptografia, Multi-AZ, failover automático
-  - Análise de engine versions e node types
-- Implementado `ECSContainerService` em `src/finops_aws/services/ecs_service.py`
-  - Listagem de clusters, serviços e tasks ECS
-  - Recomendações: clusters não utilizados, Fargate Spot optimization
-  - Análise de capacity providers e launch types
-- Atualizado `ServiceFactory` com métodos: `get_s3_service()`, `get_ebs_service()`, `get_dynamodb_service()`, `get_efs_service()`, `get_elasticache_service()`, `get_ecs_service()`
-- Enum `AWSServiceType` expandido com ELASTICACHE e ECS
-- 55 testes unitários para novos serviços em `tests/unit/test_new_services.py` e `tests/unit/test_new_services_phase2.py`
-
-#### FASE 1.3 - Factory Pattern (CONCLUÍDO)
-- Implementado `AWSClientFactory` em `src/finops_aws/core/factories.py`
-  - Criação centralizada de clientes boto3 (singleton por tipo/região)
-  - Configuração padronizada (retry, timeouts, pool connections)
-  - Cache de clientes para reutilização
-  - Suporte a injeção de mocks para testes
-  - Enum `AWSServiceType` com 16 serviços AWS suportados
-- Implementado `ServiceFactory` em `src/finops_aws/core/factories.py`
-  - Instanciação unificada de serviços FinOps
-  - Injeção de dependências automática via AWSClientFactory
-  - Cache de serviços (lazy initialization)
-  - Suporte a mocks para testes
-- Implementado `ServiceProtocol` para padronizar interfaces
-- Refatorados todos os serviços para aceitar clientes injetados:
-  - `CostService` - aceita `client` opcional
-  - `MetricsService` - aceita `cloudwatch_client`, `ec2_client`, `lambda_client`
-  - `OptimizerService` - aceita `client` opcional
-  - `RDSService` - aceita `rds_client`, `cloudwatch_client`, `cost_client`
-- Adicionada função `handle_aws_error` em `aws_helpers.py`
-- 34 testes unitários para factories em `tests/unit/test_factories.py`
-
-#### FASE 1.2 - DynamoDB State Manager & Retry Handler (CONCLUÍDO)
-- Implementado `DynamoDBStateManager` em `src/finops_aws/core/dynamodb_state_manager.py`
-  - Persistência de estado em DynamoDB com checkpoint granular por serviço AWS
-  - Injeção de dependências para cliente DynamoDB (Clean Architecture)
-  - Integração com RetryHandler para operações resilientes
-  - ConditionExpression opcional para operações atômicas
-  - DynamoDBMapper para serialização JSON/Decimal isolada
-  - TTL automático para limpeza de execuções antigas
-  - Índices secundários (GSI) para consultas eficientes
-- Implementado `RetryHandler` em `src/finops_aws/core/retry_handler.py`
-  - RetryPolicy com exponential backoff e jitter
-  - RetryMetrics para rastreamento de tentativas e falhas
-  - Classificação de erros (network/timeout/throttle/validation)
-  - Suporte síncrono e assíncrono
-  - Factory para políticas AWS-específicas
-  - Decorators para fácil integração
-- 29 testes unitários para DynamoDBStateManager
-- 30 testes unitários para RetryHandler
-
-#### FASE 1.1 - Sistema de Limpeza BKP (CONCLUÍDO)
-- Implementado `CleanupManager` em `src/finops_aws/core/cleanup_manager.py`
-- Limpeza automática de arquivos: `.bkp`, `.tmp`, `.cache`, `.log`, `.pyc`, `.pyo`
-- Limpeza de objetos S3 antigos (execuções expiradas)
-- Limpeza de diretórios `__pycache__`
-- Modo dry-run para simulação
-- Métricas detalhadas de limpeza integradas ao relatório JSON
-- 27 testes unitários criados em `tests/unit/test_cleanup_manager.py`
-- Integração no `lambda_handler.py` via helper `cleanup_after_execution`
-
-### Roadmap Progress
-- [x] FASE 1.1 - Sistema de Limpeza BKP
-- [x] FASE 1.2 - Controle de Execução (DynamoDB) + Retry Handler
-- [x] FASE 1.3 - Refatoração Core (Factory Pattern)
-- [~] FASE 2 - Expansão de Serviços AWS (EM PROGRESSO - 9 serviços: S3, EBS, DynamoDB, EFS, ElastiCache, ECS + 3 core)
-- [ ] FASE 3 - Inteligência e Automação (ML)
-- [ ] FASE 4 - Interface e Experiência (Dashboard)
-- [ ] FASE 5 - Escalabilidade e Performance
-- [ ] FASE 6 - Segurança e Compliance
-- [ ] FASE 7 - Governança e Automação
-- [ ] FASE 8 - Testes e Qualidade
-- [ ] FASE 9 - Deployment e Operações
-- [ ] FASE 10 - Go-to-Market
-
-## Project Structure
-
-```
-finops-aws-bdr/
-├── src/finops_aws/           # Main application code
-│   ├── core/                 # Core business logic
-│   │   ├── factories.py             # Factory Pattern (FASE 1.3)
-│   │   ├── cleanup_manager.py       # Sistema de limpeza automática
-│   │   ├── state_manager.py         # Gerenciamento de estado (S3 - legacy)
-│   │   ├── dynamodb_state_manager.py # Gerenciamento de estado (DynamoDB)
-│   │   ├── retry_handler.py         # Sistema de retry com backoff
-│   │   └── resilient_executor.py    # Execução resiliente
-│   ├── domain/               # Domain layer (entities, value objects)
-│   ├── application/          # Application layer (use cases, DTOs)
-│   ├── infrastructure/       # Infrastructure layer (AWS services)
-│   ├── interfaces/           # Interface layer (Lambda handlers)
-│   ├── services/             # Service layer (cost, metrics, optimizer)
-│   ├── models/               # Data models
-│   └── utils/                # Utilities (logging, AWS helpers)
-├── tests/                    # Unit tests (206 tests)
-│   └── unit/
-│       ├── test_factories.py             # 34 tests for Factory Pattern
-│       ├── test_cleanup_manager.py       # 27 tests for cleanup system
-│       ├── test_dynamodb_state_manager.py # 29 tests for DynamoDB state
-│       ├── test_retry_handler.py         # 30 tests for retry system
-│       ├── test_new_services.py          # 30 tests for S3/EBS/DynamoDB services
-│       ├── test_cost_service.py
-│       ├── test_metrics_service.py
-│       ├── test_optimizer_service.py
-│       ├── test_resilient_executor.py
-│       └── test_state_manager.py
-├── infrastructure/           # CloudFormation templates
-├── run_local_demo.py        # Local testing script (Replit)
-└── deploy.sh                # AWS deployment script
-```
-
-## Running in Replit
-
-### Testing
-The "Run Tests" workflow automatically executes the test suite using pytest with mocked AWS services.
-
-To run manually:
-```bash
-python run_local_demo.py 2
-```
-
-### Demo Mode
-To test the Lambda handler locally with mocked AWS services:
-```bash
-python run_local_demo.py 1
-```
-
-This runs the handler without requiring actual AWS credentials, using the moto library to mock AWS API calls.
-
-**Note**: The current implementation always uses mocked AWS services (via moto) regardless of whether AWS credentials are present. This ensures consistent, safe testing in the Replit environment.
-
-### Test Options
-The demo runner provides three modes:
-1. Run Lambda handler demo (with mocked AWS services)
-2. Run test suite
-3. Run both
-
-## Key Features
-
-### Financial Analysis
-- Multi-period cost analysis (7, 15, 30 days)
-- Trend detection (increasing/decreasing/stable)
-- Service-level cost breakdown
-- Top services ranking
-
-### Operational Monitoring
-- EC2 performance analytics (CPU utilization)
-- Lambda operational insights (invocations, errors, throttles)
-- Custom metrics collection
-- Real-time processing with retry logic
-
-### Optimization Recommendations
-- AWS Compute Optimizer integration
-- Right-sizing recommendations (EC2, Lambda, EBS)
-- ROI analysis with savings estimates
-- Finding classification system
-
-### Resilience Features
-- State management with S3 persistence
-- Automatic recovery from failures
-- Retry logic with exponential backoff
-- Circuit breaker pattern
-- Dependency-aware task execution
-
-### Cleanup System (NEW - FASE 1.1)
-- Automatic cleanup of temporary files (.bkp, .tmp, .cache)
-- S3 object cleanup for expired executions
-- __pycache__ directory cleanup
-- Dry-run mode for simulation
-- Detailed cleanup metrics in JSON reports
-
-## Development
-
-### Dependencies
-See `requirements.txt` for all Python dependencies. Key libraries:
-- `boto3` - AWS SDK for Python
-- `pytest` - Testing framework
-- `moto` - AWS service mocking
-- `tabulate` - Table formatting
-
-### Testing
-Tests are located in the `tests/` directory and use:
-- `pytest` for test execution
-- `pytest-mock` for mocking
-- `pytest-asyncio` for async test support
-- `moto` for AWS service mocking
-
-### Code Quality
-The project follows:
-- Clean Architecture principles
-- SOLID design principles
-- Domain-Driven Design (DDD)
-- Type hints (Python 3.11+)
-- Structured logging (JSON format)
-
-## Environment Variables
-
-### Cleanup Configuration
-- `CLEANUP_ENABLED` - Enable/disable automatic cleanup (default: `true`)
-- `CLEANUP_FILE_EXTENSIONS` - File extensions to clean (default: `.bkp,.tmp,.cache,.log,.pyc,.pyo`)
-- `CLEANUP_MAX_FILE_AGE_HOURS` - Max file age in hours (default: `24`)
-- `CLEANUP_S3_ENABLED` - Enable S3 cleanup (default: `true`)
-- `CLEANUP_S3_MAX_AGE_DAYS` - Max S3 object age in days (default: `7`)
-- `CLEANUP_DRY_RUN` - Simulate cleanup without deleting (default: `false`)
-
-### Application Configuration
-- `FINOPS_STATE_BUCKET` - S3 bucket for state storage
-- `LOG_LEVEL` - Logging level (default: `INFO`)
+FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations. This Python application, designed to run as an AWS Lambda function, aims to transform into a world-class FinOps product, offering comprehensive financial analysis, operational monitoring, and optimization insights for AWS environments.
 
 ## User Preferences
 
@@ -270,18 +10,102 @@ The project follows:
 - Perguntar antes de fazer suposições
 - Seguir padrões Clean Architecture e DDD
 
-## Notes
+## Project Status
 
-- This is a **serverless application** designed for AWS Lambda
-- Local execution uses **mocked AWS services** (no real AWS API calls without credentials)
-- The application requires **AWS credentials** for production use
-- State management uses **S3** for persistence between Lambda invocations
-- The resilient handler supports **automatic recovery** from failures
+- **Test Suite**: 268 tests passing, 1 skipped
+- **Services Implemented**: 21 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.3 - High Priority Services (COMPLETED)
 
-## Resources
+## System Architecture
 
-- **README.md** - Detailed documentation in Portuguese
-- **README_RESILIENT.md** - Resilient execution system documentation
-- **EXPANSION_ROADMAP.md** - Future enhancements and expansion plans
-- **infrastructure/cloudformation-template.yaml** - AWS infrastructure definition
-- **attached_assets/** - Contract and roadmap documents
+The project is built with Python 3.11, adhering to Clean Architecture and Domain-Driven Design (DDD) principles. It is structured as a serverless AWS Lambda application.
+
+**Core Architectural Decisions:**
+
+- **Modular Design:** Organized into `core`, `domain`, `application`, `infrastructure`, `interfaces`, `services`, `models`, and `utils` layers for clear separation of concerns.
+- **Factory Pattern:** Centralized creation and management of `boto3` clients and FinOps services using `AWSClientFactory` and `ServiceFactory` for dependency injection and testability.
+- **State Management:** Utilizes `DynamoDBStateManager` for persistent state management and checkpointing across AWS services, supporting atomic operations and TTL for old executions.
+- **Resilience:** Incorporates a `RetryHandler` with exponential backoff and jitter, and a `ResilientExecutor` for automatic recovery from failures and dependency-aware task execution.
+- **Automatic Cleanup:** `CleanupManager` handles automatic removal of temporary files, old S3 objects, and `__pycache__` directories.
+- **Extensible Service Layer:** Employs `BaseAWSService` as an abstract base class for all AWS service integrations, standardizing interfaces for `get_resources()`, `get_costs()`, `get_metrics()`, and `get_recommendations()`.
+- **Testing Strategy:** Comprehensive unit testing with Pytest, utilizing `moto` for mocking AWS services to ensure consistent and safe testing.
+
+## AWS Services Implemented (21 of 253)
+
+### Storage Services
+- **S3Service** - Object Storage analysis (buckets, costs, lifecycle, recommendations)
+- **EBSService** - Block Storage analysis (volumes, snapshots, gp2→gp3 recommendations)
+- **EFSService** - File Storage analysis (file systems, lifecycle, mount targets)
+
+### Database Services
+- **DynamoDBFinOpsService** - NoSQL analysis (tables, capacity, PITR, billing mode)
+- **ElastiCacheService** - Cache analysis (Redis/Memcached clusters, replication groups)
+- **RedshiftService** - Data Warehouse analysis (clusters, encryption, snapshots)
+
+### Compute Services
+- **EC2FinOpsService** - Instance analysis (state, rightsizing, stopped instances)
+- **LambdaFinOpsService** - Serverless analysis (memory optimization, runtime, timeout)
+- **ECSContainerService** - Container analysis (clusters, services, tasks, Fargate)
+- **EMRService** - Big Data analysis (Spark/Hadoop clusters, auto-scaling, Spot)
+- **SageMakerService** - ML analysis (notebooks, endpoints, training jobs)
+
+### Networking Services
+- **VPCNetworkService** - Network analysis (NAT Gateways, Elastic IPs)
+- **CloudFrontService** - CDN analysis (distributions, cache, compression)
+- **ELBService** - Load Balancer analysis (ALB, NLB, CLB, target groups)
+- **Route53Service** - DNS analysis (hosted zones, records, health checks)
+
+### Data & Analytics Services
+- **KinesisService** - Streaming analysis (data streams, shards, retention)
+- **GlueService** - ETL analysis (jobs, crawlers, data catalog)
+
+### Integration Services
+- **SNSSQSService** - Messaging analysis (SNS topics, SQS queues)
+- **BackupService** - Backup analysis (vaults, jobs, recovery points)
+- **SecretsManagerService** - Secrets analysis (rotation, encryption, usage)
+
+## Key Features
+
+- **Financial Analysis:** Multi-period cost analysis, trend detection, service-level cost breakdown, and top services ranking.
+- **Operational Monitoring:** EC2 performance analytics, Lambda operational insights, custom metrics collection, and real-time processing.
+- **Optimization Recommendations:** Integration with AWS Compute Optimizer, right-sizing recommendations (EC2, Lambda, EBS), and ROI analysis with savings estimates.
+
+## External Dependencies
+
+- **AWS SDK for Python (boto3):** Core library for interacting with AWS services.
+- **pytest:** Python testing framework.
+- **moto:** Library for mocking AWS services in tests.
+- **pytest-asyncio:** Pytest plugin for testing asyncio code.
+- **pytest-mock:** Pytest plugin for mocking.
+- **tabulate:** Library for pretty-printing tabular data.
+- **AWS DynamoDB:** Used for state persistence and checkpointing.
+- **AWS S3:** Used for state storage (legacy) and S3 object cleanup.
+- **AWS Lambda:** The primary execution environment for the application.
+- **AWS CloudWatch:** For collecting and analyzing metrics.
+- **AWS Compute Optimizer:** Integrated for optimization recommendations.
+
+## Recent Changes (Nov 26, 2025)
+
+### FASE 2.3 - High Priority Services (COMPLETED)
+- Added 15 new FinOps services covering high-cost-impact AWS resources
+- Expanded `AWSServiceType` enum with 14 new service types
+- Updated `ServiceFactory` with getters for all new services
+- Enhanced `ServiceRecommendation` dataclass with `title` and `action` fields
+- Fixed ELB service type to use correct boto3 service name ('elb')
+- Added 37 new unit tests for priority services
+
+### Key Service Files Added
+- `src/finops_aws/services/ec2_finops_service.py`
+- `src/finops_aws/services/lambda_finops_service.py`
+- `src/finops_aws/services/redshift_service.py`
+- `src/finops_aws/services/cloudfront_service.py`
+- `src/finops_aws/services/elb_service.py`
+- `src/finops_aws/services/emr_service.py`
+- `src/finops_aws/services/vpc_network_service.py`
+- `src/finops_aws/services/kinesis_service.py`
+- `src/finops_aws/services/glue_service.py`
+- `src/finops_aws/services/sagemaker_service.py`
+- `src/finops_aws/services/route53_service.py`
+- `src/finops_aws/services/backup_service.py`
+- `src/finops_aws/services/sns_sqs_service.py`
+- `src/finops_aws/services/secrets_manager_service.py`

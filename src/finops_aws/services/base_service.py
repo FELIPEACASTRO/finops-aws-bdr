@@ -72,16 +72,20 @@ class ServiceRecommendation:
     priority: str = "MEDIUM"
     implementation_effort: str = "MEDIUM"
     details: Dict[str, Any] = field(default_factory=dict)
+    title: str = ""
+    action: str = ""
     
     def to_dict(self) -> Dict[str, Any]:
         return {
             'resource_id': self.resource_id,
             'resource_type': self.resource_type,
             'recommendation_type': self.recommendation_type,
+            'title': self.title,
             'description': self.description,
             'estimated_savings': self.estimated_savings,
             'priority': self.priority,
             'implementation_effort': self.implementation_effort,
+            'action': self.action,
             'details': self.details
         }
 

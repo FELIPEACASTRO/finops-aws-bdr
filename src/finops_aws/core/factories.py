@@ -43,11 +43,25 @@ class AWSServiceType(Enum):
     ELASTICACHE = "elasticache"
     ECS = "ecs"
     CLOUDFRONT = "cloudfront"
-    ELB = "elasticloadbalancing"
+    ELB = "elb"
+    ELB_V2 = "elbv2"
     ROUTE53 = "route53"
     IAM = "iam"
     KMS = "kms"
     STS = "sts"
+    REDSHIFT = "redshift"
+    REDSHIFT_SERVERLESS = "redshift-serverless"
+    EMR = "emr"
+    EMR_SERVERLESS = "emr-serverless"
+    KINESIS = "kinesis"
+    FIREHOSE = "firehose"
+    GLUE = "glue"
+    SAGEMAKER = "sagemaker"
+    BACKUP = "backup"
+    SNS = "sns"
+    SQS = "sqs"
+    SECRETS_MANAGER = "secretsmanager"
+    PRICING = "pricing"
 
 
 @dataclass
@@ -557,6 +571,219 @@ class ServiceFactory:
         
         return self._services['ecs']
     
+    def get_ec2_finops_service(self):
+        """Obtém instância do EC2FinOpsService"""
+        if 'ec2_finops' in self._mocks:
+            return self._mocks['ec2_finops']
+        
+        if 'ec2_finops' not in self._services:
+            from ..services.ec2_finops_service import EC2FinOpsService
+            self._services['ec2_finops'] = EC2FinOpsService(
+                ec2_client=self.client_factory.get_client(AWSServiceType.EC2),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['ec2_finops']
+    
+    def get_lambda_finops_service(self):
+        """Obtém instância do LambdaFinOpsService"""
+        if 'lambda_finops' in self._mocks:
+            return self._mocks['lambda_finops']
+        
+        if 'lambda_finops' not in self._services:
+            from ..services.lambda_finops_service import LambdaFinOpsService
+            self._services['lambda_finops'] = LambdaFinOpsService(
+                lambda_client=self.client_factory.get_client(AWSServiceType.LAMBDA),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['lambda_finops']
+    
+    def get_redshift_service(self):
+        """Obtém instância do RedshiftService"""
+        if 'redshift' in self._mocks:
+            return self._mocks['redshift']
+        
+        if 'redshift' not in self._services:
+            from ..services.redshift_service import RedshiftService
+            self._services['redshift'] = RedshiftService(
+                redshift_client=self.client_factory.get_client(AWSServiceType.REDSHIFT),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['redshift']
+    
+    def get_cloudfront_service(self):
+        """Obtém instância do CloudFrontService"""
+        if 'cloudfront' in self._mocks:
+            return self._mocks['cloudfront']
+        
+        if 'cloudfront' not in self._services:
+            from ..services.cloudfront_service import CloudFrontService
+            self._services['cloudfront'] = CloudFrontService(
+                cloudfront_client=self.client_factory.get_client(AWSServiceType.CLOUDFRONT),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['cloudfront']
+    
+    def get_elb_service(self):
+        """Obtém instância do ELBService"""
+        if 'elb' in self._mocks:
+            return self._mocks['elb']
+        
+        if 'elb' not in self._services:
+            from ..services.elb_service import ELBService
+            self._services['elb'] = ELBService(
+                elbv2_client=self.client_factory.get_client(AWSServiceType.ELB_V2),
+                elb_client=self.client_factory.get_client(AWSServiceType.ELB),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['elb']
+    
+    def get_emr_service(self):
+        """Obtém instância do EMRService"""
+        if 'emr' in self._mocks:
+            return self._mocks['emr']
+        
+        if 'emr' not in self._services:
+            from ..services.emr_service import EMRService
+            self._services['emr'] = EMRService(
+                emr_client=self.client_factory.get_client(AWSServiceType.EMR),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['emr']
+    
+    def get_vpc_network_service(self):
+        """Obtém instância do VPCNetworkService"""
+        if 'vpc_network' in self._mocks:
+            return self._mocks['vpc_network']
+        
+        if 'vpc_network' not in self._services:
+            from ..services.vpc_network_service import VPCNetworkService
+            self._services['vpc_network'] = VPCNetworkService(
+                ec2_client=self.client_factory.get_client(AWSServiceType.EC2),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['vpc_network']
+    
+    def get_kinesis_service(self):
+        """Obtém instância do KinesisService"""
+        if 'kinesis' in self._mocks:
+            return self._mocks['kinesis']
+        
+        if 'kinesis' not in self._services:
+            from ..services.kinesis_service import KinesisService
+            self._services['kinesis'] = KinesisService(
+                kinesis_client=self.client_factory.get_client(AWSServiceType.KINESIS),
+                firehose_client=self.client_factory.get_client(AWSServiceType.FIREHOSE),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['kinesis']
+    
+    def get_glue_service(self):
+        """Obtém instância do GlueService"""
+        if 'glue' in self._mocks:
+            return self._mocks['glue']
+        
+        if 'glue' not in self._services:
+            from ..services.glue_service import GlueService
+            self._services['glue'] = GlueService(
+                glue_client=self.client_factory.get_client(AWSServiceType.GLUE),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['glue']
+    
+    def get_sagemaker_service(self):
+        """Obtém instância do SageMakerService"""
+        if 'sagemaker' in self._mocks:
+            return self._mocks['sagemaker']
+        
+        if 'sagemaker' not in self._services:
+            from ..services.sagemaker_service import SageMakerService
+            self._services['sagemaker'] = SageMakerService(
+                sagemaker_client=self.client_factory.get_client(AWSServiceType.SAGEMAKER),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['sagemaker']
+    
+    def get_route53_service(self):
+        """Obtém instância do Route53Service"""
+        if 'route53' in self._mocks:
+            return self._mocks['route53']
+        
+        if 'route53' not in self._services:
+            from ..services.route53_service import Route53Service
+            self._services['route53'] = Route53Service(
+                route53_client=self.client_factory.get_client(AWSServiceType.ROUTE53),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['route53']
+    
+    def get_backup_service(self):
+        """Obtém instância do BackupService"""
+        if 'backup' in self._mocks:
+            return self._mocks['backup']
+        
+        if 'backup' not in self._services:
+            from ..services.backup_service import BackupService
+            self._services['backup'] = BackupService(
+                backup_client=self.client_factory.get_client(AWSServiceType.BACKUP),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['backup']
+    
+    def get_sns_sqs_service(self):
+        """Obtém instância do SNSSQSService"""
+        if 'sns_sqs' in self._mocks:
+            return self._mocks['sns_sqs']
+        
+        if 'sns_sqs' not in self._services:
+            from ..services.sns_sqs_service import SNSSQSService
+            self._services['sns_sqs'] = SNSSQSService(
+                sns_client=self.client_factory.get_client(AWSServiceType.SNS),
+                sqs_client=self.client_factory.get_client(AWSServiceType.SQS),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['sns_sqs']
+    
+    def get_secrets_manager_service(self):
+        """Obtém instância do SecretsManagerService"""
+        if 'secrets_manager' in self._mocks:
+            return self._mocks['secrets_manager']
+        
+        if 'secrets_manager' not in self._services:
+            from ..services.secrets_manager_service import SecretsManagerService
+            self._services['secrets_manager'] = SecretsManagerService(
+                secretsmanager_client=self.client_factory.get_client(AWSServiceType.SECRETS_MANAGER),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['secrets_manager']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -574,7 +801,21 @@ class ServiceFactory:
             'dynamodb': self.get_dynamodb_service(),
             'efs': self.get_efs_service(),
             'elasticache': self.get_elasticache_service(),
-            'ecs': self.get_ecs_service()
+            'ecs': self.get_ecs_service(),
+            'ec2_finops': self.get_ec2_finops_service(),
+            'lambda_finops': self.get_lambda_finops_service(),
+            'redshift': self.get_redshift_service(),
+            'cloudfront': self.get_cloudfront_service(),
+            'elb': self.get_elb_service(),
+            'emr': self.get_emr_service(),
+            'vpc_network': self.get_vpc_network_service(),
+            'kinesis': self.get_kinesis_service(),
+            'glue': self.get_glue_service(),
+            'sagemaker': self.get_sagemaker_service(),
+            'route53': self.get_route53_service(),
+            'backup': self.get_backup_service(),
+            'sns_sqs': self.get_sns_sqs_service(),
+            'secrets_manager': self.get_secrets_manager_service()
         }
     
     def clear_cache(self):

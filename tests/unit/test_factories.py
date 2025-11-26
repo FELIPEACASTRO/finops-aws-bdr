@@ -383,7 +383,7 @@ class TestAWSServiceType:
         expected_services = [
             'ec2', 'lambda', 'rds', 's3', 'dynamodb', 'cloudwatch',
             'ce', 'compute-optimizer', 'ebs', 'efs', 'cloudfront',
-            'elasticloadbalancing', 'route53', 'iam', 'kms', 'sts'
+            'elb', 'route53', 'iam', 'kms', 'sts'
         ]
         
         actual_values = [s.value for s in AWSServiceType]
