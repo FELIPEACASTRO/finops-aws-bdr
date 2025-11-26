@@ -6,29 +6,33 @@ Parameters:
     Type: String
     Default: finops-aws-analyzer
     Description: Nome da função Lambda
-  
+
   LogLevel:
     Type: String
     Default: INFO
     AllowedValues: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
     Description: Nível de log da aplicação
-  
+
   ScheduleExpression:
     Type: String
     Default: 'rate(1 day)'
     Description: Expressão de agendamento (ex. rate(1 day), cron(0 9 * * ? *))
-  
+
   EnableSchedule:
     Type: String
     Default: 'true'
     AllowedValues: ['true', 'false']
     Description: Habilitar execução agendada
-  
+
   CreateApiGateway:
     Type: String
     Default: 'true'
     AllowedValues: ['true', 'false']
     Description: Criar API Gateway para acesso HTTP
+
+  StateBucket:
+    Type: String
+    Description: Bucket S3 para armazenar estado das execuções
 
 Conditions:
   ShouldCreateSchedule: !Equals [!Ref EnableSchedule, 'true']
@@ -62,7 +66,7 @@ Resources:
                   - ce:ListCostCategoryDefinitions
                   - ce:GetCostCategories
                 Resource: '*'
-              
+
               # CloudWatch permissions
               - Effect: Allow
                 Action:
@@ -70,7 +74,7 @@ Resources:
                   - cloudwatch:GetMetricStatistics
                   - cloudwatch:ListMetrics
                 Resource: '*'
-              
+
               # EC2 permissions (para listar instâncias)
               - Effect: Allow
                 Action:
@@ -78,14 +82,14 @@ Resources:
                   - ec2:DescribeInstanceTypes
                   - ec2:DescribeRegions
                 Resource: '*'
-              
+
               # Lambda permissions (para listar funções)
               - Effect: Allow
                 Action:
                   - lambda:ListFunctions
                   - lambda:GetFunction
                 Resource: '*'
-              
+
               # Compute Optimizer permissions
               - Effect: Allow
                 Action:
@@ -95,13 +99,24 @@ Resources:
                   - compute-optimizer:GetEBSVolumeRecommendations
                   - compute-optimizer:GetAutoScalingGroupRecommendations
                 Resource: '*'
-              
+
               # STS permissions (para obter account ID)
               - Effect: Allow
                 Action:
                   - sts:GetCallerIdentity
                 Resource: '*'
-              
+
+              # S3 permissions para estado das execuções
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::${StateBucket}'
+                  - !Sub 'arn:aws:s3:::${StateBucket}/*'
+
               # Organizations permissions (opcional, para multi-conta)
               - Effect: Allow
                 Action:
@@ -115,14 +130,17 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       Runtime: python3.12
-      Handler: src.finops_aws.lambda_handler.lambda_handler
+      Handler: lambda_handler.lambda_handler
       Role: !GetAtt FinOpsLambdaRole.Arn
-      Timeout: 300  # 5 minutos
-      MemorySize: 512
+      Timeout: 900  # 15 minutos (máximo para Lambda)
+      MemorySize: 1024
       Environment:
         Variables:
           LOG_LEVEL: !Ref LogLevel
           PYTHONPATH: /var/task/src
+          FINOPS_STATE_BUCKET: !Ref StateBucket
+          MAX_CONCURRENT_TASKS: '3'
+          TASK_TIMEOUT_SECONDS: '300'
       Code:
         ZipFile: |
           # Código placeholder - deve ser substituído pelo deployment
