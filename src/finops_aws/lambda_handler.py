@@ -13,6 +13,7 @@ from .services.optimizer_service import OptimizerService
 from .models.finops_models import FinOpsReport
 from .utils.logger import setup_logger, log_error
 from .utils.aws_helpers import get_aws_account_id
+from .core.cleanup_manager import cleanup_after_execution
 
 # Configuração de logging
 logger = setup_logger(__name__, os.getenv('LOG_LEVEL', 'INFO'))
@@ -78,6 +79,19 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         # Adiciona métricas de resumo
         result['summary'] = generate_summary(costs, usage, optimizer_recommendations, total_savings_potential)
+
+        # Executa limpeza automática de arquivos temporários (via helper do core)
+        cleanup_enabled = os.getenv('CLEANUP_ENABLED', 'true').lower() == 'true'
+        if cleanup_enabled:
+            try:
+                logger.info("Starting automatic cleanup...")
+                result = cleanup_after_execution(result)
+                logger.info("Cleanup completed", extra={
+                    'extra_data': result.get('cleanup_metrics', {})
+                })
+            except Exception as cleanup_error:
+                logger.warning(f"Cleanup failed (non-fatal): {cleanup_error}")
+                result['cleanup_metrics'] = {'error': str(cleanup_error)}
 
         # Log de conclusão
         duration = (datetime.now() - start_time).total_seconds()
