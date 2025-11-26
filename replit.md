@@ -12,28 +12,51 @@
 
 ## Current State
 
-This project has been successfully set up in the Replit environment for local development and testing.
+This project is undergoing transformation into a world-class FinOps product following a 10-phase roadmap.
 
 ### What's Working
 - ✅ Python 3.11 installed and configured
 - ✅ All dependencies installed (boto3, pytest, moto, pytest-asyncio, etc.)
-- ✅ Test suite fully passing (56 passed, 1 skipped)
+- ✅ Test suite fully passing (83 passed, 1 skipped)
 - ✅ Local demo runner for testing Lambda handler with mocked AWS services
 - ✅ Comprehensive .gitignore for Python projects
+- ✅ **CleanupManager** - Sistema de limpeza automática de arquivos temporários
 
 ### Recent Changes (Nov 26, 2025)
-- Installed Python 3.11 runtime
-- Installed all project dependencies from requirements.txt
-- Added pytest-asyncio for async test support (required for resilient executor tests)
-- Created `run_local_demo.py` for local testing without AWS credentials
-- Configured "Run Tests" workflow to execute test suite automatically
-- All tests now passing after installing pytest-asyncio
+
+#### FASE 1.1 - Sistema de Limpeza BKP (CONCLUÍDO)
+- Implementado `CleanupManager` em `src/finops_aws/core/cleanup_manager.py`
+- Limpeza automática de arquivos: `.bkp`, `.tmp`, `.cache`, `.log`, `.pyc`, `.pyo`
+- Limpeza de objetos S3 antigos (execuções expiradas)
+- Limpeza de diretórios `__pycache__`
+- Modo dry-run para simulação
+- Métricas detalhadas de limpeza integradas ao relatório JSON
+- 27 testes unitários criados em `tests/unit/test_cleanup_manager.py`
+- Integração no `lambda_handler.py` via helper `cleanup_after_execution`
+
+### Roadmap Progress
+- [x] FASE 1.1 - Sistema de Limpeza BKP
+- [ ] FASE 1.2 - Controle de Execução (DynamoDB)
+- [ ] FASE 1.3 - Refatoração Core (Factory Pattern)
+- [ ] FASE 2 - Expansão de Serviços AWS
+- [ ] FASE 3 - Inteligência e Automação (ML)
+- [ ] FASE 4 - Interface e Experiência (Dashboard)
+- [ ] FASE 5 - Escalabilidade e Performance
+- [ ] FASE 6 - Segurança e Compliance
+- [ ] FASE 7 - Governança e Automação
+- [ ] FASE 8 - Testes e Qualidade
+- [ ] FASE 9 - Deployment e Operações
+- [ ] FASE 10 - Go-to-Market
 
 ## Project Structure
 
 ```
 finops-aws-bdr/
 ├── src/finops_aws/           # Main application code
+│   ├── core/                 # Core business logic (NEW)
+│   │   ├── cleanup_manager.py   # Sistema de limpeza automática
+│   │   ├── state_manager.py     # Gerenciamento de estado
+│   │   └── resilient_executor.py # Execução resiliente
 │   ├── domain/               # Domain layer (entities, value objects)
 │   ├── application/          # Application layer (use cases, DTOs)
 │   ├── infrastructure/       # Infrastructure layer (AWS services)
@@ -41,7 +64,14 @@ finops-aws-bdr/
 │   ├── services/             # Service layer (cost, metrics, optimizer)
 │   ├── models/               # Data models
 │   └── utils/                # Utilities (logging, AWS helpers)
-├── tests/                    # Unit tests
+├── tests/                    # Unit tests (83 tests)
+│   └── unit/
+│       ├── test_cleanup_manager.py  # 27 tests for cleanup system
+│       ├── test_cost_service.py
+│       ├── test_metrics_service.py
+│       ├── test_optimizer_service.py
+│       ├── test_resilient_executor.py
+│       └── test_state_manager.py
 ├── infrastructure/           # CloudFormation templates
 ├── run_local_demo.py        # Local testing script (Replit)
 └── deploy.sh                # AWS deployment script
@@ -65,36 +95,13 @@ python run_local_demo.py 1
 
 This runs the handler without requiring actual AWS credentials, using the moto library to mock AWS API calls.
 
-**Note**: The current implementation always uses mocked AWS services (via moto) regardless of whether AWS credentials are present. This ensures consistent, safe testing in the Replit environment. To test against real AWS resources, you would need to run the Lambda handler outside of the demo script's mock context.
+**Note**: The current implementation always uses mocked AWS services (via moto) regardless of whether AWS credentials are present. This ensures consistent, safe testing in the Replit environment.
 
 ### Test Options
 The demo runner provides three modes:
 1. Run Lambda handler demo (with mocked AWS services)
 2. Run test suite
 3. Run both
-
-## AWS Deployment
-
-This application is designed to run in AWS as a Lambda function. Deployment requires:
-
-1. AWS Account with appropriate IAM permissions
-2. S3 bucket for Lambda code deployment
-3. S3 bucket for execution state storage
-
-### Deploy to AWS
-```bash
-./deploy.sh -b your-s3-bucket
-```
-
-For full deployment options, see `./deploy.sh --help`
-
-### Infrastructure
-The CloudFormation template (`infrastructure/cloudformation-template.yaml`) includes:
-- Lambda function with 15-minute timeout
-- IAM role with necessary permissions
-- EventBridge rule for scheduled execution (daily by default)
-- Optional API Gateway for HTTP access
-- CloudWatch log group
 
 ## Key Features
 
@@ -123,6 +130,13 @@ The CloudFormation template (`infrastructure/cloudformation-template.yaml`) incl
 - Circuit breaker pattern
 - Dependency-aware task execution
 
+### Cleanup System (NEW - FASE 1.1)
+- Automatic cleanup of temporary files (.bkp, .tmp, .cache)
+- S3 object cleanup for expired executions
+- __pycache__ directory cleanup
+- Dry-run mode for simulation
+- Detailed cleanup metrics in JSON reports
+
 ## Development
 
 ### Dependencies
@@ -147,9 +161,25 @@ The project follows:
 - Type hints (Python 3.11+)
 - Structured logging (JSON format)
 
+## Environment Variables
+
+### Cleanup Configuration
+- `CLEANUP_ENABLED` - Enable/disable automatic cleanup (default: `true`)
+- `CLEANUP_FILE_EXTENSIONS` - File extensions to clean (default: `.bkp,.tmp,.cache,.log,.pyc,.pyo`)
+- `CLEANUP_MAX_FILE_AGE_HOURS` - Max file age in hours (default: `24`)
+- `CLEANUP_S3_ENABLED` - Enable S3 cleanup (default: `true`)
+- `CLEANUP_S3_MAX_AGE_DAYS` - Max S3 object age in days (default: `7`)
+- `CLEANUP_DRY_RUN` - Simulate cleanup without deleting (default: `false`)
+
+### Application Configuration
+- `FINOPS_STATE_BUCKET` - S3 bucket for state storage
+- `LOG_LEVEL` - Logging level (default: `INFO`)
+
 ## User Preferences
 
-*No specific user preferences recorded yet.*
+- Idioma de comunicação: Português do Brasil
+- Perguntar antes de fazer suposições
+- Seguir padrões Clean Architecture e DDD
 
 ## Notes
 
@@ -159,20 +189,10 @@ The project follows:
 - State management uses **S3** for persistence between Lambda invocations
 - The resilient handler supports **automatic recovery** from failures
 
-## Next Steps
-
-To use this application in production:
-
-1. Configure AWS credentials
-2. Create S3 buckets for deployment and state storage
-3. Review and customize CloudFormation parameters
-4. Deploy using the `deploy.sh` script
-5. Enable AWS Compute Optimizer for recommendations
-6. Configure EventBridge schedule or API Gateway access
-
 ## Resources
 
 - **README.md** - Detailed documentation in Portuguese
 - **README_RESILIENT.md** - Resilient execution system documentation
 - **EXPANSION_ROADMAP.md** - Future enhancements and expansion plans
 - **infrastructure/cloudformation-template.yaml** - AWS infrastructure definition
+- **attached_assets/** - Contract and roadmap documents
