@@ -3,7 +3,7 @@ Serviços FinOps AWS
 
 Este módulo contém os serviços para análise de custos, métricas e otimização.
 
-FASE 2: Expansão de Serviços (21 serviços implementados)
+FASE 2: Expansão de Serviços (22 serviços implementados)
 - BaseAWSService: Classe base para todos os serviços
 - S3Service: Análise de Object Storage
 - EBSService: Análise de Block Storage
@@ -27,6 +27,9 @@ FASE 2.3: Serviços de Alta Prioridade
 - BackupService: Análise de AWS Backup vaults
 - SNSSQSService: Análise de SNS topics e SQS queues
 - SecretsManagerService: Análise de Secrets Manager
+
+FASE 2.4: Serviços Não-Serverless de Alto Custo
+- MSKService: Análise de Amazon MSK (Kafka gerenciado)
 """
 
 from .cost_service import CostService
@@ -59,6 +62,7 @@ from .route53_service import Route53Service, HostedZone
 from .backup_service import BackupService, BackupVault, BackupPlan
 from .sns_sqs_service import SNSSQSService, SNSTopic, SQSQueue
 from .secrets_manager_service import SecretsManagerService, Secret
+from .msk_service import MSKService, MSKCluster, MSKConfiguration
 
 __all__ = [
     'CostService',
@@ -123,5 +127,8 @@ __all__ = [
     'SNSTopic',
     'SQSQueue',
     'SecretsManagerService',
-    'Secret'
+    'Secret',
+    'MSKService',
+    'MSKCluster',
+    'MSKConfiguration'
 ]

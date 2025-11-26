@@ -62,6 +62,7 @@ class AWSServiceType(Enum):
     SQS = "sqs"
     SECRETS_MANAGER = "secretsmanager"
     PRICING = "pricing"
+    MSK = "kafka"
 
 
 @dataclass
@@ -784,6 +785,21 @@ class ServiceFactory:
         
         return self._services['secrets_manager']
     
+    def get_msk_service(self):
+        """Obtém instância do MSKService"""
+        if 'msk' in self._mocks:
+            return self._mocks['msk']
+        
+        if 'msk' not in self._services:
+            from ..services.msk_service import MSKService
+            self._services['msk'] = MSKService(
+                msk_client=self.client_factory.get_client(AWSServiceType.MSK),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['msk']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -815,7 +831,8 @@ class ServiceFactory:
             'route53': self.get_route53_service(),
             'backup': self.get_backup_service(),
             'sns_sqs': self.get_sns_sqs_service(),
-            'secrets_manager': self.get_secrets_manager_service()
+            'secrets_manager': self.get_secrets_manager_service(),
+            'msk': self.get_msk_service()
         }
     
     def clear_cache(self):

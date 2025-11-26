@@ -664,3 +664,316 @@ class TestRecommendations:
         recommendations = service.get_recommendations()
         no_sub_recs = [r for r in recommendations if r.recommendation_type == 'NO_SUBSCRIBERS']
         assert len(no_sub_recs) == 1
+
+
+class TestMSKService:
+    """Tests for MSKService - Amazon Managed Streaming for Apache Kafka"""
+    
+    @pytest.fixture
+    def mock_clients(self):
+        return {
+            'msk': Mock(),
+            'cloudwatch': Mock(),
+            'cost': Mock()
+        }
+    
+    @pytest.fixture
+    def service(self, mock_clients):
+        from src.finops_aws.services.msk_service import MSKService
+        return MSKService(
+            msk_client=mock_clients['msk'],
+            cloudwatch_client=mock_clients['cloudwatch'],
+            cost_client=mock_clients['cost']
+        )
+    
+    def test_service_name(self, service):
+        assert service.get_service_name() == "Amazon MSK"
+    
+    def test_health_check_success(self, service, mock_clients):
+        mock_clients['msk'].list_clusters_v2.return_value = {'ClusterInfoList': []}
+        assert service.health_check() is True
+    
+    def test_health_check_failure(self, service, mock_clients):
+        mock_clients['msk'].list_clusters_v2.side_effect = Exception("API Error")
+        assert service.health_check() is False
+    
+    def test_get_clusters_provisioned(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'test-cluster',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/test-cluster/abc',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'PROVISIONED',
+                        'Provisioned': {
+                            'NumberOfBrokerNodes': 3,
+                            'BrokerNodeGroupInfo': {
+                                'InstanceType': 'kafka.m5.large',
+                                'StorageInfo': {
+                                    'EbsStorageInfo': {
+                                        'VolumeSize': 100
+                                    }
+                                }
+                            },
+                            'CurrentBrokerSoftwareInfo': {
+                                'KafkaVersion': '3.4.0'
+                            },
+                            'EnhancedMonitoring': 'PER_BROKER',
+                            'EncryptionInfo': {
+                                'EncryptionAtRest': {'DataVolumeKMSKeyId': 'alias/aws/kafka'},
+                                'EncryptionInTransit': {'ClientBroker': 'TLS'}
+                            }
+                        },
+                        'Tags': {'Environment': 'production'}
+                    }
+                ]
+            }
+        ]
+        
+        clusters = service.get_clusters()
+        assert len(clusters) == 1
+        assert clusters[0].cluster_name == 'test-cluster'
+        assert clusters[0].cluster_state == 'ACTIVE'
+        assert clusters[0].is_provisioned is True
+        assert clusters[0].number_of_broker_nodes == 3
+        assert clusters[0].instance_type == 'kafka.m5.large'
+    
+    def test_get_clusters_serverless(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'serverless-cluster',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/serverless/xyz',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'SERVERLESS',
+                        'Serverless': {
+                            'VpcConfigs': []
+                        }
+                    }
+                ]
+            }
+        ]
+        
+        clusters = service.get_clusters()
+        assert len(clusters) == 1
+        assert clusters[0].is_serverless is True
+        assert clusters[0].number_of_broker_nodes == 0
+    
+    def test_get_resources(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'my-cluster',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/my-cluster/123',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'PROVISIONED',
+                        'Provisioned': {
+                            'NumberOfBrokerNodes': 3,
+                            'BrokerNodeGroupInfo': {
+                                'InstanceType': 'kafka.t3.small'
+                            },
+                            'CurrentBrokerSoftwareInfo': {'KafkaVersion': '2.8.0'}
+                        }
+                    }
+                ]
+            }
+        ]
+        
+        resources = service.get_resources()
+        assert len(resources) == 1
+        assert resources[0]['cluster_name'] == 'my-cluster'
+    
+    def test_get_metrics(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'cluster1',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/cluster1/a',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'PROVISIONED',
+                        'Provisioned': {
+                            'NumberOfBrokerNodes': 3,
+                            'BrokerNodeGroupInfo': {
+                                'InstanceType': 'kafka.m5.large',
+                                'StorageInfo': {'EbsStorageInfo': {'VolumeSize': 500}}
+                            },
+                            'CurrentBrokerSoftwareInfo': {'KafkaVersion': '3.0.0'}
+                        }
+                    },
+                    {
+                        'ClusterName': 'cluster2',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/cluster2/b',
+                        'State': 'CREATING',
+                        'ClusterType': 'SERVERLESS',
+                        'Serverless': {}
+                    }
+                ]
+            }
+        ]
+        
+        metrics = service.get_metrics()
+        assert metrics.service_name == "Amazon MSK"
+        assert metrics.resource_count == 2
+        assert metrics.metrics['provisioned_clusters'] == 1
+        assert metrics.metrics['serverless_clusters'] == 1
+        assert metrics.metrics['total_broker_nodes'] == 3
+        assert metrics.metrics['total_storage_gb'] == 1500  # 500 * 3 brokers
+    
+    def test_get_recommendations_oversized(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'oversized-cluster',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/oversized/abc',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'PROVISIONED',
+                        'Provisioned': {
+                            'NumberOfBrokerNodes': 3,
+                            'BrokerNodeGroupInfo': {
+                                'InstanceType': 'kafka.m5.24xlarge',
+                                'StorageInfo': {'EbsStorageInfo': {'VolumeSize': 100}}
+                            },
+                            'CurrentBrokerSoftwareInfo': {'KafkaVersion': '3.0.0'},
+                            'EnhancedMonitoring': 'DEFAULT'
+                        }
+                    }
+                ]
+            }
+        ]
+        
+        recommendations = service.get_recommendations()
+        rightsizing = [r for r in recommendations if r.recommendation_type == 'RIGHT_SIZING']
+        assert len(rightsizing) >= 1
+        assert any('superdimensionadas' in r.title for r in rightsizing)
+    
+    def test_get_recommendations_no_encryption(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'ClusterInfoList': [
+                    {
+                        'ClusterName': 'no-encryption-cluster',
+                        'ClusterArn': 'arn:aws:kafka:us-east-1:123:cluster/noenc/xyz',
+                        'State': 'ACTIVE',
+                        'ClusterType': 'PROVISIONED',
+                        'Provisioned': {
+                            'NumberOfBrokerNodes': 3,
+                            'BrokerNodeGroupInfo': {
+                                'InstanceType': 'kafka.m5.large',
+                                'StorageInfo': {'EbsStorageInfo': {'VolumeSize': 100}}
+                            },
+                            'CurrentBrokerSoftwareInfo': {'KafkaVersion': '3.0.0'},
+                            'EnhancedMonitoring': 'PER_BROKER',
+                            'EncryptionInfo': {}  # No encryption
+                        }
+                    }
+                ]
+            }
+        ]
+        
+        recommendations = service.get_recommendations()
+        security = [r for r in recommendations if r.recommendation_type == 'SECURITY']
+        assert len(security) >= 1
+    
+    def test_get_configurations(self, service, mock_clients):
+        mock_clients['msk'].get_paginator.return_value.paginate.return_value = [
+            {
+                'Configurations': [
+                    {
+                        'Arn': 'arn:aws:kafka:us-east-1:123:configuration/my-config/1',
+                        'Name': 'my-config',
+                        'Description': 'Custom configuration',
+                        'KafkaVersions': ['3.0.0', '2.8.0'],
+                        'State': 'ACTIVE'
+                    }
+                ]
+            }
+        ]
+        
+        configs = service.get_configurations()
+        assert len(configs) == 1
+        assert configs[0].name == 'my-config'
+        assert '3.0.0' in configs[0].kafka_versions
+
+
+class TestMSKCluster:
+    """Tests for MSKCluster dataclass"""
+    
+    def test_msk_cluster_to_dict(self):
+        from src.finops_aws.services.msk_service import MSKCluster
+        
+        cluster = MSKCluster(
+            cluster_name='test-cluster',
+            cluster_arn='arn:aws:kafka:us-east-1:123:cluster/test/abc',
+            cluster_state='ACTIVE',
+            cluster_type='PROVISIONED',
+            kafka_version='3.4.0',
+            number_of_broker_nodes=3,
+            broker_node_group_info={
+                'InstanceType': 'kafka.m5.large',
+                'StorageInfo': {'EbsStorageInfo': {'VolumeSize': 100}}
+            },
+            encryption_info={
+                'EncryptionAtRest': {'DataVolumeKMSKeyId': 'alias/aws/kafka'}
+            },
+            enhanced_monitoring='PER_BROKER'
+        )
+        
+        d = cluster.to_dict()
+        assert d['cluster_name'] == 'test-cluster'
+        assert d['cluster_type'] == 'PROVISIONED'
+        assert d['number_of_broker_nodes'] == 3
+        assert d['instance_type'] == 'kafka.m5.large'
+        assert d['has_encryption_at_rest'] is True
+    
+    def test_msk_cluster_properties(self):
+        from src.finops_aws.services.msk_service import MSKCluster
+        
+        provisioned = MSKCluster(
+            cluster_name='prov',
+            cluster_arn='arn:prov',
+            cluster_state='ACTIVE',
+            cluster_type='PROVISIONED',
+            kafka_version='3.0.0',
+            number_of_broker_nodes=3
+        )
+        
+        serverless = MSKCluster(
+            cluster_name='srv',
+            cluster_arn='arn:srv',
+            cluster_state='ACTIVE',
+            cluster_type='SERVERLESS',
+            kafka_version='serverless',
+            number_of_broker_nodes=0
+        )
+        
+        assert provisioned.is_provisioned is True
+        assert provisioned.is_serverless is False
+        assert serverless.is_provisioned is False
+        assert serverless.is_serverless is True
+
+
+class TestMSKConfiguration:
+    """Tests for MSKConfiguration dataclass"""
+    
+    def test_msk_configuration_to_dict(self):
+        from src.finops_aws.services.msk_service import MSKConfiguration
+        from datetime import datetime
+        
+        config = MSKConfiguration(
+            arn='arn:aws:kafka:us-east-1:123:configuration/test/1',
+            name='test-config',
+            description='Test configuration',
+            kafka_versions=['3.0.0', '2.8.0'],
+            state='ACTIVE',
+            creation_time=datetime(2025, 1, 1)
+        )
+        
+        d = config.to_dict()
+        assert d['name'] == 'test-config'
+        assert '3.0.0' in d['kafka_versions']
+        assert d['state'] == 'ACTIVE'
