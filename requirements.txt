@@ -10,3 +10,4 @@ moto
 pytest
 pytest-mock
 tabulate
+pytest-asyncio
