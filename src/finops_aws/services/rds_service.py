@@ -38,13 +38,47 @@ class RDSService:
     """
     Serviço para análise completa do Amazon RDS
     Coleta custos, métricas de uso e recomendações de otimização
+    
+    Suporta injeção de dependências para Clean Architecture.
+    
+    Uso com Factory (recomendado):
+        factory = ServiceFactory()
+        rds_service = factory.get_rds_service()
+        
+    Uso direto (legado):
+        rds_service = RDSService()
     """
     
-    def __init__(self):
-        self.rds_client = boto3.client('rds')
-        self.cloudwatch_client = boto3.client('cloudwatch')
-        self.cost_client = boto3.client('ce')
+    def __init__(
+        self,
+        rds_client=None,
+        cloudwatch_client=None,
+        cost_client=None
+    ):
+        """
+        Inicializa o RDSService
+        
+        Args:
+            rds_client: Cliente RDS injetado (opcional)
+            cloudwatch_client: Cliente CloudWatch injetado (opcional)
+            cost_client: Cliente Cost Explorer injetado (opcional)
+        """
+        self.rds_client = rds_client or boto3.client('rds')
+        self.cloudwatch_client = cloudwatch_client or boto3.client('cloudwatch')
+        self.cost_client = cost_client or boto3.client('ce')
         self.region = get_aws_region()
+    
+    def get_service_name(self) -> str:
+        """Retorna nome do serviço"""
+        return "RDSService"
+    
+    def health_check(self) -> bool:
+        """Verifica se serviço está operacional"""
+        try:
+            self.rds_client.describe_db_instances(MaxRecords=5)
+            return True
+        except Exception:
+            return False
     
     @log_api_call
     def get_rds_instances(self) -> List[RDSInstance]:

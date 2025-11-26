@@ -24,11 +24,36 @@ def get_compute_optimizer_client():
 
 
 class OptimizerService:
-    """Serviço para coleta de recomendações de otimização AWS"""
+    """
+    Serviço para coleta de recomendações de otimização AWS
+    
+    Suporta injeção de dependências para Clean Architecture.
+    
+    Uso com Factory (recomendado):
+        factory = ServiceFactory()
+        optimizer_service = factory.get_optimizer_service()
+        
+    Uso direto (legado):
+        optimizer_service = OptimizerService()
+    """
 
-    def __init__(self):
-        self.client = get_compute_optimizer_client()
+    def __init__(self, client=None):
+        """
+        Inicializa o OptimizerService
+        
+        Args:
+            client: Cliente Compute Optimizer injetado (opcional)
+        """
+        self.client = client or get_compute_optimizer_client()
         self._optimizer_enabled = None
+    
+    def get_service_name(self) -> str:
+        """Retorna nome do serviço"""
+        return "OptimizerService"
+    
+    def health_check(self) -> bool:
+        """Verifica se serviço está operacional"""
+        return self.is_compute_optimizer_enabled()
 
     def is_compute_optimizer_enabled(self) -> bool:
         """

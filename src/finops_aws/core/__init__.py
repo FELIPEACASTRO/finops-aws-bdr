@@ -6,6 +6,7 @@ Este módulo contém a lógica central do FinOps AWS:
 - DynamoDBStateManager: Gerenciamento de estado com DynamoDB (FASE 1.2)
 - ResilientExecutor: Execução resiliente com retry e circuit breaker
 - CleanupManager: Limpeza automática de arquivos temporários
+- Factories: Criação centralizada de clientes e serviços (FASE 1.3)
 """
 
 from .state_manager import (
@@ -49,6 +50,14 @@ from .retry_handler import (
     async_retry_with_exponential_backoff,
     create_aws_retry_policy
 )
+from .factories import (
+    AWSClientFactory,
+    AWSServiceType,
+    AWSClientConfig,
+    ServiceFactory,
+    ServiceConfig,
+    ServiceProtocol
+)
 
 __all__ = [
     # Legacy S3 State Manager
@@ -86,5 +95,12 @@ __all__ = [
     'CleanupManager',
     'CleanupConfig',
     'CleanupResult',
-    'cleanup_after_execution'
+    'cleanup_after_execution',
+    # Factories (FASE 1.3)
+    'AWSClientFactory',
+    'AWSServiceType',
+    'AWSClientConfig',
+    'ServiceFactory',
+    'ServiceConfig',
+    'ServiceProtocol'
 ]

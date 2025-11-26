@@ -26,10 +26,43 @@ def get_cost_explorer_client():
 
 
 class CostService:
-    """Serviço para coleta e análise de custos AWS"""
+    """
+    Serviço para coleta e análise de custos AWS
+    
+    Suporta injeção de dependências para Clean Architecture.
+    
+    Uso com Factory (recomendado):
+        factory = ServiceFactory()
+        cost_service = factory.get_cost_service()
+        
+    Uso direto (legado):
+        cost_service = CostService()
+    """
 
-    def __init__(self):
-        self.client = get_cost_explorer_client()
+    def __init__(self, client=None):
+        """
+        Inicializa o CostService
+        
+        Args:
+            client: Cliente Cost Explorer injetado (opcional)
+        """
+        self.client = client or get_cost_explorer_client()
+    
+    def get_service_name(self) -> str:
+        """Retorna nome do serviço"""
+        return "CostService"
+    
+    def health_check(self) -> bool:
+        """Verifica se serviço está operacional"""
+        try:
+            self.client.get_cost_and_usage(
+                TimePeriod={'Start': '2025-01-01', 'End': '2025-01-02'},
+                Granularity='DAILY',
+                Metrics=['UnblendedCost']
+            )
+            return True
+        except Exception:
+            return False
 
     @retry_with_backoff(max_retries=3)
     def get_costs_by_service(self, days: int) -> Dict[str, float]:

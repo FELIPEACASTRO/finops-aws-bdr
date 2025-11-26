@@ -43,12 +43,48 @@ def get_lambda_client():
 
 
 class MetricsService:
-    """Serviço para coleta de métricas de uso de recursos AWS"""
+    """
+    Serviço para coleta de métricas de uso de recursos AWS
+    
+    Suporta injeção de dependências para Clean Architecture.
+    
+    Uso com Factory (recomendado):
+        factory = ServiceFactory()
+        metrics_service = factory.get_metrics_service()
+        
+    Uso direto (legado):
+        metrics_service = MetricsService()
+    """
 
-    def __init__(self):
-        self.cloudwatch = get_cloudwatch_client()
-        self.ec2 = get_ec2_client()
-        self.lambda_client = get_lambda_client()
+    def __init__(
+        self,
+        cloudwatch_client=None,
+        ec2_client=None,
+        lambda_client=None
+    ):
+        """
+        Inicializa o MetricsService
+        
+        Args:
+            cloudwatch_client: Cliente CloudWatch injetado (opcional)
+            ec2_client: Cliente EC2 injetado (opcional)
+            lambda_client: Cliente Lambda injetado (opcional)
+        """
+        self.cloudwatch = cloudwatch_client or get_cloudwatch_client()
+        self.ec2 = ec2_client or get_ec2_client()
+        self.lambda_client = lambda_client or get_lambda_client()
+    
+    def get_service_name(self) -> str:
+        """Retorna nome do serviço"""
+        return "MetricsService"
+    
+    def health_check(self) -> bool:
+        """Verifica se serviço está operacional"""
+        try:
+            self.ec2.describe_instances(MaxResults=5)
+            return True
+        except Exception:
+            return False
 
     @retry_with_backoff(max_retries=3)
     def get_ec2_instances(self) -> List[Dict[str, Any]]:

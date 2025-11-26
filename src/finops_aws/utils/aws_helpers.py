@@ -136,3 +136,35 @@ def safe_get_nested(data: Dict[str, Any], keys: List[str], default: Any = None) 
         return data
     except (KeyError, TypeError):
         return default
+
+
+def handle_aws_error(error: Exception, operation: str, raise_exception: bool = False) -> None:
+    """
+    Handler centralizado para erros AWS
+    
+    Args:
+        error: Exceção capturada
+        operation: Nome da operação que falhou
+        raise_exception: Se deve relançar a exceção
+    """
+    error_details = {"operation": operation}
+    
+    if isinstance(error, ClientError):
+        error_code = error.response.get('Error', {}).get('Code', 'Unknown')
+        error_message = error.response.get('Error', {}).get('Message', str(error))
+        error_details.update({
+            'error_code': error_code,
+            'error_message': error_message
+        })
+        
+        if error_code in ['AccessDeniedException', 'UnauthorizedAccess']:
+            logger.warning(f"Access denied for operation: {operation}")
+        elif error_code in ['ThrottlingException', 'RequestLimitExceeded']:
+            logger.warning(f"Rate limit exceeded for operation: {operation}")
+        else:
+            log_error(logger, error, error_details)
+    else:
+        log_error(logger, error, error_details)
+    
+    if raise_exception:
+        raise error
