@@ -24,6 +24,25 @@ This project is undergoing transformation into a world-class FinOps product foll
 
 ### Recent Changes (Nov 26, 2025)
 
+#### FASE 1.2 - DynamoDB State Manager & Retry Handler (CONCLUÍDO)
+- Implementado `DynamoDBStateManager` em `src/finops_aws/core/dynamodb_state_manager.py`
+  - Persistência de estado em DynamoDB com checkpoint granular por serviço AWS
+  - Injeção de dependências para cliente DynamoDB (Clean Architecture)
+  - Integração com RetryHandler para operações resilientes
+  - ConditionExpression opcional para operações atômicas
+  - DynamoDBMapper para serialização JSON/Decimal isolada
+  - TTL automático para limpeza de execuções antigas
+  - Índices secundários (GSI) para consultas eficientes
+- Implementado `RetryHandler` em `src/finops_aws/core/retry_handler.py`
+  - RetryPolicy com exponential backoff e jitter
+  - RetryMetrics para rastreamento de tentativas e falhas
+  - Classificação de erros (network/timeout/throttle/validation)
+  - Suporte síncrono e assíncrono
+  - Factory para políticas AWS-específicas
+  - Decorators para fácil integração
+- 29 testes unitários para DynamoDBStateManager
+- 30 testes unitários para RetryHandler
+
 #### FASE 1.1 - Sistema de Limpeza BKP (CONCLUÍDO)
 - Implementado `CleanupManager` em `src/finops_aws/core/cleanup_manager.py`
 - Limpeza automática de arquivos: `.bkp`, `.tmp`, `.cache`, `.log`, `.pyc`, `.pyo`
@@ -36,7 +55,7 @@ This project is undergoing transformation into a world-class FinOps product foll
 
 ### Roadmap Progress
 - [x] FASE 1.1 - Sistema de Limpeza BKP
-- [ ] FASE 1.2 - Controle de Execução (DynamoDB)
+- [x] FASE 1.2 - Controle de Execução (DynamoDB) + Retry Handler
 - [ ] FASE 1.3 - Refatoração Core (Factory Pattern)
 - [ ] FASE 2 - Expansão de Serviços AWS
 - [ ] FASE 3 - Inteligência e Automação (ML)
@@ -54,9 +73,11 @@ This project is undergoing transformation into a world-class FinOps product foll
 finops-aws-bdr/
 ├── src/finops_aws/           # Main application code
 │   ├── core/                 # Core business logic (NEW)
-│   │   ├── cleanup_manager.py   # Sistema de limpeza automática
-│   │   ├── state_manager.py     # Gerenciamento de estado
-│   │   └── resilient_executor.py # Execução resiliente
+│   │   ├── cleanup_manager.py       # Sistema de limpeza automática
+│   │   ├── state_manager.py         # Gerenciamento de estado (S3 - legacy)
+│   │   ├── dynamodb_state_manager.py # Gerenciamento de estado (DynamoDB)
+│   │   ├── retry_handler.py         # Sistema de retry com backoff
+│   │   └── resilient_executor.py    # Execução resiliente
 │   ├── domain/               # Domain layer (entities, value objects)
 │   ├── application/          # Application layer (use cases, DTOs)
 │   ├── infrastructure/       # Infrastructure layer (AWS services)
@@ -64,9 +85,11 @@ finops-aws-bdr/
 │   ├── services/             # Service layer (cost, metrics, optimizer)
 │   ├── models/               # Data models
 │   └── utils/                # Utilities (logging, AWS helpers)
-├── tests/                    # Unit tests (83 tests)
+├── tests/                    # Unit tests (143 tests)
 │   └── unit/
-│       ├── test_cleanup_manager.py  # 27 tests for cleanup system
+│       ├── test_cleanup_manager.py       # 27 tests for cleanup system
+│       ├── test_dynamodb_state_manager.py # 29 tests for DynamoDB state
+│       ├── test_retry_handler.py         # 30 tests for retry system
 │       ├── test_cost_service.py
 │       ├── test_metrics_service.py
 │       ├── test_optimizer_service.py
