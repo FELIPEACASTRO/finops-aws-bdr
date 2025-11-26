@@ -17,7 +17,7 @@ This project is undergoing transformation into a world-class FinOps product foll
 ### What's Working
 - ✅ Python 3.11 installed and configured
 - ✅ All dependencies installed (boto3, pytest, moto, pytest-asyncio, etc.)
-- ✅ Test suite fully passing (206 passed, 1 skipped)
+- ✅ Test suite fully passing (231 passed, 1 skipped)
 - ✅ Local demo runner for testing Lambda handler with mocked AWS services
 - ✅ Comprehensive .gitignore for Python projects
 - ✅ **CleanupManager** - Sistema de limpeza automática de arquivos temporários
@@ -26,10 +26,13 @@ This project is undergoing transformation into a world-class FinOps product foll
 - ✅ **S3Service** - Análise de Object Storage (buckets, custos, recomendações)
 - ✅ **EBSService** - Análise de Block Storage (volumes, snapshots, custos)
 - ✅ **DynamoDBFinOpsService** - Análise de NoSQL (tabelas, capacidade, custos)
+- ✅ **EFSService** - Análise de File Storage (file systems, lifecycle, mount targets)
+- ✅ **ElastiCacheService** - Análise de Cache (clusters Redis/Memcached, replication groups)
+- ✅ **ECSContainerService** - Análise de Containers (clusters, serviços, tasks, Fargate)
 
 ### Recent Changes (Nov 26, 2025)
 
-#### FASE 2 - Expansão de Serviços AWS (EM PROGRESSO)
+#### FASE 2 - Expansão de Serviços AWS (EM PROGRESSO - 9 serviços implementados)
 - Implementado `BaseAWSService` em `src/finops_aws/services/base_service.py`
   - Classe base abstrata para todos os serviços AWS
   - Interface padrão: `get_resources()`, `get_costs()`, `get_metrics()`, `get_recommendations()`
@@ -47,8 +50,21 @@ This project is undergoing transformation into a world-class FinOps product foll
   - Listagem de tabelas com detalhes (billing mode, TTL, PITR, GSI)
   - Recomendações: On-Demand vs Provisioned, PITR, TTL, table class
   - Análise de capacidade provisionada vs consumida
-- Atualizado `ServiceFactory` com métodos: `get_s3_service()`, `get_ebs_service()`, `get_dynamodb_service()`
-- 30 testes unitários para novos serviços em `tests/unit/test_new_services.py`
+- Implementado `EFSService` em `src/finops_aws/services/efs_service.py`
+  - Listagem de file systems (performance mode, throughput mode, encryption)
+  - Recomendações: lifecycle policies, throughput mode optimization
+  - Análise de mount targets e conectividade
+- Implementado `ElastiCacheService` em `src/finops_aws/services/elasticache_service.py`
+  - Listagem de clusters Redis/Memcached e replication groups
+  - Recomendações: criptografia, Multi-AZ, failover automático
+  - Análise de engine versions e node types
+- Implementado `ECSContainerService` em `src/finops_aws/services/ecs_service.py`
+  - Listagem de clusters, serviços e tasks ECS
+  - Recomendações: clusters não utilizados, Fargate Spot optimization
+  - Análise de capacity providers e launch types
+- Atualizado `ServiceFactory` com métodos: `get_s3_service()`, `get_ebs_service()`, `get_dynamodb_service()`, `get_efs_service()`, `get_elasticache_service()`, `get_ecs_service()`
+- Enum `AWSServiceType` expandido com ELASTICACHE e ECS
+- 55 testes unitários para novos serviços em `tests/unit/test_new_services.py` e `tests/unit/test_new_services_phase2.py`
 
 #### FASE 1.3 - Factory Pattern (CONCLUÍDO)
 - Implementado `AWSClientFactory` em `src/finops_aws/core/factories.py`
@@ -104,7 +120,7 @@ This project is undergoing transformation into a world-class FinOps product foll
 - [x] FASE 1.1 - Sistema de Limpeza BKP
 - [x] FASE 1.2 - Controle de Execução (DynamoDB) + Retry Handler
 - [x] FASE 1.3 - Refatoração Core (Factory Pattern)
-- [~] FASE 2 - Expansão de Serviços AWS (EM PROGRESSO - S3, EBS, DynamoDB implementados)
+- [~] FASE 2 - Expansão de Serviços AWS (EM PROGRESSO - 9 serviços: S3, EBS, DynamoDB, EFS, ElastiCache, ECS + 3 core)
 - [ ] FASE 3 - Inteligência e Automação (ML)
 - [ ] FASE 4 - Interface e Experiência (Dashboard)
 - [ ] FASE 5 - Escalabilidade e Performance
