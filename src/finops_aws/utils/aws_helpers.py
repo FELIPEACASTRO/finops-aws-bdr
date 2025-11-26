@@ -2,6 +2,7 @@
 Utilitários para interação com AWS
 """
 import time
+import os
 from functools import wraps
 from typing import Any, Callable, Dict, List
 import boto3
@@ -9,6 +10,22 @@ from botocore.exceptions import ClientError
 from .logger import setup_logger, log_error
 
 logger = setup_logger(__name__)
+
+
+def get_aws_region() -> str:
+    """
+    Obtém a região AWS configurada
+
+    Returns:
+        Região AWS (padrão: us-east-1)
+    """
+    # Tenta obter região de várias fontes
+    region = (
+        os.getenv('AWS_DEFAULT_REGION') or
+        os.getenv('AWS_REGION') or
+        'us-east-1'  # Fallback padrão
+    )
+    return region
 
 
 def retry_with_backoff(max_retries: int = 3, base_delay: float = 1.0):
@@ -77,7 +94,7 @@ def get_aws_account_id() -> str:
         ID da conta AWS
     """
     try:
-        sts_client = boto3.client('sts')
+        sts_client = boto3.client('sts', region_name=get_aws_region())
         response = sts_client.get_caller_identity()
         return response['Account']
     except Exception as e:
@@ -93,12 +110,12 @@ def get_aws_regions() -> List[str]:
         Lista de códigos de região
     """
     try:
-        ec2_client = boto3.client('ec2', region_name='us-east-1')
+        ec2_client = boto3.client('ec2', region_name=get_aws_region())
         response = ec2_client.describe_regions()
         return [region['RegionName'] for region in response['Regions']]
     except Exception as e:
         log_error(logger, e, {"operation": "describe_regions"})
-        return ['us-east-1']  # Fallback para região padrão
+        return [get_aws_region()]  # Fallback para região configurada
 
 
 def safe_get_nested(data: Dict[str, Any], keys: List[str], default: Any = None) -> Any:
