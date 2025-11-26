@@ -16,17 +16,18 @@ This project has been successfully set up in the Replit environment for local de
 
 ### What's Working
 - ✅ Python 3.11 installed and configured
-- ✅ All dependencies installed (boto3, pytest, moto, etc.)
-- ✅ Test suite configured and running (48/57 tests passing)
-- ✅ Local demo runner for testing Lambda handler
+- ✅ All dependencies installed (boto3, pytest, moto, pytest-asyncio, etc.)
+- ✅ Test suite fully passing (56 passed, 1 skipped)
+- ✅ Local demo runner for testing Lambda handler with mocked AWS services
 - ✅ Comprehensive .gitignore for Python projects
 
 ### Recent Changes (Nov 26, 2025)
 - Installed Python 3.11 runtime
 - Installed all project dependencies from requirements.txt
-- Added pytest-asyncio for async test support
+- Added pytest-asyncio for async test support (required for resilient executor tests)
 - Created `run_local_demo.py` for local testing without AWS credentials
-- Configured "Run Tests" workflow to execute test suite
+- Configured "Run Tests" workflow to execute test suite automatically
+- All tests now passing after installing pytest-asyncio
 
 ## Project Structure
 
@@ -63,6 +64,8 @@ python run_local_demo.py 1
 ```
 
 This runs the handler without requiring actual AWS credentials, using the moto library to mock AWS API calls.
+
+**Note**: The current implementation always uses mocked AWS services (via moto) regardless of whether AWS credentials are present. This ensures consistent, safe testing in the Replit environment. To test against real AWS resources, you would need to run the Lambda handler outside of the demo script's mock context.
 
 ### Test Options
 The demo runner provides three modes:
