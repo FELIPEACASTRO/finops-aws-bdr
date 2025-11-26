@@ -40,6 +40,8 @@ class AWSServiceType(Enum):
     COMPUTE_OPTIMIZER = "compute-optimizer"
     EBS = "ebs"
     EFS = "efs"
+    ELASTICACHE = "elasticache"
+    ECS = "ecs"
     CLOUDFRONT = "cloudfront"
     ELB = "elasticloadbalancing"
     ROUTE53 = "route53"
@@ -495,6 +497,66 @@ class ServiceFactory:
         
         return self._services['dynamodb']
     
+    def get_efs_service(self):
+        """
+        Obtém instância do EFSService
+        
+        Returns:
+            EFSService configurado
+        """
+        if 'efs' in self._mocks:
+            return self._mocks['efs']
+        
+        if 'efs' not in self._services:
+            from ..services.efs_service import EFSService
+            self._services['efs'] = EFSService(
+                efs_client=self.client_factory.get_client(AWSServiceType.EFS),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['efs']
+    
+    def get_elasticache_service(self):
+        """
+        Obtém instância do ElastiCacheService
+        
+        Returns:
+            ElastiCacheService configurado
+        """
+        if 'elasticache' in self._mocks:
+            return self._mocks['elasticache']
+        
+        if 'elasticache' not in self._services:
+            from ..services.elasticache_service import ElastiCacheService
+            self._services['elasticache'] = ElastiCacheService(
+                elasticache_client=self.client_factory.get_client(AWSServiceType.ELASTICACHE),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['elasticache']
+    
+    def get_ecs_service(self):
+        """
+        Obtém instância do ECSContainerService
+        
+        Returns:
+            ECSContainerService configurado
+        """
+        if 'ecs' in self._mocks:
+            return self._mocks['ecs']
+        
+        if 'ecs' not in self._services:
+            from ..services.ecs_service import ECSContainerService
+            self._services['ecs'] = ECSContainerService(
+                ecs_client=self.client_factory.get_client(AWSServiceType.ECS),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['ecs']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -509,7 +571,10 @@ class ServiceFactory:
             'rds': self.get_rds_service(),
             's3': self.get_s3_service(),
             'ebs': self.get_ebs_service(),
-            'dynamodb': self.get_dynamodb_service()
+            'dynamodb': self.get_dynamodb_service(),
+            'efs': self.get_efs_service(),
+            'elasticache': self.get_elasticache_service(),
+            'ecs': self.get_ecs_service()
         }
     
     def clear_cache(self):

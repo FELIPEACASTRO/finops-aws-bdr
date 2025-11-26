@@ -8,6 +8,9 @@ FASE 2: Expansão de Serviços
 - S3Service: Análise de Object Storage
 - EBSService: Análise de Block Storage
 - DynamoDBFinOpsService: Análise de NoSQL
+- EFSService: Análise de File Storage
+- ElastiCacheService: Análise de Cache (Redis/Memcached)
+- ECSContainerService: Análise de Containers (ECS/Fargate)
 """
 
 from .cost_service import CostService
@@ -23,6 +26,9 @@ from .base_service import (
 from .s3_service import S3Service, S3Bucket
 from .ebs_service import EBSService, EBSVolume, EBSSnapshot
 from .dynamodb_finops_service import DynamoDBFinOpsService, DynamoDBTable
+from .efs_service import EFSService, EFSFileSystem
+from .elasticache_service import ElastiCacheService, ElastiCacheCluster, ElastiCacheReplicationGroup
+from .ecs_service import ECSContainerService, ECSCluster, ECSService, ECSTask
 
 __all__ = [
     'CostService',
@@ -40,5 +46,14 @@ __all__ = [
     'EBSVolume',
     'EBSSnapshot',
     'DynamoDBFinOpsService',
-    'DynamoDBTable'
+    'DynamoDBTable',
+    'EFSService',
+    'EFSFileSystem',
+    'ElastiCacheService',
+    'ElastiCacheCluster',
+    'ElastiCacheReplicationGroup',
+    'ECSContainerService',
+    'ECSCluster',
+    'ECSService',
+    'ECSTask'
 ]
