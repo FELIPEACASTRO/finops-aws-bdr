@@ -189,15 +189,19 @@ def generate_summary(costs: Dict[str, Dict[str, float]],
             if hasattr(i, 'avg_cpu_30d') and i.avg_cpu_30d and i.avg_cpu_30d < 20
         ]
 
+        instances_with_cpu = [i for i in running_instances if hasattr(i, 'avg_cpu_30d') and i.avg_cpu_30d]
+        avg_cpu = 0
+        if instances_with_cpu:
+            avg_cpu = round(
+                sum(i.avg_cpu_30d for i in instances_with_cpu) / len(instances_with_cpu),
+                2
+            )
+        
         summary['usage_insights']['ec2'] = {
             'total_instances': len(ec2_instances),
             'running_instances': len(running_instances),
             'low_utilization_instances': len(low_cpu_instances),
-            'avg_cpu_utilization_30d': round(
-                sum(i.avg_cpu_30d for i in running_instances if hasattr(i, 'avg_cpu_30d') and i.avg_cpu_30d) /
-                len([i for i in running_instances if hasattr(i, 'avg_cpu_30d') and i.avg_cpu_30d]),
-                2
-            ) if running_instances else 0
+            'avg_cpu_utilization_30d': avg_cpu
         }
 
     # Análise de Lambda
