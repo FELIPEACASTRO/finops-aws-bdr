@@ -1,784 +1,838 @@
-# FinOps AWS BDR - Solução Empresarial de Otimização de Custos AWS
+# FinOps AWS - Solução Empresarial de Otimização de Custos AWS
 
-Uma solução **serverless empresarial** em Python para análise inteligente de custos, monitoramento de uso e recomendações de otimização na AWS. Implementada com **Clean Architecture**, **Domain-Driven Design (DDD)**, **padrões SOLID** e **observabilidade completa**.
-
-## 🎯 Visão Geral da Solução
-
-Esta solução FinOps (Financial Operations) utiliza **AWS Lambda** como núcleo de processamento para automatizar a coleta, análise e consolidação de dados financeiros e operacionais da AWS. A arquitetura segue princípios de **Clean Architecture** e **DDD**, garantindo alta manutenibilidade, testabilidade e extensibilidade.
-
-### 🏗️ **Arquitetura Técnica**
-- **Clean Architecture**: Separação clara de responsabilidades em 4 camadas
-- **Domain-Driven Design**: Entities, Value Objects, Domain Services e Repository Pattern
-- **SOLID Principles**: Código extensível, testável e manutenível
-- **Strategy Pattern**: Análises plugáveis e configuráveis
-- **Async/Await**: Processamento paralelo para melhor performance
-
-### 📊 **Capacidades Funcionais**
-
-#### 💰 **Análise Financeira Inteligente**
-- **Multi-Period Cost Analysis**: Custos detalhados por serviço AWS (7, 15 e 30 dias)
-- **Trend Analysis Engine**: Detecção automática de padrões INCREASING/DECREASING/STABLE
-- **Cost Distribution**: Categorização e percentuais por serviço com análise de impacto
-- **Top Services Ranking**: Classificação dinâmica dos serviços mais caros
-
-#### 📈 **Monitoramento Operacional Avançado**
-- **EC2 Performance Analytics**: CPU utilization, resource efficiency, instance profiling
-- **Lambda Operational Insights**: Invocations, duration, errors, throttles com reliability scoring
-- **Custom Metrics Collection**: Multi-source data com validação e cache inteligente
-- **Real-time Processing**: Processamento em tempo real com retry automático
-
-#### 🤖 **Otimização Baseada em Machine Learning**
-- **AWS Compute Optimizer Integration**: Recomendações nativas com confidence scoring
-- **Intelligent Right-Sizing**: EC2, Lambda, EBS e Auto Scaling optimization
-- **ROI Analysis Engine**: Cálculo preciso de economia vs custo de implementação
-- **Finding Classification**: OVER_PROVISIONED, UNDER_PROVISIONED, OPTIMIZED, NOT_OPTIMIZED
-
-#### 📊 **Relatórios Executivos e Analytics**
-- **Executive Summary Dashboard**: KPIs principais com visualizações gráficas
-- **Detailed Analytics Reports**: Análise por serviço, utilização e performance benchmarks
-- **Optimization Roadmap**: Plano de implementação em fases com timeline
-- **Compliance Reports**: Relatórios para auditoria e governance
-
-## 🏗️ Arquitetura da Solução
-
-### Arquitetura de Alto Nível
-```
-                    ┌─────────────────────────────────────────┐
-                    │           FINOPS AWS SOLUTION           │
-                    │         (Serverless Architecture)       │
-                    └─────────────────────────────────────────┘
-                                        │
-        ┌───────────────────────────────┼───────────────────────────────┐
-        │                               │                               │
-        ▼                               ▼                               ▼
-┌─────────────────┐            ┌──────────────────┐            ┌─────────────────┐
-│   EventBridge   │            │  API Gateway     │            │   CloudWatch    │
-│   (Scheduler)   │            │  (REST API)      │            │   (Dashboard)   │
-│                 │            │                  │            │                 │
-│ • Daily Exec    │            │ • HTTP Access    │            │ • Metrics       │
-│ • Custom Cron   │            │ • Auth Support   │            │ • Logs          │
-│ • Multi-trigger │            │ • Rate Limiting  │            │ • Alarms        │
-└─────────────────┘            └──────────────────┘            └─────────────────┘
-        │                               │                               ▲
-        └───────────────┐               │               ┌───────────────┘
-                        │               │               │
-                        ▼               ▼               │
-                    ┌─────────────────────────────────────────┐
-                    │         AWS LAMBDA FUNCTION             │
-                    │        (Python 3.11 Runtime)           │
-                    │                                         │
-                    │  ┌─────────────────────────────────┐    │
-                    │  │        FINOPS CORE ENGINE       │    │
-                    │  │                                 │    │
-                    │  │  • Cost Analysis Service        │    │
-                    │  │  • Metrics Collection Service   │    │
-                    │  │  • Optimization Service         │    │
-                    │  │  • Report Generation Engine     │    │
-                    │  │  • Error Handling & Retry       │    │
-                    │  └─────────────────────────────────┘    │
-                    └─────────────────────────────────────────┘
-                                        │
-        ┌───────────────────────────────┼───────────────────────────────┐
-        │                               │                               │
-        ▼                               ▼                               ▼
-┌─────────────────┐            ┌──────────────────┐            ┌─────────────────┐
-│ Cost Explorer   │            │   CloudWatch     │            │Compute Optimizer│
-│                 │            │                  │            │                 │
-│ • Cost Data     │            │ • EC2 Metrics    │            │ • EC2 Recommendations│
-│ • Usage Reports │            │ • Lambda Metrics │            │ • Lambda Optimization│
-│ • Multi-period  │            │ • Custom Metrics │            │ • EBS Recommendations│
-│ • Service Costs │            │ • Performance    │            │ • Auto Scaling Tips  │
-└─────────────────┘            └──────────────────┘            └─────────────────┘
-```
-
-### Arquitetura de Software (Clean Architecture + Domain-Driven Design)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           🔧 INFRASTRUCTURE LAYER                           │
-│                        (External Systems & Frameworks)                     │
-│                                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────┐ │
-│  │   AWS Services  │  │   CloudWatch    │  │ Cost Explorer   │  │  Boto3  │ │
-│  │                 │  │                 │  │                 │  │   SDK   │ │
-│  │ • EC2 Client    │  │ • Metrics API   │  │ • Cost API      │  │ • Retry │ │
-│  │ • Lambda Client │  │ • Log Groups    │  │ • Usage API     │  │ • Auth  │ │
-│  │ • Compute Opt   │  │ • Dashboards    │  │ • Billing API   │  │ • Error │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                        ▲
-                                        │ (Dependency Injection)
-                                        │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            🌐 INTERFACE LAYER                              │
-│                           (Controllers & Adapters)                         │
-│                                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────┐ │
-│  │ Lambda Handler  │  │   API Gateway   │  │   EventBridge   │  │  JSON   │ │
-│  │                 │  │                 │  │                 │  │ Logger  │ │
-│  │ • Entry Point   │  │ • REST Adapter  │  │ • Event Adapter │  │ • Struct│ │
-│  │ • Error Handler │  │ • Auth Handler  │  │ • Cron Trigger  │  │ • Format│ │
-│  │ • Response      │  │ • CORS Support  │  │ • Schedule Mgmt │  │ • Filter│ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                        ▲
-                                        │ (Use Case Orchestration)
-                                        │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          🎯 APPLICATION LAYER                              │
-│                         (Use Cases & Orchestration)                        │
-│                                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────┐ │
-│  │   Use Cases     │  │      DTOs       │  │   Strategies    │  │ Async   │ │
-│  │                 │  │                 │  │                 │  │ Proc    │ │
-│  │ • Analyze Costs │  │ • Cost Analysis │  │ • Top Services  │  │ • Gather│ │
-│  │ • Collect Usage │  │ • Usage Report  │  │ • Trend Analysis│  │ • Parallel│ │
-│  │ • Generate Recs │  │ • Optimization  │  │ • Distribution  │  │ • Cache │ │
-│  │ • Create Report │  │ • Executive Sum │  │ • ROI Analysis  │  │ • Retry │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                        ▲
-                                        │ (Business Rules & Entities)
-                                        │
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            🏛️ DOMAIN LAYER                                 │
-│                          (Core Business Logic)                             │
-│                                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────┐ │
-│  │    Entities     │  │ Value Objects   │  │ Domain Services │  │ Repos   │ │
-│  │                 │  │                 │  │                 │  │ (Interf)│ │
-│  │ • CostEntity    │  │ • Money         │  │ • Cost Rules    │  │ • Cost  │ │
-│  │ • UsageEntity   │  │ • TimePeriod    │  │ • Usage Rules   │  │ • Usage │ │
-│  │ • OptimEntity   │  │ • ServiceName   │  │ • Optim Rules   │  │ • Optim │ │
-│  │ • ReportEntity  │  │ • ResourceType  │  │ • Report Rules  │  │ • Report│ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Princípios Arquiteturais Implementados
-
-#### 🎯 **Clean Architecture**
-- **Separação de Responsabilidades**: Cada camada tem responsabilidades bem definidas
-- **Inversão de Dependências**: Camadas internas não dependem de camadas externas
-- **Testabilidade**: Cada camada pode ser testada independentemente
-- **Flexibilidade**: Mudanças em uma camada não afetam outras
-
-#### 🏛️ **Domain-Driven Design (DDD)**
-- **Entities**: Objetos com identidade e ciclo de vida (CostEntity, UsageEntity)
-- **Value Objects**: Objetos imutáveis sem identidade (Money, TimePeriod)
-- **Domain Services**: Lógica de negócio que não pertence a entidades
-- **Repository Pattern**: Abstração para acesso a dados
-
-#### 🔧 **SOLID Principles**
-- **Single Responsibility**: Cada classe tem uma única responsabilidade
-- **Open/Closed**: Extensível para novos recursos sem modificar código existente
-- **Liskov Substitution**: Subtipos podem substituir tipos base
-- **Interface Segregation**: Interfaces específicas ao invés de genéricas
-- **Dependency Inversion**: Dependências de abstrações, não implementações
-
-## 🚀 Funcionalidades Avançadas
-
-### 📊 **Análise Financeira Inteligente**
-
-#### 💰 **Multi-Period Cost Analysis**
-- **Períodos Configuráveis**: Análise de custos para 7, 15 e 30 dias
-- **Granularidade Diária**: Coleta de dados com granularidade diária para precisão
-- **Agregação por Serviço**: Custos organizados por serviço AWS
-- **Moeda Padronizada**: Todos os valores em USD com precisão decimal
-- **Filtros Automáticos**: Remove serviços com custo < $0.01 para reduzir ruído
-
-#### 📈 **Trend Analysis Engine**
-- **Padrões Automáticos**: Detecção de tendências INCREASING/DECREASING/STABLE
-- **Análise Comparativa**: Comparação entre períodos para identificar mudanças
-- **Alertas de Anomalias**: Identificação de picos ou quedas anômalas de custo
-- **Projeções**: Estimativas de custos futuros baseadas em tendências históricas
-
-#### 🏆 **Top Services Ranking**
-- **Ranking Dinâmico**: Classificação dos serviços por custo e impacto
-- **Análise Percentual**: Distribuição percentual de custos por serviço
-- **Categorização**: Agrupamento de serviços por categoria (Compute, Storage, etc.)
-- **Impact Analysis**: Análise de impacto financeiro de cada serviço
-
-### 📈 **Monitoramento Operacional Avançado**
-
-#### 🖥️ **EC2 Performance Analytics**
-- **CPU Utilization**: Monitoramento de utilização de CPU multi-período
-- **Resource Efficiency**: Identificação de instâncias subutilizadas (<20% CPU)
-- **Instance Profiling**: Análise por tipo de instância e zona de disponibilidade
-- **State Management**: Monitoramento de estado (running, stopped, terminated)
-- **Cost-Performance Correlation**: Correlação entre custo e performance
-
-#### ⚡ **Lambda Operational Insights**
-- **Invocation Analytics**: Análise detalhada de invocações por função
-- **Performance Metrics**: Duração média, erros e throttles
-- **Reliability Scoring**: Score de confiabilidade baseado em métricas
-- **Active vs Inactive**: Identificação de funções ativas vs dormentes
-- **Cost Optimization**: Análise de custo-benefício por função
-
-#### 📊 **Custom Metrics Collection**
-- **Multi-Source Data**: Coleta de métricas de CloudWatch, Cost Explorer e Compute Optimizer
-- **Real-time Processing**: Processamento em tempo real com cache inteligente
-- **Data Validation**: Validação e sanitização automática de dados
-- **Error Handling**: Tratamento robusto de erros com retry automático
-
-### 🎯 **Otimização Baseada em Machine Learning**
-
-#### 🤖 **AWS Compute Optimizer Integration**
-- **Native AI Recommendations**: Integração com recomendações nativas da AWS
-- **Multi-Resource Support**: Suporte para EC2, Lambda, EBS e Auto Scaling
-- **Confidence Scoring**: Score de confiança para cada recomendação
-- **Historical Analysis**: Análise baseada em dados históricos de 14+ dias
-
-#### 💡 **Intelligent Right-Sizing**
-- **EC2 Optimization**: Recomendações de redimensionamento com economia estimada
-- **Lambda Memory Optimization**: Otimização de memória e configuração
-- **EBS Volume Optimization**: Recomendações para volumes EBS
-- **Auto Scaling Optimization**: Otimização de grupos de Auto Scaling
-
-#### 📊 **ROI Analysis Engine**
-- **Savings Calculation**: Cálculo preciso de economia mensal estimada
-- **Implementation Cost**: Análise de custo de implementação das recomendações
-- **Risk Assessment**: Avaliação de riscos de cada otimização
-- **Priority Matrix**: Matriz de priorização baseada em impacto vs esforço
-
-#### 🏷️ **Finding Classification System**
-- **OVER_PROVISIONED**: Recursos com capacidade excessiva
-- **UNDER_PROVISIONED**: Recursos com capacidade insuficiente
-- **OPTIMIZED**: Recursos já otimizados
-- **NOT_OPTIMIZED**: Recursos que podem ser otimizados
-- **INSUFFICIENT_DATA**: Recursos sem dados suficientes para análise
-
-### 📋 **Relatórios Executivos e Dashboards**
-
-#### 📊 **Executive Summary Dashboard**
-- **KPI Overview**: Visão geral dos principais indicadores financeiros
-- **Cost Trends**: Tendências de custo com visualizações gráficas
-- **Savings Opportunities**: Oportunidades de economia categorizadas
-- **Action Items**: Itens de ação priorizados por impacto
-
-#### 📈 **Detailed Analytics Reports**
-- **Service-Level Analysis**: Análise detalhada por serviço AWS
-- **Resource Utilization**: Relatórios de utilização de recursos
-- **Performance Benchmarks**: Benchmarks de performance por categoria
-- **Compliance Reports**: Relatórios para auditoria e compliance
-
-#### 🎯 **Optimization Roadmap**
-- **Phased Implementation**: Plano de implementação em fases
-- **Timeline Estimates**: Estimativas de timeline para cada otimização
-- **Resource Requirements**: Recursos necessários para implementação
-- **Success Metrics**: Métricas de sucesso para cada otimização
-
-### 🔍 **Observabilidade e Monitoramento**
-
-#### 📝 **Structured Logging**
-- **JSON Format**: Logs estruturados em formato JSON
-- **Contextual Information**: Informações contextuais ricas
-- **Performance Metrics**: Métricas de performance integradas
-- **Error Tracking**: Rastreamento detalhado de erros
-
-#### 📊 **CloudWatch Integration**
-- **Custom Dashboards**: Dashboards personalizados no CloudWatch
-- **Automated Alerts**: Alertas automáticos baseados em métricas
-- **Log Analysis**: Análise avançada de logs com queries personalizadas
-- **Performance Monitoring**: Monitoramento contínuo de performance
-
-## 🛠️ Stack Tecnológico
-
-### Core Technologies
-- **Runtime**: Python 3.11 com type hints completos
-- **Cloud Platform**: AWS (Lambda, CloudWatch, Cost Explorer, Compute Optimizer)
-- **Infrastructure as Code**: CloudFormation com parâmetros configuráveis
-- **Testing Framework**: pytest + moto para mocking AWS
-
-### Architecture Patterns
-- **Domain-Driven Design (DDD)**: Entities, Value Objects, Domain Services
-- **Clean Architecture**: Separação clara de responsabilidades em camadas
-- **SOLID Principles**: Código extensível e manutenível
-- **Strategy Pattern**: Análises plugáveis e extensíveis
-- **Repository Pattern**: Abstração de acesso a dados
-
-### Quality & Observability
-- **Structured Logging**: JSON logs com contexto rico
-- **Error Handling**: Retry com backoff exponencial
-- **Monitoring**: CloudWatch Dashboard automático
-- **Type Safety**: Mypy-compatible type annotations
-
-## 📦 Estrutura do Projeto (Clean Architecture + DDD)
-
-```
-finops-aws-bdr/
-├── src/finops_aws/
-│   ├── domain/                    # 🏛️ DOMAIN LAYER (Core Business Logic)
-│   │   ├── entities/
-│   │   │   └── cost_entity.py            # Rich domain entities with business logic
-│   │   ├── value_objects/
-│   │   │   ├── money.py                  # Money value object with precision
-│   │   │   ├── time_period.py            # Time period abstraction
-│   │   │   └── service_name.py           # AWS service name with categories
-│   │   ├── repositories/
-│   │   │   └── cost_repository.py        # Repository interfaces (contracts)
-│   │   └── services/
-│   │       └── domain_services.py        # Domain business rules
-│   │
-│   ├── application/               # 🎯 APPLICATION LAYER (Use Cases & Orchestration)
-│   │   ├── use_cases/
-│   │   │   └── analyze_costs_use_case.py # Strategy Pattern + Async processing
-│   │   ├── dto/
-│   │   │   └── cost_analysis_dto.py      # Data transfer objects
-│   │   └── interfaces/
-│   │       └── logger_interface.py       # Application interfaces
-│   │
-│   ├── infrastructure/            # 🔧 INFRASTRUCTURE LAYER (External Systems)
-│   │   └── services/
-│   │       ├── aws_cost_repository.py    # Cost Explorer implementation
-│   │       └── aws_metrics_service.py    # CloudWatch implementation
-│   │
-│   ├── interfaces/                # 🌐 INTERFACE LAYER (Entry Points)
-│   │   └── lambda_handler.py             # AWS Lambda handler with error handling
-│   │
-│   ├── services/                  # 📊 CURRENT SERVICE LAYER (Legacy - being refactored)
-│   │   ├── cost_service.py               # Cost Explorer service with retry logic
-│   │   ├── metrics_service.py            # CloudWatch metrics with caching
-│   │   └── optimizer_service.py          # Compute Optimizer with ML recommendations
-│   │
-│   ├── models/                    # 📋 DATA MODELS (DTOs & Dataclasses)
-│   │   └── finops_models.py              # Typed data models with validation
-│   │
-│   └── utils/                     # 🛠️ SHARED UTILITIES
-│       ├── logger.py                     # Structured JSON logging with context
-│       └── aws_helpers.py                # AWS SDK helpers with exponential backoff
-│
-├── tests/                         # 🧪 COMPREHENSIVE TEST SUITE
-│   ├── unit/                             # Unit tests with moto mocking
-│   │   ├── test_cost_service.py          # Cost service tests
-│   │   ├── test_metrics_service.py       # Metrics service tests
-│   │   └── test_optimizer_service.py     # Optimizer service tests
-│   ├── integration/                      # Integration tests (planned)
-│   └── fixtures/                         # Test data fixtures (planned)
-│
-├── infrastructure/                # 🏗️ INFRASTRUCTURE AS CODE
-│   └── cloudformation-template.yaml     # Complete AWS stack with IAM, Lambda, API Gateway
-│
-├── example_events/                # 📝 SAMPLE DATA & TESTING
-│   ├── api_gateway_event.json           # API Gateway test event
-│   └── scheduled_event.json             # EventBridge scheduled event
-│
-├── deploy.sh                      # 🚀 AUTOMATED DEPLOYMENT SCRIPT
-├── requirements.txt               # 📦 Python dependencies (boto3, pytest, etc.)
-├── pytest.ini                    # 🧪 Test configuration
-├── .env.example                   # 🔐 Environment variables template
-└── README.md                      # 📖 Complete documentation
-```
-
-### Arquitetura em Camadas
-
-#### 🏛️ Domain Layer (Núcleo do Negócio)
-- **Entities**: `CostEntity` com lógica de negócio rica
-- **Value Objects**: `Money`, `TimePeriod`, `ServiceName` com validações
-- **Domain Services**: Regras de negócio complexas
-- **Repository Interfaces**: Contratos para acesso a dados
-
-#### 🎯 Application Layer (Casos de Uso)
-- **Use Cases**: `AnalyzeCostsUseCase` com Strategy Pattern
-- **DTOs**: Objetos de transferência de dados
-- **Application Services**: Orquestração de casos de uso
-
-#### 🔧 Infrastructure Layer (Detalhes Técnicos)
-- **AWS Services**: Implementações concretas dos repositórios
-- **External APIs**: Integração com Cost Explorer, CloudWatch
-- **Persistence**: (Future) DynamoDB para histórico
-
-#### 🌐 Interface Layer (Pontos de Entrada)
-- **Lambda Handler**: Controlador principal
-- **API Gateway**: Interface REST (opcional)
-- **EventBridge**: Trigger agendado
-
-## 🔧 Instalação e Configuração
-
-### Pré-requisitos
-
-1. **AWS CLI** configurado com credenciais adequadas
-2. **Python 3.11+**
-3. **Bucket S3** para deploy do código
-4. **Permissões IAM** necessárias (veja seção de Permissões)
-
-### Deploy Rápido
-
-```bash
-# Clone o repositório
-git clone <repository-url>
-cd finops-aws-bdr
-
-# Instale dependências
-pip install -r requirements.txt
-
-# Execute testes
-python -m pytest tests/ -v
-
-# Deploy na AWS
-./deploy.sh -b SEU_BUCKET_S3
-```
-
-### Deploy Personalizado
-
-```bash
-# Deploy com configurações específicas
-./deploy.sh \
-  --stack-name finops-prod \
-  --function-name finops-analyzer \
-  --region us-west-2 \
-  --bucket meu-bucket-deploy \
-  --log-level DEBUG
-```
-
-### Opções do Deploy
-
-| Parâmetro | Descrição | Padrão |
-|-----------|-----------|---------|
-| `--stack-name` | Nome da stack CloudFormation | `finops-aws-stack` |
-| `--function-name` | Nome da função Lambda | `finops-aws-analyzer` |
-| `--region` | Região AWS | `us-east-1` |
-| `--bucket` | Bucket S3 para código | **obrigatório** |
-| `--log-level` | Nível de log | `INFO` |
-| `--no-schedule` | Desabilitar execução agendada | - |
-| `--no-api` | Não criar API Gateway | - |
-| `--update-only` | Apenas atualizar código | - |
-
-## 🔐 Permissões IAM Necessárias
-
-A função Lambda precisa das seguintes permissões:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ce:GetCostAndUsage",
-        "cloudwatch:GetMetricData",
-        "cloudwatch:GetMetricStatistics",
-        "ec2:DescribeInstances",
-        "lambda:ListFunctions",
-        "compute-optimizer:GetEC2InstanceRecommendations",
-        "compute-optimizer:GetLambdaFunctionRecommendations",
-        "compute-optimizer:GetEnrollmentStatus",
-        "sts:GetCallerIdentity"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-```
-
-## 🧪 Execução Local
-
-### Teste Básico
-```bash
-# Configure credenciais AWS
-aws configure
-
-# Execute localmente
-python -m src.finops_aws.lambda_handler
-```
-
-### Com Variáveis de Ambiente
-```bash
-export LOG_LEVEL=DEBUG
-export AWS_DEFAULT_REGION=us-east-1
-python -m src.finops_aws.lambda_handler
-```
-
-## 📊 Exemplo de Resposta Detalhada
-
-### Resposta Completa da API
-```json
-{
-  "statusCode": 200,
-  "headers": {
-    "Content-Type": "application/json",
-    "X-Request-ID": "abc123-def456-ghi789"
-  },
-  "body": {
-    "account_id": "123456789012",
-    "generated_at": "2025-01-26T10:00:00Z",
-
-    "costs": {
-      "last_7_days": {
-        "Amazon Elastic Compute Cloud - Compute": 123.45,
-        "Amazon Simple Storage Service": 12.34,
-        "AWS Lambda": 8.90,
-        "Amazon CloudWatch": 5.67
-      },
-      "last_15_days": {
-        "Amazon Elastic Compute Cloud - Compute": 267.89,
-        "Amazon Simple Storage Service": 24.68,
-        "AWS Lambda": 17.80,
-        "Amazon CloudWatch": 11.34
-      },
-      "last_30_days": {
-        "Amazon Elastic Compute Cloud - Compute": 534.21,
-        "Amazon Simple Storage Service": 49.36,
-        "AWS Lambda": 35.60,
-        "Amazon CloudWatch": 22.68
-      }
-    },
-
-    "usage": {
-      "ec2": [
-        {
-          "instance_id": "i-0123456789abcdef0",
-          "instance_type": "t3.xlarge",
-          "state": "running",
-          "availability_zone": "us-east-1a",
-          "avg_cpu_7d": 27.3,
-          "avg_cpu_15d": 29.1,
-          "avg_cpu_30d": 30.0
-        },
-        {
-          "instance_id": "i-0987654321fedcba0",
-          "instance_type": "m5.large",
-          "state": "running",
-          "availability_zone": "us-east-1b",
-          "avg_cpu_7d": 85.7,
-          "avg_cpu_15d": 82.4,
-          "avg_cpu_30d": 79.8
-        }
-      ],
-      "lambda": [
-        {
-          "function_name": "data-processor",
-          "invocations_7d": 1500,
-          "avg_duration_7d": 245.2,
-          "errors_7d": 3,
-          "throttles_7d": 0
-        },
-        {
-          "function_name": "api-handler",
-          "invocations_7d": 8750,
-          "avg_duration_7d": 89.5,
-          "errors_7d": 12,
-          "throttles_7d": 2
-        }
-      ]
-    },
-
-    "optimizer": {
-      "ec2_recommendations": [
-        {
-          "resource_id": "i-0123456789abcdef0",
-          "resource_type": "EC2",
-          "current_configuration": "t3.xlarge",
-          "recommended_configurations": ["t3.large", "t3.medium"],
-          "estimated_monthly_savings": 45.67,
-          "finding": "OVER_PROVISIONED",
-          "utilization_metrics": {
-            "cpu_utilization": 30.0,
-            "memory_utilization": 42.5
-          }
-        }
-      ],
-      "lambda_recommendations": [
-        {
-          "resource_id": "data-processor",
-          "resource_type": "Lambda",
-          "current_configuration": "512MB",
-          "recommended_configurations": ["256MB"],
-          "estimated_monthly_savings": 12.34,
-          "finding": "OVER_PROVISIONED",
-          "utilization_metrics": {
-            "memory_utilization": 35.2,
-            "duration_average": 245.2
-          }
-        }
-      ]
-    },
-
-    "summary": {
-      "total_estimated_monthly_savings": 158.01,
-
-      "cost_analysis": {
-        "total_cost_last_30_days": 641.85,
-        "top_5_services": [
-          {
-            "service": "Amazon Elastic Compute Cloud - Compute",
-            "cost": 534.21,
-            "percentage": 83.2
-          },
-          {
-            "service": "Amazon Simple Storage Service",
-            "cost": 49.36,
-            "percentage": 7.7
-          },
-          {
-            "service": "AWS Lambda",
-            "cost": 35.60,
-            "percentage": 5.5
-          },
-          {
-            "service": "Amazon CloudWatch",
-            "cost": 22.68,
-            "percentage": 3.5
-          }
-        ]
-      },
-
-      "usage_insights": {
-        "ec2": {
-          "total_instances": 2,
-          "running_instances": 2,
-          "low_utilization_instances": 1,
-          "avg_cpu_utilization_30d": 54.9
-        },
-        "lambda": {
-          "total_functions": 2,
-          "active_functions_7d": 2,
-          "total_invocations_7d": 10250,
-          "total_errors_7d": 15
-        }
-      },
-
-      "optimization_opportunities": [
-        {
-          "finding": "OVER_PROVISIONED",
-          "resource_count": 2,
-          "estimated_monthly_savings": 158.01
-        }
-      ]
-    },
-
-    "metadata": {
-      "analysis_duration_seconds": 12.45,
-      "services_analyzed": 4,
-      "recommendations_found": 2,
-      "data_sources": ["Cost Explorer", "CloudWatch", "Compute Optimizer"]
-    }
-  }
-}
-```
-
-### Estrutura de Dados Tipada (Domain Models)
-
-```python
-# Domain Entity Example
-@dataclass(frozen=True)
-class CostEntity:
-    account_id: str
-    service_costs: Dict[ServiceName, Dict[TimePeriod, Money]]
-    analysis_date: datetime
-
-    def get_total_cost_for_period(self, period: TimePeriod) -> Money:
-        # Rich domain behavior with business logic
-
-    def calculate_cost_trend(self, service: ServiceName) -> str:
-        # Domain-specific trend analysis
-
-# Value Object Example
-@dataclass(frozen=True)
-class Money:
-    amount: Decimal
-    currency: str = "USD"
-
-    def __add__(self, other: 'Money') -> 'Money':
-        # Type-safe monetary operations
-```
-
-## 🔄 Uso da API
-
-Se habilitada, a API Gateway fornece acesso HTTP:
-
-```bash
-# GET request para análise
-curl https://api-id.execute-api.region.amazonaws.com/prod/analyze
-
-# Com autenticação (se configurada)
-curl -H "Authorization: Bearer TOKEN" \
-     https://api-id.execute-api.region.amazonaws.com/prod/analyze
-```
-
-## 📅 Execução Agendada
-
-Por padrão, a função executa diariamente via EventBridge:
-- **Agendamento**: `rate(1 day)` (configurável)
-- **Logs**: CloudWatch Logs `/aws/lambda/function-name`
-- **Dashboard**: CloudWatch Dashboard automático
-
-## 🧪 Testes
-
-```bash
-# Todos os testes
-python -m pytest tests/ -v
-
-# Testes específicos
-python -m pytest tests/unit/test_cost_service.py -v
-
-# Com cobertura
-python -m pytest tests/ --cov=src --cov-report=html
-```
-
-## 🔍 Monitoramento
-
-### CloudWatch Logs
-```bash
-# Visualizar logs
-aws logs tail /aws/lambda/finops-aws-analyzer --follow
-
-# Filtrar erros
-aws logs filter-log-events \
-  --log-group-name /aws/lambda/finops-aws-analyzer \
-  --filter-pattern "ERROR"
-```
-
-### Métricas Lambda
-- Duration, Errors, Invocations
-- Dashboard automático criado
-- Alertas configuráveis
-
-## ⚠️ Limitações e Considerações
-
-### AWS Compute Optimizer
-- Deve ser habilitado previamente na conta
-- Requer pelo menos 12 horas de dados para recomendações
-- Disponível apenas em regiões específicas
-
-### Cost Explorer
-- Dados podem ter até 24h de atraso
-- Custos em USD por padrão
-- Paginação automática implementada
-
-### Timeouts
-- Função Lambda: 5 minutos máximo
-- Comandos de lint/test: 5 minutos máximo
-- Retry automático para throttling
-
-## 🚀 Próximos Passos
-
-1. **Multi-conta**: Suporte a AWS Organizations
-2. **Mais serviços**: RDS, EBS, ELB métricas
-3. **Alertas**: Integração com SNS
-4. **Histórico**: Armazenamento em DynamoDB
-5. **Dashboard**: Interface web personalizada
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -am 'Add nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
-
-## 📞 Suporte
-
-Para dúvidas ou problemas:
-1. Verifique os logs no CloudWatch
-2. Confirme permissões IAM
-3. Valide configuração do Compute Optimizer
-4. Abra uma issue no repositório
+Uma solução **serverless empresarial** em Python para análise inteligente de custos, monitoramento de uso e recomendações de otimização na AWS. Projetada para analisar até **253 serviços AWS**, oferecendo insights financeiros e operacionais abrangentes.
 
 ---
 
-**Desenvolvido com ❤️ para otimização de custos AWS**
+## Índice
+
+1. [Visão Geral](#visão-geral)
+2. [O Que Este Sistema Faz](#o-que-este-sistema-faz)
+3. [Arquitetura da Solução](#arquitetura-da-solução)
+4. [Serviços AWS Suportados](#serviços-aws-suportados)
+5. [Funcionalidades Detalhadas](#funcionalidades-detalhadas)
+6. [Estrutura do Projeto](#estrutura-do-projeto)
+7. [Como Usar](#como-usar)
+8. [Configuração](#configuração)
+9. [Testes](#testes)
+10. [Deploy na AWS](#deploy-na-aws)
+11. [Stack Tecnológico](#stack-tecnológico)
+12. [Roadmap](#roadmap)
+
+---
+
+## Visão Geral
+
+### O Que é FinOps?
+
+**FinOps (Financial Operations)** é uma prática de gerenciamento financeiro em nuvem que combina sistemas, melhores práticas e cultura para aumentar a capacidade de uma organização de entender os custos da nuvem e tomar decisões de negócios informadas.
+
+### Por Que Esta Solução?
+
+| Problema | Nossa Solução |
+|----------|---------------|
+| Custos AWS crescendo sem controle | Análise automática multi-período (7, 15, 30 dias) |
+| Recursos subutilizados | Identificação de instâncias com CPU < 20% |
+| Falta de visibilidade | Dashboard consolidado com 21+ serviços |
+| Recomendações manuais | Integração com AWS Compute Optimizer (ML) |
+| Dificuldade de monitoramento | Alertas proativos e métricas em tempo real |
+
+### Métricas do Projeto
+
+| Métrica | Valor |
+|---------|-------|
+| Serviços AWS Implementados | 21 de 253 (8.3%) |
+| Testes Automatizados | 271 passando |
+| Cobertura de Categorias | Compute, Storage, Database, Networking, Analytics |
+
+---
+
+## O Que Este Sistema Faz
+
+### 1. Análise Financeira Inteligente
+
+O sistema coleta e analisa custos da sua conta AWS automaticamente:
+
+```
+Exemplo de Saida - Custos por Periodo:
+-------------------------------------
+Ultimos 30 dias:
+  - Amazon EC2:      $1,234.56 (45.2%)
+  - Amazon RDS:      $567.89  (20.8%)
+  - Amazon S3:       $234.56  (8.6%)
+  - AWS Lambda:      $123.45  (4.5%)
+  - Outros:          $567.89  (20.9%)
+  
+  TOTAL: $2,728.35
+  
+Tendência: INCREASING (+12% vs mês anterior)
+```
+
+### 2. Monitoramento Operacional
+
+Coleta métricas de performance dos seus recursos:
+
+```
+Exemplo de Saida - EC2 Performance:
+-----------------------------------
+Instancia: i-0abc123def456
+  - Tipo: m5.xlarge
+  - Estado: running
+  - CPU Média (30d): 15.3%
+  - Status: SUBUTILIZADA (candidata a downsizing)
+  
+Instância: i-0xyz789ghi012
+  - Tipo: t3.medium
+  - Estado: stopped (há 45 dias)
+  - Status: CANDIDATA A TERMINAÇÃO
+```
+
+### 3. Recomendações de Otimização
+
+Gera recomendações inteligentes baseadas em ML:
+
+```
+Exemplo de Saída - Recomendações:
+---------------------------------
+[ALTA PRIORIDADE] EC2 Right-Sizing
+  Recurso: i-0abc123def456
+  Ação: Reduzir de m5.xlarge para m5.large
+  Economia Mensal: $45.60
+  Confiança: 92%
+
+[MÉDIA PRIORIDADE] EBS Volume Type
+  Recurso: vol-0abc123def456
+  Ação: Migrar de gp2 para gp3
+  Economia Mensal: $12.30
+  Confiança: 88%
+
+ECONOMIA TOTAL POTENCIAL: $57.90/mês
+```
+
+---
+
+## Arquitetura da Solução
+
+### Diagrama de Alto Nível
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     TRIGGERS (Gatilhos)                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  EventBridge │  │ API Gateway  │  │   Manual     │          │
+│  │  (Agendado)  │  │  (HTTP/REST) │  │  (Console)   │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    AWS LAMBDA FUNCTION                          │
+│                    (Python 3.11 Runtime)                        │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                   FINOPS CORE ENGINE                      │  │
+│  │                                                           │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐         │  │
+│  │  │    Cost     │ │   Metrics   │ │  Optimizer  │         │  │
+│  │  │   Service   │ │   Service   │ │   Service   │         │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘         │  │
+│  │                                                           │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐         │  │
+│  │  │   State     │ │   Retry     │ │   Cleanup   │         │  │
+│  │  │   Manager   │ │   Handler   │ │   Manager   │         │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘         │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ Cost Explorer │    │  CloudWatch   │    │   Compute     │
+│               │    │               │    │   Optimizer   │
+│ - Custos      │    │ - Metricas    │    │ - ML Recs     │
+│ - Uso         │    │ - Logs        │    │ - Savings     │
+│ - Tendencias  │    │ - Alertas     │    │ - Confidence  │
+└───────────────┘    └───────────────┘    └───────────────┘
+```
+
+### Arquitetura de Software (Clean Architecture)
+
+O projeto segue **Clean Architecture** com 4 camadas distintas:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   INFRASTRUCTURE LAYER                          │
+│              (Serviços Externos e Frameworks)                   │
+│                                                                 │
+│  - Boto3 (AWS SDK)           - Cost Explorer API                │
+│  - CloudWatch API            - Compute Optimizer API            │
+│  - DynamoDB (State)          - S3 (Storage)                     │
+└──────────────────────────────────────────────────────────────────┘
+                              ▲
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                    INTERFACE LAYER                              │
+│                 (Controladores e Adaptadores)                   │
+│                                                                 │
+│  - Lambda Handler            - Event Processors                 │
+│  - API Adapters              - Response Formatters              │
+└──────────────────────────────────────────────────────────────────┘
+                              ▲
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                   APPLICATION LAYER                             │
+│                  (Casos de Uso e DTOs)                          │
+│                                                                 │
+│  - AnalyzeCostsUseCase       - GenerateReportUseCase            │
+│  - CollectMetricsUseCase     - CostAnalysisDTO                  │
+└──────────────────────────────────────────────────────────────────┘
+                              ▲
+                              │
+┌─────────────────────────────────────────────────────────────────┐
+│                     DOMAIN LAYER                                │
+│                  (Lógica de Negócio Core)                       │
+│                                                                 │
+│  - Entities (CostEntity)     - Value Objects (Money, Period)    │
+│  - Domain Services           - Repository Interfaces            │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Serviços AWS Suportados
+
+### Serviços Implementados (21 de 253)
+
+#### Compute (Computação)
+
+| Serviço | Descrição | Recursos Analisados |
+|---------|-----------|---------------------|
+| **EC2** | Máquinas virtuais | Instâncias, Reserved, Spot, estados |
+| **Lambda** | Funções serverless | Memória, durações, invocações, erros |
+| **ECS** | Containers | Clusters, services, tasks, Fargate |
+| **EMR** | Big Data (Spark/Hadoop) | Clusters, auto-scaling, Spot |
+| **SageMaker** | Machine Learning | Notebooks, endpoints, training jobs |
+
+#### Storage (Armazenamento)
+
+| Serviço | Descrição | Recursos Analisados |
+|---------|-----------|---------------------|
+| **S3** | Object Storage | Buckets, lifecycle, classes de storage |
+| **EBS** | Block Storage | Volumes, snapshots, tipos (gp2/gp3) |
+| **EFS** | File Storage | File systems, lifecycle, mount targets |
+
+#### Database (Banco de Dados)
+
+| Serviço | Descrição | Recursos Analisados |
+|---------|-----------|---------------------|
+| **RDS** | Bancos relacionais | Instâncias, Multi-AZ, backups |
+| **DynamoDB** | NoSQL | Tabelas, capacidade, PITR, billing |
+| **ElastiCache** | Cache (Redis/Memcached) | Clusters, replication groups |
+| **Redshift** | Data Warehouse | Clusters, encriptação, snapshots |
+
+#### Networking (Rede)
+
+| Serviço | Descrição | Recursos Analisados |
+|---------|-----------|---------------------|
+| **VPC** | Rede virtual | NAT Gateways, Elastic IPs, VPNs |
+| **CloudFront** | CDN | Distribuições, cache, compressão |
+| **ELB** | Load Balancers | ALB, NLB, CLB, target groups |
+| **Route53** | DNS | Hosted zones, health checks, records |
+
+#### Analytics e Integração
+
+| Serviço | Descrição | Recursos Analisados |
+|---------|-----------|---------------------|
+| **Kinesis** | Streaming | Data Streams, Firehose, shards |
+| **Glue** | ETL | Jobs, crawlers, data catalog |
+| **SNS/SQS** | Messaging | Topics, queues, subscribers |
+| **Backup** | Backup centralizado | Vaults, plans, recovery points |
+| **Secrets Manager** | Gerenciamento de secrets | Rotação, encriptação, uso |
+
+---
+
+## Funcionalidades Detalhadas
+
+### 1. Sistema de Análise de Custos
+
+#### Como Funciona
+
+```python
+# O CostService coleta dados do AWS Cost Explorer
+cost_service = CostService()
+
+# Coleta custos dos ultimos 30 dias
+costs = cost_service.get_costs_by_service(days=30)
+
+# Resultado estruturado
+{
+    "period": "last_30_days",
+    "total_cost": 2728.35,
+    "currency": "USD",
+    "services": {
+        "Amazon EC2": 1234.56,
+        "Amazon RDS": 567.89,
+        "Amazon S3": 234.56,
+        ...
+    },
+    "trend": "INCREASING",
+    "trend_percentage": 12.5
+}
+```
+
+#### Períodos Disponíveis
+
+| Período | Descrição | Uso Recomendado |
+|---------|-----------|-----------------|
+| 7 dias | Última semana | Monitoramento rápido |
+| 15 dias | Duas semanas | Análise de tendências |
+| 30 dias | Último mês | Planejamento financeiro |
+
+### 2. Sistema de Métricas
+
+#### Métricas EC2
+
+```python
+# Coleta métricas de performance EC2
+metrics_service = MetricsService()
+ec2_usage = metrics_service.get_ec2_usage_data()
+
+# Cada instância retorna:
+{
+    "instance_id": "i-0abc123def456",
+    "instance_type": "m5.xlarge",
+    "state": "running",
+    "launch_time": "2024-01-15T10:30:00Z",
+    "avg_cpu_7d": 15.3,
+    "avg_cpu_30d": 18.2,
+    "is_underutilized": true  # CPU < 20%
+}
+```
+
+#### Métricas Lambda
+
+```python
+# Coleta métricas de funções Lambda
+lambda_usage = metrics_service.get_lambda_usage_data()
+
+# Cada função retorna:
+{
+    "function_name": "my-function",
+    "runtime": "python3.11",
+    "memory_mb": 256,
+    "timeout_seconds": 30,
+    "invocations_7d": 15420,
+    "errors_7d": 23,
+    "avg_duration_ms": 145.5,
+    "error_rate": 0.15  # percentual
+}
+```
+
+### 3. Sistema de Recomendações
+
+#### Tipos de Recomendações
+
+| Tipo | Descrição | Exemplo |
+|------|-----------|---------|
+| **RIGHT_SIZING** | Ajuste de tamanho | m5.xlarge -> m5.large |
+| **STOP_INSTANCE** | Parar recurso | Instância parada há 30+ dias |
+| **TERMINATE** | Encerrar recurso | Volume EBS não anexado |
+| **UPGRADE** | Atualizar tipo | gp2 -> gp3 (mais barato) |
+| **ENABLE_FEATURE** | Ativar recurso | Ativar lifecycle S3 |
+
+#### Estrutura de Recomendação
+
+```python
+{
+    "service": "EC2",
+    "resource_id": "i-0abc123def456",
+    "finding": "OVER_PROVISIONED",
+    "title": "Instancia Subutilizada",
+    "description": "CPU media de 15% nos ultimos 30 dias",
+    "action": "Reduzir para m5.large",
+    "estimated_monthly_savings": 45.60,
+    "confidence_score": 0.92,
+    "implementation_effort": "LOW",
+    "risk_level": "LOW"
+}
+```
+
+### 4. Sistema de Resiliência
+
+#### Retry Handler
+
+O sistema inclui tratamento automático de erros com retry:
+
+```python
+# Configuração de retry
+retry_policy = RetryPolicy(
+    max_attempts=3,
+    base_delay=1.0,
+    max_delay=30.0,
+    exponential_base=2.0,
+    jitter=True  # Adiciona aleatoriedade
+)
+
+# Erros que disparam retry automático:
+# - Throttling (429)
+# - Service Unavailable (503)
+# - Timeout
+# - Connection Errors
+```
+
+#### Circuit Breaker
+
+Protege contra falhas em cascata:
+
+```python
+from src.finops_aws.core import CircuitBreaker, CircuitBreakerConfig
+
+# Estados do Circuit Breaker:
+# - CLOSED: Operação normal
+# - OPEN: Serviço indisponível, falha imediata
+# - HALF_OPEN: Testando recuperação
+
+# Configuração
+config = CircuitBreakerConfig(
+    failure_threshold=5,      # Abre após 5 falhas
+    recovery_timeout=60       # Tenta recuperar em 60s
+)
+circuit_breaker = CircuitBreaker(config=config)
+
+# Uso
+if circuit_breaker.can_execute():
+    try:
+        result = call_aws_service()
+        circuit_breaker.record_success()
+    except Exception:
+        circuit_breaker.record_failure()
+```
+
+#### State Manager (DynamoDB)
+
+Gerencia estado de execuções longas:
+
+```python
+# Permite retomar execuções interrompidas
+state_manager = DynamoDBStateManager(table_name="finops-state")
+
+# Salva checkpoint
+state_manager.save_checkpoint(
+    execution_id="exec-123",
+    service="EC2",
+    progress={"instances_processed": 150, "total": 500}
+)
+
+# Resume de onde parou
+checkpoint = state_manager.get_checkpoint("exec-123", "EC2")
+```
+
+### 5. Sistema de Limpeza Automática
+
+Remove arquivos temporários automaticamente:
+
+```python
+# Configuração
+cleanup_config = CleanupConfig(
+    file_extensions={'.bkp', '.tmp', '.cache', '.log'},
+    max_file_age_hours=24,
+    max_file_size_mb=100,
+    s3_cleanup_enabled=True,
+    s3_max_age_days=7,
+    dry_run=False  # True para simular
+)
+
+# Execução
+cleanup_manager = CleanupManager(config=cleanup_config)
+result = cleanup_manager.cleanup_all()
+
+# Resultado
+{
+    "files_deleted": 45,
+    "bytes_freed": 125829120,  # 120 MB
+    "s3_objects_deleted": 12,
+    "execution_time_seconds": 3.5
+}
+```
+
+---
+
+## Estrutura do Projeto
+
+```
+finops-aws/
+├── src/
+│   └── finops_aws/
+│       ├── application/           # Camada de Aplicação
+│       │   ├── dto/               # Data Transfer Objects
+│       │   │   └── cost_analysis_dto.py
+│       │   ├── interfaces/        # Interfaces da aplicação
+│       │   │   └── logger_interface.py
+│       │   └── use_cases/         # Casos de uso
+│       │       └── analyze_costs_use_case.py
+│       │
+│       ├── core/                  # Núcleo do sistema
+│       │   ├── factories.py       # Factory Pattern (clientes AWS)
+│       │   ├── retry_handler.py   # Retry com backoff exponencial
+│       │   ├── resilient_executor.py  # Circuit breaker
+│       │   ├── state_manager.py   # Gerenciamento de estado
+│       │   ├── dynamodb_state_manager.py  # Estado no DynamoDB
+│       │   └── cleanup_manager.py # Limpeza automática
+│       │
+│       ├── domain/                # Camada de Domínio
+│       │   ├── entities/          # Entidades de negócio
+│       │   │   └── cost_entity.py
+│       │   ├── repositories/      # Interfaces de repositório
+│       │   │   └── cost_repository.py
+│       │   └── value_objects/     # Objetos de valor
+│       │       ├── money.py
+│       │       ├── service_name.py
+│       │       └── time_period.py
+│       │
+│       ├── infrastructure/        # Camada de Infraestrutura
+│       │   └── services/          # Implementações externas
+│       │
+│       ├── services/              # Serviços FinOps (21 serviços)
+│       │   ├── base_service.py    # Classe base abstrata
+│       │   ├── cost_service.py    # Análise de custos
+│       │   ├── metrics_service.py # Coleta de métricas
+│       │   ├── optimizer_service.py  # Recomendações
+│       │   ├── ec2_finops_service.py
+│       │   ├── lambda_finops_service.py
+│       │   ├── s3_service.py
+│       │   ├── ebs_service.py
+│       │   ├── dynamodb_finops_service.py
+│       │   ├── rds_service.py
+│       │   ├── elasticache_service.py
+│       │   ├── ecs_service.py
+│       │   ├── efs_service.py
+│       │   ├── redshift_service.py
+│       │   ├── cloudfront_service.py
+│       │   ├── elb_service.py
+│       │   ├── emr_service.py
+│       │   ├── vpc_network_service.py
+│       │   ├── kinesis_service.py
+│       │   ├── glue_service.py
+│       │   ├── sagemaker_service.py
+│       │   ├── route53_service.py
+│       │   ├── backup_service.py
+│       │   ├── sns_sqs_service.py
+│       │   └── secrets_manager_service.py
+│       │
+│       ├── models/                # Modelos de dados
+│       │   └── finops_models.py
+│       │
+│       ├── utils/                 # Utilitários
+│       │   ├── logger.py          # Logging estruturado
+│       │   ├── aws_helpers.py     # Helpers AWS
+│       │   └── execution_monitor.py
+│       │
+│       ├── lambda_handler.py      # Entry point Lambda
+│       └── resilient_lambda_handler.py  # Handler resiliente
+│
+├── tests/
+│   └── unit/                      # Testes unitários (271 testes)
+│       ├── test_cleanup_manager.py
+│       ├── test_cost_service.py
+│       ├── test_dynamodb_state_manager.py
+│       ├── test_factories.py
+│       ├── test_metrics_service.py
+│       ├── test_new_services.py
+│       ├── test_new_services_phase2.py
+│       ├── test_optimizer_service.py
+│       ├── test_phase2_priority_services.py
+│       ├── test_resilient_executor.py
+│       ├── test_retry_handler.py
+│       └── test_state_manager.py
+│
+├── example_events/                # Eventos de exemplo
+│   ├── api_gateway_event.json
+│   └── scheduled_event.json
+│
+├── infrastructure/                # IaC (CloudFormation)
+│   └── cloudformation-template.yaml
+│
+├── requirements.txt               # Dependencias Python
+├── pytest.ini                     # Configuracao pytest
+├── deploy.sh                      # Script de deploy
+├── service_aws.json               # Catalogo 253 servicos AWS
+└── replit.md                      # Documentacao do projeto
+```
+
+---
+
+## Como Usar
+
+### 1. Instalacao de Dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Configuração de Credenciais AWS
+
+```bash
+# Opção 1: Variáveis de ambiente
+export AWS_ACCESS_KEY_ID="sua-access-key"
+export AWS_SECRET_ACCESS_KEY="sua-secret-key"
+export AWS_DEFAULT_REGION="us-east-1"
+
+# Opção 2: AWS CLI
+aws configure
+```
+
+### 3. Execução Local
+
+```bash
+# Executar demo com serviços mockados
+python run_local_demo.py 1
+
+# Executar testes
+python run_local_demo.py 2
+
+# Executar ambos
+python run_local_demo.py 3
+```
+
+### 4. Usando como Biblioteca
+
+```python
+from src.finops_aws.services import (
+    CostService,
+    MetricsService,
+    OptimizerService,
+    S3Service,
+    EC2FinOpsService
+)
+from src.finops_aws.core.factories import ServiceFactory
+
+# Usando o Factory Pattern
+factory = ServiceFactory()
+
+# Obter serviços
+cost_service = factory.get_cost_service()
+metrics_service = factory.get_metrics_service()
+optimizer_service = factory.get_optimizer_service()
+
+# Coletar dados de custos
+costs_7d = cost_service.get_costs_by_service(days=7)
+costs_30d = cost_service.get_costs_by_service(days=30)
+
+# Coletar métricas
+ec2_metrics = metrics_service.get_ec2_usage_data()
+lambda_metrics = metrics_service.get_lambda_usage_data()
+
+# Obter recomendações de otimização
+ec2_recs = optimizer_service.get_ec2_recommendations()
+lambda_recs = optimizer_service.get_lambda_recommendations()
+
+print(f"Custo 30 dias: ${costs_30d.get('total', 0):.2f}")
+```
+
+---
+
+## Configuração
+
+### Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `AWS_DEFAULT_REGION` | Região AWS | us-east-1 |
+| `LOG_LEVEL` | Nível de log | INFO |
+| `CLEANUP_ENABLED` | Ativar limpeza automática | true |
+| `CLEANUP_DRY_RUN` | Simular limpeza | false |
+| `FINOPS_STATE_BUCKET` | Bucket para estado | finops-aws-state |
+| `FINOPS_STATE_TABLE` | Tabela DynamoDB | finops-state |
+
+### Configuração de Limpeza
+
+```bash
+# Extensões de arquivos para limpar
+CLEANUP_FILE_EXTENSIONS=".bkp,.tmp,.cache,.log"
+
+# Idade máxima dos arquivos (horas)
+CLEANUP_MAX_FILE_AGE_HOURS=24
+
+# Tamanho máximo por arquivo (MB)
+CLEANUP_MAX_FILE_SIZE_MB=100
+
+# Limpar objetos S3
+CLEANUP_S3_ENABLED=true
+CLEANUP_S3_MAX_AGE_DAYS=7
+```
+
+---
+
+## Testes
+
+### Executar Todos os Testes
+
+```bash
+pytest tests/ -v
+```
+
+### Executar Testes Específicos
+
+```bash
+# Testes de um arquivo
+pytest tests/unit/test_cost_service.py -v
+
+# Testes por categoria
+pytest tests/unit/test_phase2_priority_services.py -v
+```
+
+### Estrutura dos Testes
+
+| Arquivo | Cobertura |
+|---------|-----------|
+| test_cleanup_manager.py | Sistema de limpeza |
+| test_cost_service.py | Serviço de custos |
+| test_dynamodb_state_manager.py | Gerenciamento de estado |
+| test_factories.py | Factory Pattern |
+| test_metrics_service.py | Coleta de métricas |
+| test_new_services.py | S3, EBS, DynamoDB |
+| test_new_services_phase2.py | EFS, ElastiCache, ECS |
+| test_optimizer_service.py | Recomendações |
+| test_phase2_priority_services.py | 14 serviços prioritários |
+| test_resilient_executor.py | Circuit Breaker |
+| test_retry_handler.py | Retry com backoff |
+| test_state_manager.py | State Manager |
+
+---
+
+## Deploy na AWS
+
+### 1. Preparar Pacote Lambda
+
+```bash
+# Criar pacote de deploy
+./deploy.sh package
+```
+
+### 2. Deploy via CloudFormation
+
+```bash
+# Deploy completo
+./deploy.sh deploy --stack-name finops-aws-prod
+
+# Ou usando AWS CLI diretamente
+aws cloudformation deploy \
+  --template-file infrastructure/cloudformation-template.yaml \
+  --stack-name finops-aws-prod \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides \
+    Environment=prod \
+    ScheduleExpression="rate(1 day)"
+```
+
+### 3. Verificar Deploy
+
+```bash
+# Ver status da stack
+aws cloudformation describe-stacks --stack-name finops-aws-prod
+
+# Ver logs da Lambda
+aws logs tail /aws/lambda/finops-aws-prod --follow
+```
+
+---
+
+## Stack Tecnológico
+
+### Linguagem e Runtime
+
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| Python | 3.11 | Linguagem principal |
+| Boto3 | Latest | AWS SDK |
+| Pytest | 9.0+ | Framework de testes |
+| Moto | Latest | Mock AWS para testes |
+
+### Serviços AWS Utilizados
+
+| Serviço | Uso |
+|---------|-----|
+| Lambda | Execução serverless |
+| Cost Explorer | Dados de custo |
+| CloudWatch | Métricas e logs |
+| Compute Optimizer | Recomendações ML |
+| DynamoDB | Gerenciamento de estado |
+| S3 | Armazenamento |
+| EventBridge | Agendamento |
+| IAM | Permissões |
+
+### Padrões de Design
+
+| Padrão | Aplicação |
+|--------|-----------|
+| Clean Architecture | Separação de camadas |
+| Domain-Driven Design | Modelagem de domínio |
+| Factory Pattern | Criação de serviços |
+| Strategy Pattern | Algoritmos de análise |
+| Repository Pattern | Acesso a dados |
+| Circuit Breaker | Resiliência |
+| Retry with Backoff | Tratamento de erros |
+
+---
+
+## Roadmap
+
+### Fase Atual: FASE 2.3 (Concluída)
+
+- 21 serviços implementados
+- 271 testes automatizados
+- Sistema de resiliência completo
+
+### Próximas Fases
+
+#### FASE 3: Serviços de Prioridade 2 (Planejado)
+
+- AWS Organizations (multi-conta)
+- AWS Budgets (alertas de orçamento)
+- Cost Anomaly Detection
+- Savings Plans Analysis
+
+#### FASE 4: Serviços de Prioridade 3 (Planejado)
+
+- API Gateway
+- Step Functions
+- CodeBuild/CodePipeline
+- EKS (Kubernetes)
+
+#### FASE 5: Features Avançadas (Planejado)
+
+- Dashboard Web (React)
+- Alertas proativos (Slack, Email)
+- Predição ML de custos
+- Multi-account consolidation
+- Cost Allocation Tags
+
+---
+
+## Suporte e Contribuição
+
+### Reportar Problemas
+
+1. Verifique os logs no CloudWatch
+2. Execute os testes localmente
+3. Abra uma issue com detalhes
+
+### Contribuir
+
+1. Fork o repositório
+2. Crie uma branch feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+---
+
+## Licença
+
+Este projeto é de uso interno. Todos os direitos reservados.
+
+---
+
+**Desenvolvido para otimização de custos AWS**
+
+*Versão: 2.3 | Última atualização: Novembro 2025*

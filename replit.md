@@ -12,9 +12,10 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 
 ## Project Status
 
-- **Test Suite**: 268 tests passing, 1 skipped
+- **Test Suite**: 271 tests passing
 - **Services Implemented**: 21 AWS services (of 253 total target)
 - **Current Phase**: FASE 2.3 - High Priority Services (COMPLETED)
+- **Documentation**: README.md completamente atualizado (extremamente didático)
 
 ## System Architecture
 
@@ -99,7 +100,7 @@ finops-aws/
 │   ├── utils/                # Utilities (logger, helpers)
 │   ├── lambda_handler.py     # Main Lambda entry point
 │   └── resilient_lambda_handler.py
-├── tests/unit/               # Unit tests (268 tests)
+├── tests/unit/               # Unit tests (271 tests)
 ├── example_events/           # Sample Lambda event payloads
 ├── infrastructure/           # CloudFormation templates
 ├── deploy.sh                 # Deployment script
