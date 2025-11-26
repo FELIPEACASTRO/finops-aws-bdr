@@ -13,6 +13,7 @@ from .services.optimizer_service import OptimizerService
 from .models.finops_models import FinOpsReport
 from .utils.logger import setup_logger, log_error
 from .utils.aws_helpers import get_aws_account_id
+from .utils.cleanup_manager import CleanupManager, CleanupConfig
 
 # Configuração de logging
 logger = setup_logger(__name__, os.getenv('LOG_LEVEL', 'INFO'))
@@ -78,6 +79,29 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         # Adiciona métricas de resumo
         result['summary'] = generate_summary(costs, usage, optimizer_recommendations, total_savings_potential)
+
+        # Executa limpeza automática de arquivos
+        logger.info("Starting automatic file cleanup...")
+        cleanup_manager = CleanupManager()
+        cleanup_result = cleanup_manager.cleanup_files()
+
+        # Adiciona métricas de limpeza ao resultado
+        result['cleanup_metrics'] = {
+            'files_removed': cleanup_result.files_removed,
+            'size_freed_mb': round(cleanup_result.total_size_freed_mb, 3),
+            'execution_time_seconds': round(cleanup_result.execution_time_seconds, 2),
+            'directories_processed': cleanup_result.directories_processed,
+            'errors_count': len(cleanup_result.errors)
+        }
+
+        if cleanup_result.errors:
+            logger.warning("Cleanup completed with errors", extra={
+                'extra_data': {'cleanup_errors': cleanup_result.errors}
+            })
+        else:
+            logger.info("File cleanup completed successfully", extra={
+                'extra_data': result['cleanup_metrics']
+            })
 
         # Log de conclusão
         duration = (datetime.now() - start_time).total_seconds()
