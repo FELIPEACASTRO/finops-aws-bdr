@@ -435,6 +435,66 @@ class ServiceFactory:
         
         return self._services['rds']
     
+    def get_s3_service(self):
+        """
+        Obtém instância do S3Service
+        
+        Returns:
+            S3Service configurado
+        """
+        if 's3' in self._mocks:
+            return self._mocks['s3']
+        
+        if 's3' not in self._services:
+            from ..services.s3_service import S3Service
+            self._services['s3'] = S3Service(
+                s3_client=self.client_factory.get_client(AWSServiceType.S3),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['s3']
+    
+    def get_ebs_service(self):
+        """
+        Obtém instância do EBSService
+        
+        Returns:
+            EBSService configurado
+        """
+        if 'ebs' in self._mocks:
+            return self._mocks['ebs']
+        
+        if 'ebs' not in self._services:
+            from ..services.ebs_service import EBSService
+            self._services['ebs'] = EBSService(
+                ec2_client=self.client_factory.get_client(AWSServiceType.EC2),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['ebs']
+    
+    def get_dynamodb_service(self):
+        """
+        Obtém instância do DynamoDBFinOpsService
+        
+        Returns:
+            DynamoDBFinOpsService configurado
+        """
+        if 'dynamodb' in self._mocks:
+            return self._mocks['dynamodb']
+        
+        if 'dynamodb' not in self._services:
+            from ..services.dynamodb_finops_service import DynamoDBFinOpsService
+            self._services['dynamodb'] = DynamoDBFinOpsService(
+                dynamodb_client=self.client_factory.get_client(AWSServiceType.DYNAMODB),
+                cloudwatch_client=self.client_factory.get_client(AWSServiceType.CLOUDWATCH),
+                cost_client=self.client_factory.get_client(AWSServiceType.COST_EXPLORER)
+            )
+        
+        return self._services['dynamodb']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -446,7 +506,10 @@ class ServiceFactory:
             'cost': self.get_cost_service(),
             'metrics': self.get_metrics_service(),
             'optimizer': self.get_optimizer_service(),
-            'rds': self.get_rds_service()
+            'rds': self.get_rds_service(),
+            's3': self.get_s3_service(),
+            'ebs': self.get_ebs_service(),
+            'dynamodb': self.get_dynamodb_service()
         }
     
     def clear_cache(self):
