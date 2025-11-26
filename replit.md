@@ -12,9 +12,9 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 
 ## Project Status
 
-- **Test Suite**: 405+ tests passing
-- **Services Implemented**: 34 AWS services (of 253 total target)
-- **Current Phase**: FASE 2.6 - Compute & Application Services (COMPLETED)
+- **Test Suite**: 454+ tests passing
+- **Services Implemented**: 38 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.7 - Monitoring & Security Services (COMPLETED)
 - **Documentation**: README.md completamente atualizado (extremamente didático)
 
 ## System Architecture
@@ -31,7 +31,7 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **Extensible Service Layer:** Employs `BaseAWSService` as an abstract base class for all AWS service integrations, standardizing interfaces for `get_resources()`, `get_costs()`, `get_metrics()`, and `get_recommendations()`.
 - **Testing Strategy:** Comprehensive unit testing with Pytest, utilizing `moto` for mocking AWS services to ensure consistent and safe testing.
 
-## AWS Services Implemented (34 of 253)
+## AWS Services Implemented (38 of 253)
 
 ### Storage Services
 - **S3Service** - Object Storage analysis (buckets, costs, lifecycle, recommendations)
@@ -82,6 +82,12 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **StepFunctionsService** - Workflow orchestration analysis (state machines, executions, activities)
 - **APIGatewayService** - API analysis (REST APIs, HTTP APIs, WebSocket APIs, stages)
 - **TransferFamilyService** - File transfer analysis (SFTP/FTPS/FTP servers, users, connectors)
+
+### Monitoring & Security Services (NEW)
+- **CloudWatchService** - CloudWatch analysis (log groups, alarms, dashboards, metric streams)
+- **WAFService** - WAF analysis (Web ACLs, rule groups, IP sets, regex patterns)
+- **CognitoService** - Cognito analysis (user pools, identity pools, app clients)
+- **EventBridgeService** - EventBridge analysis (event buses, rules, archives, pipes)
 
 ### Integration Services
 - **SNSSQSService** - Messaging analysis (SNS topics, SQS queues)
@@ -181,7 +187,17 @@ finops-aws/
 - Added 48 new unit tests for Phase 2.6 services
 - Total: 405+ tests passing
 
-### Service Files (34 total)
+### FASE 2.7 - Monitoring & Security Services (COMPLETED)
+- Added **CloudWatchService** for CloudWatch analysis (log groups, alarms, dashboards, metric streams)
+- Added **WAFService** for AWS WAF analysis (Web ACLs, rule groups, IP sets, regex patterns)
+- Added **CognitoService** for Amazon Cognito analysis (user pools, identity pools, app clients)
+- Added **EventBridgeService** for EventBridge analysis (event buses, rules, archives, pipes)
+- Updated `AWSServiceType` enum with 7 new types (LOGS, WAFV2, COGNITO_IDP, COGNITO_IDENTITY, EVENTS, PIPES, SCHEMAS)
+- Updated `ServiceFactory` with getters for all 4 new services
+- Added 49 new unit tests for Phase 2.7 services
+- Total: 454+ tests passing
+
+### Service Files (38 total)
 **Core Services:** `cost_service.py`, `metrics_service.py`, `optimizer_service.py`, `rds_service.py`
 **Storage:** `s3_service.py`, `ebs_service.py`, `efs_service.py`
 **Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`, `aurora_service.py`, `documentdb_service.py`, `neptune_service.py`
@@ -193,3 +209,4 @@ finops-aws/
 **Graph/Document DB:** `neptune_service.py`, `documentdb_service.py`
 **File Systems:** `fsx_service.py`
 **Compute/Application:** `batch_service.py`, `stepfunctions_service.py`, `apigateway_service.py`, `transfer_service.py`
+**Monitoring/Security:** `cloudwatch_service.py`, `waf_service.py`, `cognito_service.py`, `eventbridge_service.py`

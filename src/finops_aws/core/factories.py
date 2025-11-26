@@ -76,6 +76,13 @@ class AWSServiceType(Enum):
     APIGATEWAY = "apigateway"
     APIGATEWAYV2 = "apigatewayv2"
     TRANSFER = "transfer"
+    LOGS = "logs"
+    WAFV2 = "wafv2"
+    COGNITO_IDP = "cognito-idp"
+    COGNITO_IDENTITY = "cognito-identity"
+    EVENTS = "events"
+    PIPES = "pipes"
+    SCHEMAS = "schemas"
 
 
 @dataclass
@@ -945,6 +952,50 @@ class ServiceFactory:
         
         return self._services['transfer']
     
+    def get_cloudwatch_logs_service(self):
+        """Obtém instância do CloudWatchService"""
+        if 'cloudwatch_logs' in self._mocks:
+            return self._mocks['cloudwatch_logs']
+        
+        if 'cloudwatch_logs' not in self._services:
+            from ..services.cloudwatch_service import CloudWatchService
+            self._services['cloudwatch_logs'] = CloudWatchService(self.client_factory)
+        
+        return self._services['cloudwatch_logs']
+    
+    def get_waf_service(self):
+        """Obtém instância do WAFService"""
+        if 'waf' in self._mocks:
+            return self._mocks['waf']
+        
+        if 'waf' not in self._services:
+            from ..services.waf_service import WAFService
+            self._services['waf'] = WAFService(self.client_factory)
+        
+        return self._services['waf']
+    
+    def get_cognito_service(self):
+        """Obtém instância do CognitoService"""
+        if 'cognito' in self._mocks:
+            return self._mocks['cognito']
+        
+        if 'cognito' not in self._services:
+            from ..services.cognito_service import CognitoService
+            self._services['cognito'] = CognitoService(self.client_factory)
+        
+        return self._services['cognito']
+    
+    def get_eventbridge_service(self):
+        """Obtém instância do EventBridgeService"""
+        if 'eventbridge' in self._mocks:
+            return self._mocks['eventbridge']
+        
+        if 'eventbridge' not in self._services:
+            from ..services.eventbridge_service import EventBridgeService
+            self._services['eventbridge'] = EventBridgeService(self.client_factory)
+        
+        return self._services['eventbridge']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -989,7 +1040,11 @@ class ServiceFactory:
             'batch': self.get_batch_service(),
             'stepfunctions': self.get_stepfunctions_service(),
             'apigateway': self.get_apigateway_service(),
-            'transfer': self.get_transfer_service()
+            'transfer': self.get_transfer_service(),
+            'cloudwatch_logs': self.get_cloudwatch_logs_service(),
+            'waf': self.get_waf_service(),
+            'cognito': self.get_cognito_service(),
+            'eventbridge': self.get_eventbridge_service()
         }
     
     def clear_cache(self):

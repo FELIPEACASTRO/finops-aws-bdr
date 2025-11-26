@@ -46,6 +46,12 @@ FASE 2.6: Serviços de Computação e Aplicação
 - StepFunctionsService: Análise de Step Functions (orquestração de workflows)
 - APIGatewayService: Análise de API Gateway (REST, HTTP, WebSocket)
 - TransferFamilyService: Análise de AWS Transfer Family (SFTP/FTPS/FTP)
+
+FASE 2.7: Serviços de Monitoramento e Segurança
+- CloudWatchService: Análise de CloudWatch (logs, métricas, alarmes, dashboards)
+- WAFService: Análise de WAF (Web ACLs, regras, IP sets)
+- CognitoService: Análise de Cognito (user pools, identity pools)
+- EventBridgeService: Análise de EventBridge (event buses, rules, archives, pipes)
 """
 
 from .cost_service import CostService
@@ -91,6 +97,10 @@ from .batch_service import BatchService, BatchComputeEnvironment, BatchJobQueue,
 from .stepfunctions_service import StepFunctionsService, StateMachine, StateMachineExecution, Activity
 from .apigateway_service import APIGatewayService, RestAPI, HttpAPI, APIStage, UsagePlan
 from .transfer_service import TransferFamilyService, TransferServer, TransferUser, TransferConnector
+from .cloudwatch_service import CloudWatchService, LogGroup, CloudWatchAlarm, CloudWatchDashboard, MetricStream
+from .waf_service import WAFService, WebACL, RuleGroup, IPSet, RegexPatternSet
+from .cognito_service import CognitoService, UserPool, UserPoolClient, IdentityPool, ResourceServer
+from .eventbridge_service import EventBridgeService, EventBus, EventRule, EventArchive, EventPipe, SchemaRegistry
 
 __all__ = [
     'CostService',
@@ -204,5 +214,26 @@ __all__ = [
     'TransferFamilyService',
     'TransferServer',
     'TransferUser',
-    'TransferConnector'
+    'TransferConnector',
+    'CloudWatchService',
+    'LogGroup',
+    'CloudWatchAlarm',
+    'CloudWatchDashboard',
+    'MetricStream',
+    'WAFService',
+    'WebACL',
+    'RuleGroup',
+    'IPSet',
+    'RegexPatternSet',
+    'CognitoService',
+    'UserPool',
+    'UserPoolClient',
+    'IdentityPool',
+    'ResourceServer',
+    'EventBridgeService',
+    'EventBus',
+    'EventRule',
+    'EventArchive',
+    'EventPipe',
+    'SchemaRegistry'
 ]
