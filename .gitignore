@@ -177,6 +177,12 @@ cython_debug/
 output.json
 test_output.json
 
+# Attached assets (pasted content)
+attached_assets/
+
+# Temporary logs
+/tmp/logs/
+
 # OS generated files
 .DS_Store
 .DS_Store?

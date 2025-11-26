@@ -84,28 +84,52 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **AWS CloudWatch:** For collecting and analyzing metrics.
 - **AWS Compute Optimizer:** Integrated for optimization recommendations.
 
+## Project Structure
+
+```
+finops-aws/
+├── src/finops_aws/           # Main application code
+│   ├── application/          # Use cases and DTOs
+│   ├── core/                 # Core infrastructure (factories, retry, state)
+│   ├── domain/               # Domain entities and value objects
+│   ├── infrastructure/       # External service adapters
+│   ├── interfaces/           # Interface definitions
+│   ├── models/               # Data models
+│   ├── services/             # AWS FinOps service implementations (21 services)
+│   ├── utils/                # Utilities (logger, helpers)
+│   ├── lambda_handler.py     # Main Lambda entry point
+│   └── resilient_lambda_handler.py
+├── tests/unit/               # Unit tests (268 tests)
+├── example_events/           # Sample Lambda event payloads
+├── infrastructure/           # CloudFormation templates
+├── deploy.sh                 # Deployment script
+├── requirements.txt          # Python dependencies
+├── service_aws.json          # AWS services catalog (253 services)
+└── replit.md                 # This file
+```
+
 ## Recent Changes (Nov 26, 2025)
 
+### Project Cleanup
+- Removed unnecessary files: `attached_assets/`, `test_resilient_simple.py`, `test_resilient_system.py`
+- Removed redundant documentation: `README_RESILIENT.md`, `EXPANSION_ROADMAP.md`
+- Cleaned `.pytest_cache/` and `__pycache__` directories
+- Updated `.gitignore` to prevent future clutter
+- All 268 tests passing after cleanup
+
 ### FASE 2.3 - High Priority Services (COMPLETED)
-- Added 15 new FinOps services covering high-cost-impact AWS resources
+- Added 14 new FinOps services covering high-cost-impact AWS resources
 - Expanded `AWSServiceType` enum with 14 new service types
 - Updated `ServiceFactory` with getters for all new services
 - Enhanced `ServiceRecommendation` dataclass with `title` and `action` fields
 - Fixed ELB service type to use correct boto3 service name ('elb')
+- Fixed critical export gap in `services/__init__.py` (all 14 services + 15+ dataclasses)
 - Added 37 new unit tests for priority services
 
-### Key Service Files Added
-- `src/finops_aws/services/ec2_finops_service.py`
-- `src/finops_aws/services/lambda_finops_service.py`
-- `src/finops_aws/services/redshift_service.py`
-- `src/finops_aws/services/cloudfront_service.py`
-- `src/finops_aws/services/elb_service.py`
-- `src/finops_aws/services/emr_service.py`
-- `src/finops_aws/services/vpc_network_service.py`
-- `src/finops_aws/services/kinesis_service.py`
-- `src/finops_aws/services/glue_service.py`
-- `src/finops_aws/services/sagemaker_service.py`
-- `src/finops_aws/services/route53_service.py`
-- `src/finops_aws/services/backup_service.py`
-- `src/finops_aws/services/sns_sqs_service.py`
-- `src/finops_aws/services/secrets_manager_service.py`
+### Service Files (21 total)
+**Core Services:** `cost_service.py`, `metrics_service.py`, `optimizer_service.py`, `rds_service.py`
+**Storage:** `s3_service.py`, `ebs_service.py`, `efs_service.py`
+**Database:** `dynamodb_finops_service.py`, `elasticache_service.py`, `redshift_service.py`
+**Compute:** `ec2_finops_service.py`, `lambda_finops_service.py`, `ecs_service.py`, `emr_service.py`, `sagemaker_service.py`
+**Networking:** `vpc_network_service.py`, `cloudfront_service.py`, `elb_service.py`, `route53_service.py`
+**Integration:** `kinesis_service.py`, `glue_service.py`, `sns_sqs_service.py`, `backup_service.py`, `secrets_manager_service.py`
