@@ -108,6 +108,10 @@ class AWSServiceType(Enum):
     APPRUNNER = "apprunner"
     ELASTICBEANSTALK = "elasticbeanstalk"
     LIGHTSAIL = "lightsail"
+    IOT = "iot"
+    IOTANALYTICS = "iotanalytics"
+    GREENGRASSV2 = "greengrassv2"
+    IOTEVENTS = "iotevents"
 
 
 @dataclass
@@ -1296,6 +1300,50 @@ class ServiceFactory:
         
         return self._services['lightsail']
     
+    def get_iot_service(self):
+        """Obtém instância do IoTCoreService"""
+        if 'iot' in self._mocks:
+            return self._mocks['iot']
+        
+        if 'iot' not in self._services:
+            from ..services.iot_service import IoTCoreService
+            self._services['iot'] = IoTCoreService(self.client_factory)
+        
+        return self._services['iot']
+    
+    def get_iotanalytics_service(self):
+        """Obtém instância do IoTAnalyticsService"""
+        if 'iotanalytics' in self._mocks:
+            return self._mocks['iotanalytics']
+        
+        if 'iotanalytics' not in self._services:
+            from ..services.iotanalytics_service import IoTAnalyticsService
+            self._services['iotanalytics'] = IoTAnalyticsService(self.client_factory)
+        
+        return self._services['iotanalytics']
+    
+    def get_greengrass_service(self):
+        """Obtém instância do GreengrassService"""
+        if 'greengrass' in self._mocks:
+            return self._mocks['greengrass']
+        
+        if 'greengrass' not in self._services:
+            from ..services.greengrass_service import GreengrassService
+            self._services['greengrass'] = GreengrassService(self.client_factory)
+        
+        return self._services['greengrass']
+    
+    def get_iotevents_service(self):
+        """Obtém instância do IoTEventsService"""
+        if 'iotevents' in self._mocks:
+            return self._mocks['iotevents']
+        
+        if 'iotevents' not in self._services:
+            from ..services.iotevents_service import IoTEventsService
+            self._services['iotevents'] = IoTEventsService(self.client_factory)
+        
+        return self._services['iotevents']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1369,7 +1417,11 @@ class ServiceFactory:
             'ecr': self.get_ecr_service(),
             'apprunner': self.get_apprunner_service(),
             'elasticbeanstalk': self.get_elasticbeanstalk_service(),
-            'lightsail': self.get_lightsail_service()
+            'lightsail': self.get_lightsail_service(),
+            'iot': self.get_iot_service(),
+            'iotanalytics': self.get_iotanalytics_service(),
+            'greengrass': self.get_greengrass_service(),
+            'iotevents': self.get_iotevents_service()
         }
     
     def clear_cache(self):
