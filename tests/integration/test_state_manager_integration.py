@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
 from finops_aws.core.state_manager import (
-    StateManager, DynamoDBStateManager, TaskType, ExecutionStatus,
+    StateManager, TaskType, ExecutionStatus,
     TaskState, ExecutionState
 )
 from finops_aws.core.resilient_executor import ResilientExecutor

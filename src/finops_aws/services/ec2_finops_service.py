@@ -370,7 +370,8 @@ class EC2FinOpsService(BaseAWSService):
         
         for inst in stopped:
             if inst.launch_time:
-                stopped_days = (datetime.now(timezone.utc) - inst.launch_time.replace(tzinfo=None)).days
+                launch_time = inst.launch_time if inst.launch_time.tzinfo else inst.launch_time.replace(tzinfo=timezone.utc)
+                stopped_days = (datetime.now(timezone.utc) - launch_time).days
                 if stopped_days > 7:
                     recommendations.append(ServiceRecommendation(
                         resource_id=inst.instance_id,
