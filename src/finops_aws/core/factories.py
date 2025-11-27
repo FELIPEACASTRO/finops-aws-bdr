@@ -137,6 +137,44 @@ class AWSServiceType(Enum):
     TRUSTEDADVISOR = "support"
     ORGANIZATIONS = "organizations"
     CONTROLTOWER = "controltower"
+    PINPOINT = "pinpoint"
+    SES = "ses"
+    CONNECT = "connect"
+    SERVICECATALOG = "servicecatalog"
+    APPFLOW = "appflow"
+    MQ = "mq"
+    KINESISVIDEO = "kinesisvideo"
+    MEDIASTORE = "mediastore"
+    ELASTICINFERENCE = "elastic-inference"
+    FORECAST = "forecast"
+    LOOKOUTMETRICS = "lookoutmetrics"
+    LOOKOUTVISION = "lookoutvision"
+    MEMORYDB = "memorydb"
+    KEYSPACES = "keyspaces"
+    STORAGEGATEWAY = "storagegateway"
+    DATAEXCHANGE = "dataexchange"
+    CODESTAR = "codestar"
+    CLOUD9 = "cloud9"
+    SERVERLESSREPO = "serverlessrepo"
+    PROTON = "proton"
+    LEX = "lex"
+    POLLY = "polly"
+    TRANSCRIBE = "transcribe"
+    PERSONALIZE = "personalize"
+    FINSPACE = "finspace"
+    MARKETPLACECATALOG = "marketplace-catalog"
+    AUTOGLUON = "autogluon"
+    BACKUPRESTORE = "backuprestore"
+    CASSANDRA = "cassandra"
+    CODECOMMIT_ENHANCED = "codecommit"
+    DATAPORTAL = "dataportal"
+    DATASYNC_ENHANCED = "datasync"
+    DISTRO = "distro"
+    DYNAMODB_STREAMS = "dynamodb-streams"
+    GLUESTREAMING = "glue-streaming"
+    LOOKOUTEQUIPMENT = "lookoutequipment"
+    S3OUTPOSTS = "s3outposts"
+    SNOW = "snow"
 
 
 @dataclass
@@ -1666,6 +1704,402 @@ class ServiceFactory:
         
         return self._services['controltower']
     
+    def get_pinpoint_service(self):
+        """Obtém instância do PinpointService"""
+        if 'pinpoint' in self._mocks:
+            return self._mocks['pinpoint']
+        if 'pinpoint' not in self._services:
+            from ..services.pinpoint_service import PinpointService
+            self._services['pinpoint'] = PinpointService(self.client_factory)
+        return self._services['pinpoint']
+    
+    def get_ses_service(self):
+        """Obtém instância do SESService"""
+        if 'ses' in self._mocks:
+            return self._mocks['ses']
+        if 'ses' not in self._services:
+            from ..services.ses_service import SesService
+            self._services['ses'] = SesService(self.client_factory)
+        return self._services['ses']
+    
+    def get_connect_service(self):
+        """Obtém instância do ConnectService"""
+        if 'connect' in self._mocks:
+            return self._mocks['connect']
+        if 'connect' not in self._services:
+            from ..services.connect_service import ConnectService
+            self._services['connect'] = ConnectService(self.client_factory)
+        return self._services['connect']
+    
+    def get_servicecatalog_service(self):
+        """Obtém instância do ServiceCatalogService"""
+        if 'servicecatalog' in self._mocks:
+            return self._mocks['servicecatalog']
+        if 'servicecatalog' not in self._services:
+            from ..services.servicecatalog_service import ServicecatalogService
+            self._services['servicecatalog'] = ServicecatalogService(self.client_factory)
+        return self._services['servicecatalog']
+    
+    def get_appflow_service(self):
+        """Obtém instância do AppFlowService"""
+        if 'appflow' in self._mocks:
+            return self._mocks['appflow']
+        if 'appflow' not in self._services:
+            from ..services.appflow_service import AppflowService
+            self._services['appflow'] = AppflowService(self.client_factory)
+        return self._services['appflow']
+    
+    def get_mq_service(self):
+        """Obtém instância do MQService"""
+        if 'mq' in self._mocks:
+            return self._mocks['mq']
+        if 'mq' not in self._services:
+            from ..services.mq_service import MqService
+            self._services['mq'] = MqService(self.client_factory)
+        return self._services['mq']
+    
+    def get_kinesisvideo_service(self):
+        """Obtém instância do KinesisVideoService"""
+        if 'kinesisvideo' in self._mocks:
+            return self._mocks['kinesisvideo']
+        if 'kinesisvideo' not in self._services:
+            from ..services.kinesisvideo_service import KinesisvideoService
+            self._services['kinesisvideo'] = KinesisvideoService(self.client_factory)
+        return self._services['kinesisvideo']
+    
+    def get_mediastore_service(self):
+        """Obtém instância do MediaStoreService"""
+        if 'mediastore' in self._mocks:
+            return self._mocks['mediastore']
+        if 'mediastore' not in self._services:
+            from ..services.mediastore_service import MediastoreService
+            self._services['mediastore'] = MediastoreService(self.client_factory)
+        return self._services['mediastore']
+    
+    def get_forecast_service(self):
+        """Obtém instância do ForecastService"""
+        if 'forecast' in self._mocks:
+            return self._mocks['forecast']
+        if 'forecast' not in self._services:
+            from ..services.forecast_service import ForecastService
+            self._services['forecast'] = ForecastService(self.client_factory)
+        return self._services['forecast']
+    
+    def get_memorydb_service(self):
+        """Obtém instância do MemoryDBService"""
+        if 'memorydb' in self._mocks:
+            return self._mocks['memorydb']
+        if 'memorydb' not in self._services:
+            from ..services.memorydb_service import MemorydbService
+            self._services['memorydb'] = MemorydbService(self.client_factory)
+        return self._services['memorydb']
+    
+    def get_keyspaces_service(self):
+        """Obtém instância do KeyspacesService"""
+        if 'keyspaces' in self._mocks:
+            return self._mocks['keyspaces']
+        if 'keyspaces' not in self._services:
+            from ..services.keyspaces_service import KeyspacesService
+            self._services['keyspaces'] = KeyspacesService(self.client_factory)
+        return self._services['keyspaces']
+    
+    def get_storagegateway_service(self):
+        """Obtém instância do StorageGatewayService"""
+        if 'storagegateway' in self._mocks:
+            return self._mocks['storagegateway']
+        if 'storagegateway' not in self._services:
+            from ..services.storagegateway_service import StoragegatewayService
+            self._services['storagegateway'] = StoragegatewayService(self.client_factory)
+        return self._services['storagegateway']
+    
+    def get_dataexchange_service(self):
+        """Obtém instância do DataExchangeService"""
+        if 'dataexchange' in self._mocks:
+            return self._mocks['dataexchange']
+        if 'dataexchange' not in self._services:
+            from ..services.dataexchange_service import DataexchangeService
+            self._services['dataexchange'] = DataexchangeService(self.client_factory)
+        return self._services['dataexchange']
+    
+    def get_codestar_service(self):
+        """Obtém instância do CodeStarService"""
+        if 'codestar' in self._mocks:
+            return self._mocks['codestar']
+        if 'codestar' not in self._services:
+            from ..services.codestar_service import CodestarService
+            self._services['codestar'] = CodestarService(self.client_factory)
+        return self._services['codestar']
+    
+    def get_cloud9_service(self):
+        """Obtém instância do Cloud9Service"""
+        if 'cloud9' in self._mocks:
+            return self._mocks['cloud9']
+        if 'cloud9' not in self._services:
+            from ..services.cloud9_service import Cloud9Service
+            self._services['cloud9'] = Cloud9Service(self.client_factory)
+        return self._services['cloud9']
+    
+    def get_serverlessrepo_service(self):
+        """Obtém instância do ServerlessRepoService"""
+        if 'serverlessrepo' in self._mocks:
+            return self._mocks['serverlessrepo']
+        if 'serverlessrepo' not in self._services:
+            from ..services.serverlessrepo_service import ServerlessrepoService
+            self._services['serverlessrepo'] = ServerlessrepoService(self.client_factory)
+        return self._services['serverlessrepo']
+    
+    def get_proton_service(self):
+        """Obtém instância do ProtonService"""
+        if 'proton' in self._mocks:
+            return self._mocks['proton']
+        if 'proton' not in self._services:
+            from ..services.proton_service import ProtonService
+            self._services['proton'] = ProtonService(self.client_factory)
+        return self._services['proton']
+    
+    def get_lex_service(self):
+        """Obtém instância do LexService"""
+        if 'lex' in self._mocks:
+            return self._mocks['lex']
+        if 'lex' not in self._services:
+            from ..services.lex_service import LexService
+            self._services['lex'] = LexService(self.client_factory)
+        return self._services['lex']
+    
+    def get_polly_service(self):
+        """Obtém instância do PollyService"""
+        if 'polly' in self._mocks:
+            return self._mocks['polly']
+        if 'polly' not in self._services:
+            from ..services.polly_service import PollyService
+            self._services['polly'] = PollyService(self.client_factory)
+        return self._services['polly']
+    
+    def get_transcribe_service(self):
+        """Obtém instância do TranscribeService"""
+        if 'transcribe' in self._mocks:
+            return self._mocks['transcribe']
+        if 'transcribe' not in self._services:
+            from ..services.transcribe_service import TranscribeService
+            self._services['transcribe'] = TranscribeService(self.client_factory)
+        return self._services['transcribe']
+    
+    def get_personalize_service(self):
+        """Obtém instância do PersonalizeService"""
+        if 'personalize' in self._mocks:
+            return self._mocks['personalize']
+        if 'personalize' not in self._services:
+            from ..services.personalize_service import PersonalizeService
+            self._services['personalize'] = PersonalizeService(self.client_factory)
+        return self._services['personalize']
+    
+    def get_finspace_service(self):
+        """Obtém instância do FinSpaceService"""
+        if 'finspace' in self._mocks:
+            return self._mocks['finspace']
+        if 'finspace' not in self._services:
+            from ..services.finspace_service import FinspaceService
+            self._services['finspace'] = FinspaceService(self.client_factory)
+        return self._services['finspace']
+    
+    def get_autogluon_service(self):
+        """Obtém instância do AutoGluonService"""
+        if 'autogluon' in self._mocks:
+            return self._mocks['autogluon']
+        if 'autogluon' not in self._services:
+            from ..services.autogluon_service import AutogluonService
+            self._services['autogluon'] = AutogluonService(self.client_factory)
+        return self._services['autogluon']
+    
+    def get_backuprestore_service(self):
+        """Obtém instância do BackupRestoreService"""
+        if 'backuprestore' in self._mocks:
+            return self._mocks['backuprestore']
+        if 'backuprestore' not in self._services:
+            from ..services.backuprestore_service import BackuprestoreService
+            self._services['backuprestore'] = BackuprestoreService(self.client_factory)
+        return self._services['backuprestore']
+    
+    def get_cassandra_service(self):
+        """Obtém instância do CassandraService"""
+        if 'cassandra' in self._mocks:
+            return self._mocks['cassandra']
+        if 'cassandra' not in self._services:
+            from ..services.cassandra_service import CassandraService
+            self._services['cassandra'] = CassandraService(self.client_factory)
+        return self._services['cassandra']
+    
+    def get_cloudwatch_service(self):
+        """Obtém instância do CloudWatchService"""
+        if 'cloudwatch' in self._mocks:
+            return self._mocks['cloudwatch']
+        if 'cloudwatch' not in self._services:
+            from ..services.cloudwatch_service import CloudWatchService
+            self._services['cloudwatch'] = CloudWatchService(self.client_factory)
+        return self._services['cloudwatch']
+    
+    def get_codecommit_enhanced_service(self):
+        """Obtém instância do CodeCommitEnhancedService"""
+        if 'codecommit_enhanced' in self._mocks:
+            return self._mocks['codecommit_enhanced']
+        if 'codecommit_enhanced' not in self._services:
+            from ..services.codecommit_enhanced_service import CodecommitenhancedService
+            self._services['codecommit_enhanced'] = CodecommitenhancedService(self.client_factory)
+        return self._services['codecommit_enhanced']
+    
+    def get_dataportal_service(self):
+        """Obtém instância do DataPortalService"""
+        if 'dataportal' in self._mocks:
+            return self._mocks['dataportal']
+        if 'dataportal' not in self._services:
+            from ..services.dataportal_service import DataportalService
+            self._services['dataportal'] = DataportalService(self.client_factory)
+        return self._services['dataportal']
+    
+    def get_datasync_enhanced_service(self):
+        """Obtém instância do DataSyncEnhancedService"""
+        if 'datasync_enhanced' in self._mocks:
+            return self._mocks['datasync_enhanced']
+        if 'datasync_enhanced' not in self._services:
+            from ..services.datasync_enhanced_service import DatasyncenhancedService
+            self._services['datasync_enhanced'] = DatasyncenhancedService(self.client_factory)
+        return self._services['datasync_enhanced']
+    
+    def get_distro_service(self):
+        """Obtém instância do DistroService"""
+        if 'distro' in self._mocks:
+            return self._mocks['distro']
+        if 'distro' not in self._services:
+            from ..services.distro_service import DistroService
+            self._services['distro'] = DistroService(self.client_factory)
+        return self._services['distro']
+    
+    def get_dynamodb_finops_service(self):
+        """Obtém instância do DynamoDBFinOpsService"""
+        if 'dynamodb_finops' in self._mocks:
+            return self._mocks['dynamodb_finops']
+        if 'dynamodb_finops' not in self._services:
+            from ..services.dynamodb_finops_service import DynamoDBFinOpsService
+            self._services['dynamodb_finops'] = DynamoDBFinOpsService(self.client_factory)
+        return self._services['dynamodb_finops']
+    
+    def get_dynamodb_streams_service(self):
+        """Obtém instância do DynamoDBStreamsService"""
+        if 'dynamodb_streams' in self._mocks:
+            return self._mocks['dynamodb_streams']
+        if 'dynamodb_streams' not in self._services:
+            from ..services.dynamodb_streams_service import DynamodbstreamsService
+            self._services['dynamodb_streams'] = DynamodbstreamsService(self.client_factory)
+        return self._services['dynamodb_streams']
+    
+    def get_elasticache_serverless_service(self):
+        """Obtém instância do ElastiCacheServerlessService"""
+        if 'elasticache_serverless' in self._mocks:
+            return self._mocks['elasticache_serverless']
+        if 'elasticache_serverless' not in self._services:
+            from ..services.elasticache_serverless_service import ElasticacheserverlessService
+            self._services['elasticache_serverless'] = ElasticacheserverlessService(self.client_factory)
+        return self._services['elasticache_serverless']
+    
+    def get_elasticinference_service(self):
+        """Obtém instância do ElasticInferenceService"""
+        if 'elasticinference' in self._mocks:
+            return self._mocks['elasticinference']
+        if 'elasticinference' not in self._services:
+            from ..services.elasticinference_service import ElasticinferenceService
+            self._services['elasticinference'] = ElasticinferenceService(self.client_factory)
+        return self._services['elasticinference']
+    
+    def get_emr_serverless_service(self):
+        """Obtém instância do EMRServerlessService"""
+        if 'emr_serverless' in self._mocks:
+            return self._mocks['emr_serverless']
+        if 'emr_serverless' not in self._services:
+            from ..services.emr_serverless_service import EmrserverlessService
+            self._services['emr_serverless'] = EmrserverlessService(self.client_factory)
+        return self._services['emr_serverless']
+    
+    def get_gluestreaming_service(self):
+        """Obtém instância do GlueStreamingService"""
+        if 'gluestreaming' in self._mocks:
+            return self._mocks['gluestreaming']
+        if 'gluestreaming' not in self._services:
+            from ..services.gluestreaming_service import GluestreamingService
+            self._services['gluestreaming'] = GluestreamingService(self.client_factory)
+        return self._services['gluestreaming']
+    
+    def get_lookoutequipment_service(self):
+        """Obtém instância do LookoutEquipmentService"""
+        if 'lookoutequipment' in self._mocks:
+            return self._mocks['lookoutequipment']
+        if 'lookoutequipment' not in self._services:
+            from ..services.lookoutequipment_service import LookoutequipmentService
+            self._services['lookoutequipment'] = LookoutequipmentService(self.client_factory)
+        return self._services['lookoutequipment']
+    
+    def get_lookoutmetrics_service(self):
+        """Obtém instância do LookoutMetricsService"""
+        if 'lookoutmetrics' in self._mocks:
+            return self._mocks['lookoutmetrics']
+        if 'lookoutmetrics' not in self._services:
+            from ..services.lookoutmetrics_service import LookoutmetricsService
+            self._services['lookoutmetrics'] = LookoutmetricsService(self.client_factory)
+        return self._services['lookoutmetrics']
+    
+    def get_lookoutvision_service(self):
+        """Obtém instância do LookoutVisionService"""
+        if 'lookoutvision' in self._mocks:
+            return self._mocks['lookoutvision']
+        if 'lookoutvision' not in self._services:
+            from ..services.lookoutvision_service import LookoutvisionService
+            self._services['lookoutvision'] = LookoutvisionService(self.client_factory)
+        return self._services['lookoutvision']
+    
+    def get_marketplacecatalog_service(self):
+        """Obtém instância do MarketplaceCatalogService"""
+        if 'marketplacecatalog' in self._mocks:
+            return self._mocks['marketplacecatalog']
+        if 'marketplacecatalog' not in self._services:
+            from ..services.marketplacecatalog_service import MarketplacecatalogService
+            self._services['marketplacecatalog'] = MarketplacecatalogService(self.client_factory)
+        return self._services['marketplacecatalog']
+    
+    def get_msk_serverless_service(self):
+        """Obtém instância do MSKServerlessService"""
+        if 'msk_serverless' in self._mocks:
+            return self._mocks['msk_serverless']
+        if 'msk_serverless' not in self._services:
+            from ..services.msk_serverless_service import MskserverlessService
+            self._services['msk_serverless'] = MskserverlessService(self.client_factory)
+        return self._services['msk_serverless']
+    
+    def get_rds_custom_service(self):
+        """Obtém instância do RDSCustomService"""
+        if 'rds_custom' in self._mocks:
+            return self._mocks['rds_custom']
+        if 'rds_custom' not in self._services:
+            from ..services.rds_custom_service import RdscustomService
+            self._services['rds_custom'] = RdscustomService(self.client_factory)
+        return self._services['rds_custom']
+    
+    def get_s3outposts_service(self):
+        """Obtém instância do S3OutpostsService"""
+        if 's3outposts' in self._mocks:
+            return self._mocks['s3outposts']
+        if 's3outposts' not in self._services:
+            from ..services.s3outposts_service import S3outpostsService
+            self._services['s3outposts'] = S3outpostsService(self.client_factory)
+        return self._services['s3outposts']
+    
+    def get_snow_service(self):
+        """Obtém instância do SnowService"""
+        if 'snow' in self._mocks:
+            return self._mocks['snow']
+        if 'snow' not in self._services:
+            from ..services.snow_service import SnowService
+            self._services['snow'] = SnowService(self.client_factory)
+        return self._services['snow']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1767,7 +2201,54 @@ class ServiceFactory:
             'sqs': self.get_sqs_service(),
             'iam': self.get_iam_service(),
             'securityhub': self.get_securityhub_service(),
-            'macie': self.get_macie_service()
+            'macie': self.get_macie_service(),
+            'trustedadvisor': self.get_trustedadvisor_service(),
+            'organizations': self.get_organizations_service(),
+            'controltower': self.get_controltower_service(),
+            'pinpoint': self.get_pinpoint_service(),
+            'ses': self.get_ses_service(),
+            'connect': self.get_connect_service(),
+            'servicecatalog': self.get_servicecatalog_service(),
+            'appflow': self.get_appflow_service(),
+            'mq': self.get_mq_service(),
+            'kinesisvideo': self.get_kinesisvideo_service(),
+            'mediastore': self.get_mediastore_service(),
+            'forecast': self.get_forecast_service(),
+            'memorydb': self.get_memorydb_service(),
+            'keyspaces': self.get_keyspaces_service(),
+            'storagegateway': self.get_storagegateway_service(),
+            'dataexchange': self.get_dataexchange_service(),
+            'codestar': self.get_codestar_service(),
+            'cloud9': self.get_cloud9_service(),
+            'serverlessrepo': self.get_serverlessrepo_service(),
+            'proton': self.get_proton_service(),
+            'lex': self.get_lex_service(),
+            'polly': self.get_polly_service(),
+            'transcribe': self.get_transcribe_service(),
+            'personalize': self.get_personalize_service(),
+            'finspace': self.get_finspace_service(),
+            'autogluon': self.get_autogluon_service(),
+            'backuprestore': self.get_backuprestore_service(),
+            'cassandra': self.get_cassandra_service(),
+            'cloudwatch': self.get_cloudwatch_service(),
+            'codecommit_enhanced': self.get_codecommit_enhanced_service(),
+            'dataportal': self.get_dataportal_service(),
+            'datasync_enhanced': self.get_datasync_enhanced_service(),
+            'distro': self.get_distro_service(),
+            'dynamodb_finops': self.get_dynamodb_finops_service(),
+            'dynamodb_streams': self.get_dynamodb_streams_service(),
+            'elasticache_serverless': self.get_elasticache_serverless_service(),
+            'elasticinference': self.get_elasticinference_service(),
+            'emr_serverless': self.get_emr_serverless_service(),
+            'gluestreaming': self.get_gluestreaming_service(),
+            'lookoutequipment': self.get_lookoutequipment_service(),
+            'lookoutmetrics': self.get_lookoutmetrics_service(),
+            'lookoutvision': self.get_lookoutvision_service(),
+            'marketplacecatalog': self.get_marketplacecatalog_service(),
+            'msk_serverless': self.get_msk_serverless_service(),
+            'rds_custom': self.get_rds_custom_service(),
+            's3outposts': self.get_s3outposts_service(),
+            'snow': self.get_snow_service(),
         }
     
     def clear_cache(self):
