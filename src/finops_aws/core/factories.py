@@ -420,7 +420,7 @@ class AWSClientFactory:
         if service_type in self._mocks:
             return self._mocks[service_type]
         
-        effective_region = region or self.config.region
+        effective_region = region or self.config.region or 'us-east-1'
         
         if service_type == AWSServiceType.COST_EXPLORER:
             effective_region = 'us-east-1'
@@ -456,7 +456,7 @@ class AWSClientFactory:
         if service_type in self._mocks:
             return self._mocks[service_type]
         
-        effective_region = region or self.config.region
+        effective_region = region or self.config.region or 'us-east-1'
         cache_key = f"{service_type.value}_{effective_region}_resource"
         
         if cache_key not in self._resources:

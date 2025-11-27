@@ -337,3 +337,66 @@ class BaseAWSService(ABC):
             'recommendations': [r.to_dict() for r in self.get_recommendations()],
             'health': self.health_check()
         }
+
+
+class SimpleAWSService(BaseAWSService):
+    """
+    Classe base para serviços AWS com implementação padrão.
+    
+    Use esta classe para serviços que seguem o padrão básico
+    sem necessidade de lógica especializada. Reduz duplicação
+    de código em serviços simples.
+    
+    Subclasses devem definir:
+    - SERVICE_NAME: Nome do serviço AWS
+    - CLIENT_NAME: Nome do cliente boto3 (opcional, default = service_name.lower())
+    """
+    
+    CLIENT_NAME: str = ""
+    
+    def __init__(self, client_factory, cost_client=None, cloudwatch_client=None):
+        super().__init__(cost_client, cloudwatch_client)
+        self._client_factory = client_factory
+        self._service_client = None
+    
+    @property
+    def service_client(self):
+        """Cliente AWS para o serviço"""
+        if self._service_client is None:
+            client_name = self.CLIENT_NAME or self.SERVICE_NAME.lower()
+            try:
+                self._service_client = self._client_factory.get_client(client_name)
+            except Exception:
+                self._service_client = None
+        return self._service_client
+    
+    def health_check(self) -> bool:
+        """Verifica saúde do serviço"""
+        try:
+            return self.service_client is not None
+        except Exception:
+            return False
+    
+    def get_resources(self) -> List[Dict[str, Any]]:
+        """Obtém recursos do serviço"""
+        return []
+    
+    def get_costs(self, period_days: int = 30) -> ServiceCost:
+        """Obtém custos do serviço"""
+        return ServiceCost(
+            service_name=self.SERVICE_NAME,
+            total_cost=0.0,
+            period_days=period_days
+        )
+    
+    def get_metrics(self) -> ServiceMetrics:
+        """Obtém métricas do serviço"""
+        return ServiceMetrics(
+            service_name=self.SERVICE_NAME,
+            resource_count=0,
+            metrics={}
+        )
+    
+    def get_recommendations(self) -> List[ServiceRecommendation]:
+        """Obtém recomendações de otimização"""
+        return []
