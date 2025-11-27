@@ -58,6 +58,14 @@ FASE 2.8: Serviços de DevOps e CI/CD
 - CodePipelineService: Análise de CodePipeline (pipelines, execuções, webhooks)
 - CodeDeployService: Análise de CodeDeploy (aplicações, deployment groups, deployments)
 - CodeCommitService: Análise de CodeCommit (repositórios, branches, PRs)
+
+FASE 2.9: Serviços de Segurança e Conformidade
+- GuardDutyService: Análise de GuardDuty (detectors, findings, members)
+- InspectorService: Análise de Inspector (findings, cobertura, vulnerabilidades)
+- ConfigService: Análise de Config (rules, conformance packs, recorders)
+- CloudTrailService: Análise de CloudTrail (trails, event data stores, channels)
+- KMSService: Análise de KMS (keys, aliases, grants)
+- ACMService: Análise de ACM (certificados SSL/TLS)
 """
 
 from .cost_service import CostService
@@ -111,6 +119,12 @@ from .codebuild_service import CodeBuildService, BuildProject, BuildHistory, Rep
 from .codepipeline_service import CodePipelineService, Pipeline, PipelineExecution, Webhook
 from .codedeploy_service import CodeDeployService, DeploymentApplication, DeploymentGroup, Deployment, DeploymentConfig
 from .codecommit_service import CodeCommitService, Repository, Branch, PullRequest, ApprovalRule
+from .guardduty_service import GuardDutyService, Detector, Finding, Member
+from .inspector_service import InspectorService, InspectorFinding, CoverageStatistics, AccountStatus
+from .config_service import ConfigService, ConfigRule, ConfigurationRecorder, DeliveryChannel, ConformancePack
+from .cloudtrail_service import CloudTrailService, Trail, EventDataStore, Channel
+from .kms_service import KMSService, KMSKey, KeyAlias, Grant
+from .acm_service import ACMService, Certificate
 
 __all__ = [
     'CostService',
@@ -263,5 +277,28 @@ __all__ = [
     'Repository',
     'Branch',
     'PullRequest',
-    'ApprovalRule'
+    'ApprovalRule',
+    'GuardDutyService',
+    'Detector',
+    'Finding',
+    'Member',
+    'InspectorService',
+    'InspectorFinding',
+    'CoverageStatistics',
+    'AccountStatus',
+    'ConfigService',
+    'ConfigRule',
+    'ConfigurationRecorder',
+    'DeliveryChannel',
+    'ConformancePack',
+    'CloudTrailService',
+    'Trail',
+    'EventDataStore',
+    'Channel',
+    'KMSService',
+    'KMSKey',
+    'KeyAlias',
+    'Grant',
+    'ACMService',
+    'Certificate'
 ]

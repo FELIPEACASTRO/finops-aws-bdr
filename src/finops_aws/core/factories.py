@@ -87,6 +87,11 @@ class AWSServiceType(Enum):
     CODEPIPELINE = "codepipeline"
     CODEDEPLOY = "codedeploy"
     CODECOMMIT = "codecommit"
+    GUARDDUTY = "guardduty"
+    INSPECTOR2 = "inspector2"
+    CONFIG = "config"
+    CLOUDTRAIL = "cloudtrail"
+    ACM = "acm"
 
 
 @dataclass
@@ -1044,6 +1049,72 @@ class ServiceFactory:
         
         return self._services['codecommit']
     
+    def get_guardduty_service(self):
+        """Obtém instância do GuardDutyService"""
+        if 'guardduty' in self._mocks:
+            return self._mocks['guardduty']
+        
+        if 'guardduty' not in self._services:
+            from ..services.guardduty_service import GuardDutyService
+            self._services['guardduty'] = GuardDutyService(self.client_factory)
+        
+        return self._services['guardduty']
+    
+    def get_inspector_service(self):
+        """Obtém instância do InspectorService"""
+        if 'inspector' in self._mocks:
+            return self._mocks['inspector']
+        
+        if 'inspector' not in self._services:
+            from ..services.inspector_service import InspectorService
+            self._services['inspector'] = InspectorService(self.client_factory)
+        
+        return self._services['inspector']
+    
+    def get_config_service(self):
+        """Obtém instância do ConfigService"""
+        if 'config' in self._mocks:
+            return self._mocks['config']
+        
+        if 'config' not in self._services:
+            from ..services.config_service import ConfigService
+            self._services['config'] = ConfigService(self.client_factory)
+        
+        return self._services['config']
+    
+    def get_cloudtrail_service(self):
+        """Obtém instância do CloudTrailService"""
+        if 'cloudtrail' in self._mocks:
+            return self._mocks['cloudtrail']
+        
+        if 'cloudtrail' not in self._services:
+            from ..services.cloudtrail_service import CloudTrailService
+            self._services['cloudtrail'] = CloudTrailService(self.client_factory)
+        
+        return self._services['cloudtrail']
+    
+    def get_kms_service(self):
+        """Obtém instância do KMSService"""
+        if 'kms' in self._mocks:
+            return self._mocks['kms']
+        
+        if 'kms' not in self._services:
+            from ..services.kms_service import KMSService
+            self._services['kms'] = KMSService(self.client_factory)
+        
+        return self._services['kms']
+    
+    def get_acm_service(self):
+        """Obtém instância do ACMService"""
+        if 'acm' in self._mocks:
+            return self._mocks['acm']
+        
+        if 'acm' not in self._services:
+            from ..services.acm_service import ACMService
+            self._services['acm'] = ACMService(self.client_factory)
+        
+        return self._services['acm']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1096,7 +1167,13 @@ class ServiceFactory:
             'codebuild': self.get_codebuild_service(),
             'codepipeline': self.get_codepipeline_service(),
             'codedeploy': self.get_codedeploy_service(),
-            'codecommit': self.get_codecommit_service()
+            'codecommit': self.get_codecommit_service(),
+            'guardduty': self.get_guardduty_service(),
+            'inspector': self.get_inspector_service(),
+            'config': self.get_config_service(),
+            'cloudtrail': self.get_cloudtrail_service(),
+            'kms': self.get_kms_service(),
+            'acm': self.get_acm_service()
         }
     
     def clear_cache(self):

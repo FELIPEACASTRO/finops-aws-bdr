@@ -10,6 +10,12 @@ FinOps AWS BDR is an enterprise-grade serverless solution for intelligent AWS co
 - Perguntar antes de fazer suposições
 - Seguir padrões Clean Architecture e DDD
 
+## Project Status
+
+- **Test Suite**: 582+ tests passing
+- **Services Implemented**: 48 AWS services (of 253 total target)
+- **Current Phase**: FASE 2.9 - Security & Compliance Services (COMPLETED)
+
 ## System Architecture
 
 The project is built with Python 3.11, adhering to Clean Architecture and Domain-Driven Design (DDD) principles. It is structured as a serverless AWS Lambda application.
