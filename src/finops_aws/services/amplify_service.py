@@ -5,7 +5,7 @@ Análise de custos e otimização para AWS Amplify
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
-from .base_service import BaseAWSService
+from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 from ..utils.logger import setup_logger
 
 
@@ -58,24 +58,24 @@ class AmplifyService(BaseAWSService):
             self.logger.error(f"Erro ao obter recursos: {e}")
             return []
     
-    def get_costs(self, period_days: int = 30) -> Dict[str, Any]:
+    def get_costs(self, period_days: int = 30) -> ServiceCost:
         """Obtém custos do serviço"""
-        return {
-            'service': 'amplify',
-            'period_days': period_days,
-            'total_cost': 0.0,
-            'currency': 'USD'
-        }
+        return ServiceCost(
+            service_name='Amplify',
+            total_cost=0.0,
+            period_days=period_days,
+            currency='USD'
+        )
     
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> ServiceMetrics:
         """Obtém métricas do serviço"""
-        return {
-            'service': 'amplify',
-            'resource_count': 0,
-            'metrics': {}
-        }
+        return ServiceMetrics(
+            service_name='Amplify',
+            resource_count=0,
+            metrics={}
+        )
     
-    def get_recommendations(self) -> List[Dict[str, Any]]:
+    def get_recommendations(self) -> List[ServiceRecommendation]:
         """Obtém recomendações de otimização"""
         return []
     

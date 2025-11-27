@@ -257,7 +257,7 @@ class BaseAWSService(ABC):
         metric_name: str,
         dimensions: List[Dict[str, str]],
         period_days: int = 7,
-        statistics: List[str] = None
+        statistics: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Obtém métricas do CloudWatch

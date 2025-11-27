@@ -483,58 +483,52 @@ class EKSService(BaseAWSService):
         
         return addons
     
-    def get_resources(self) -> Dict[str, Any]:
+    def get_resources(self) -> List[Dict[str, Any]]:
         """Retorna todos os recursos EKS"""
         clusters = self.get_clusters()
         
-        total_nodes = sum(c.total_node_count for c in clusters)
-        total_node_groups = sum(len(c.node_groups) for c in clusters)
-        total_fargate_profiles = sum(len(c.fargate_profiles) for c in clusters)
-        
-        return {
-            'clusters': [c.to_dict() for c in clusters],
-            'summary': {
-                'total_clusters': len(clusters),
-                'active_clusters': len([c for c in clusters if c.is_active]),
-                'total_node_groups': total_node_groups,
-                'total_fargate_profiles': total_fargate_profiles,
-                'total_nodes': total_nodes,
-                'clusters_with_encryption': len([c for c in clusters if c.has_encryption]),
-                'clusters_using_spot': len([c for c in clusters if c.uses_spot_instances])
-            }
-        }
+        resources = []
+        for cluster in clusters:
+            resources.append({
+                'resource_id': cluster.arn,
+                'resource_type': 'EKS Cluster',
+                'name': cluster.name,
+                'status': cluster.status,
+                'node_groups': len(cluster.node_groups),
+                'fargate_profiles': len(cluster.fargate_profiles),
+                'total_nodes': cluster.total_node_count,
+                'has_encryption': cluster.has_encryption,
+                'uses_spot': cluster.uses_spot_instances
+            })
+        return resources
     
-    def get_costs(self) -> List[ServiceCost]:
+    def get_costs(self, period_days: int = 30) -> ServiceCost:
         """Retorna estimativas de custo para clusters EKS"""
-        costs = []
         clusters = self.get_clusters()
+        total_cost = 0.0
+        cost_by_resource = {}
         
         for cluster in clusters:
-            cluster_cost = 0.10 * 24 * 30
+            cluster_cost = 0.10 * 24 * period_days
             
             for ng in cluster.node_groups:
                 node_count = ng.desired_size
                 hourly_rate = self._estimate_instance_hourly_rate(ng.primary_instance_type)
                 if ng.is_spot:
                     hourly_rate *= 0.3
-                node_cost = hourly_rate * 24 * 30 * node_count
+                node_cost = hourly_rate * 24 * period_days * node_count
                 cluster_cost += node_cost
             
-            costs.append(ServiceCost(
-                service_name='EKS',
-                resource_id=cluster.arn,
-                cost=cluster_cost,
-                period='monthly_estimate',
-                currency='USD',
-                metadata={
-                    'cluster_name': cluster.name,
-                    'node_count': cluster.total_node_count,
-                    'node_groups': len(cluster.node_groups),
-                    'uses_spot': cluster.uses_spot_instances
-                }
-            ))
+            total_cost += cluster_cost
+            cost_by_resource[cluster.name] = cluster_cost
         
-        return costs
+        return ServiceCost(
+            service_name='EKS',
+            total_cost=total_cost,
+            period_days=period_days,
+            cost_by_resource=cost_by_resource,
+            currency='USD'
+        )
     
     def _estimate_instance_hourly_rate(self, instance_type: str) -> float:
         """Estima custo por hora de um tipo de instância"""
@@ -557,36 +551,31 @@ class EKSService(BaseAWSService):
         }
         return rates.get(instance_type, 0.10)
     
-    def get_metrics(self) -> List[ServiceMetrics]:
+    def get_metrics(self) -> ServiceMetrics:
         """Retorna métricas dos clusters EKS"""
-        metrics = []
         clusters = self.get_clusters()
         
-        for cluster in clusters:
-            try:
-                cpu_metric = self._get_cluster_metric(
-                    cluster.name,
-                    'cluster_failed_node_count'
-                )
-                
-                metrics.append(ServiceMetrics(
-                    service_name='EKS',
-                    resource_id=cluster.arn,
-                    metric_name='cluster_status',
-                    value=1.0 if cluster.is_active else 0.0,
-                    unit='Count',
-                    period='current',
-                    metadata={
-                        'cluster_name': cluster.name,
-                        'version': cluster.version,
-                        'node_count': cluster.total_node_count
-                    }
-                ))
-                
-            except Exception as e:
-                logger.warning(f"Error getting metrics for cluster {cluster.name}: {e}")
+        total_nodes = sum(c.total_node_count for c in clusters)
+        active_clusters = len([c for c in clusters if c.is_active])
         
-        return metrics
+        metrics_data = {
+            'total_clusters': len(clusters),
+            'active_clusters': active_clusters,
+            'total_nodes': total_nodes,
+            'total_node_groups': sum(len(c.node_groups) for c in clusters),
+            'total_fargate_profiles': sum(len(c.fargate_profiles) for c in clusters),
+            'clusters_with_encryption': len([c for c in clusters if c.has_encryption]),
+            'clusters_using_spot': len([c for c in clusters if c.uses_spot_instances])
+        }
+        
+        utilization = (active_clusters / len(clusters) * 100) if clusters else 0.0
+        
+        return ServiceMetrics(
+            service_name='EKS',
+            resource_count=len(clusters),
+            metrics=metrics_data,
+            utilization=utilization
+        )
     
     def _get_cluster_metric(self, cluster_name: str, metric_name: str) -> Optional[float]:
         """Obtém uma métrica específica do cluster"""
@@ -629,7 +618,7 @@ class EKSService(BaseAWSService):
                     action='Habilitar encryption config com KMS key',
                     estimated_savings=0.0,
                     priority='HIGH',
-                    metadata={'cluster_name': cluster.name}
+                    details={'cluster_name': cluster.name}
                 ))
             
             if cluster.is_public and not cluster.is_private:
@@ -643,7 +632,7 @@ class EKSService(BaseAWSService):
                     action='Habilitar private endpoint access',
                     estimated_savings=0.0,
                     priority='MEDIUM',
-                    metadata={'cluster_name': cluster.name}
+                    details={'cluster_name': cluster.name}
                 ))
             
             if not cluster.has_logging_enabled:
@@ -657,7 +646,7 @@ class EKSService(BaseAWSService):
                     action='Habilitar api, audit, authenticator, controllerManager, scheduler logs',
                     estimated_savings=0.0,
                     priority='MEDIUM',
-                    metadata={'cluster_name': cluster.name}
+                    details={'cluster_name': cluster.name}
                 ))
             
             for ng in cluster.node_groups:
@@ -673,7 +662,7 @@ class EKSService(BaseAWSService):
                         action='Migrar para capacity type SPOT ou criar node group misto',
                         estimated_savings=estimated_savings,
                         priority='MEDIUM',
-                        metadata={
+                        details={
                             'cluster_name': cluster.name,
                             'node_group': ng.nodegroup_name,
                             'instance_types': ng.instance_types,
@@ -692,7 +681,7 @@ class EKSService(BaseAWSService):
                         action='Configurar diferentes valores para min/max size',
                         estimated_savings=0.0,
                         priority='LOW',
-                        metadata={
+                        details={
                             'cluster_name': cluster.name,
                             'node_group': ng.nodegroup_name
                         }
@@ -709,7 +698,7 @@ class EKSService(BaseAWSService):
                         action='Investigar health issues do node group',
                         estimated_savings=0.0,
                         priority='HIGH',
-                        metadata={
+                        details={
                             'cluster_name': cluster.name,
                             'node_group': ng.nodegroup_name,
                             'health': ng.health
@@ -727,7 +716,7 @@ class EKSService(BaseAWSService):
                     action='Avaliar migração de workloads adequados para Fargate',
                     estimated_savings=0.0,
                     priority='LOW',
-                    metadata={'cluster_name': cluster.name}
+                    details={'cluster_name': cluster.name}
                 ))
         
         logger.info(f"Generated {len(recommendations)} EKS recommendations")
