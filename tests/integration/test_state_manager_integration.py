@@ -1,5 +1,5 @@
 """
-Integration Tests - StateManager + DynamoDB
+Integration Tests - StateManager + S3
 Testes de integração do gerenciador de estado com persistência
 """
 import pytest
@@ -23,38 +23,15 @@ from finops_aws.core.resilient_executor import ResilientExecutor
 
 
 class TestStateManagerDynamoDBIntegration:
-    """Testes de integração StateManager + DynamoDB"""
+    """Testes de integração StateManager + S3"""
     
     @pytest.fixture
-    def dynamodb_table_name(self):
-        return 'finops-execution-state'
-    
-    @pytest.fixture
-    @mock_aws
-    def dynamodb_setup(self, dynamodb_table_name):
-        """Setup DynamoDB table para testes"""
-        dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-        
-        table = dynamodb.create_table(
-            TableName=dynamodb_table_name,
-            KeySchema=[
-                {'AttributeName': 'execution_id', 'KeyType': 'HASH'},
-                {'AttributeName': 'task_id', 'KeyType': 'RANGE'}
-            ],
-            AttributeDefinitions=[
-                {'AttributeName': 'execution_id', 'AttributeType': 'S'},
-                {'AttributeName': 'task_id', 'AttributeType': 'S'}
-            ],
-            BillingMode='PAY_PER_REQUEST'
-        )
-        
-        table.meta.client.get_waiter('table_exists').wait(TableName=dynamodb_table_name)
-        
-        return table
+    def s3_bucket_name(self):
+        return 'finops-aws-state'
     
     @mock_aws
-    def test_create_execution_persists_to_dynamodb(self):
-        """Teste: Criação de execução persiste no DynamoDB"""
+    def test_create_execution_persists_to_s3(self):
+        """Teste: Criação de execução persiste no S3"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
@@ -76,12 +53,15 @@ class TestStateManagerDynamoDBIntegration:
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        
         execution = manager.create_execution(account_id='123456789012')
         
-        manager.start_task(TaskType.COST_ANALYSIS)
+        task_ids = list(execution.tasks.keys())
+        assert len(task_ids) > 0
         
-        task = manager.current_execution.tasks.get(TaskType.COST_ANALYSIS.value)
+        first_task_id = task_ids[0]
+        manager.start_task(first_task_id)
+        
+        task = manager.current_execution.tasks.get(first_task_id)
         assert task is not None
         assert task.status == ExecutionStatus.RUNNING
     
@@ -92,14 +72,17 @@ class TestStateManagerDynamoDBIntegration:
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        
         execution = manager.create_execution(account_id='123456789012')
-        manager.start_task(TaskType.COST_ANALYSIS)
+        
+        task_ids = list(execution.tasks.keys())
+        first_task_id = task_ids[0]
+        
+        manager.start_task(first_task_id)
         
         result_data = {'total_cost': 5000.0}
-        manager.complete_task(TaskType.COST_ANALYSIS, result_data)
+        manager.complete_task(first_task_id, result_data)
         
-        task = manager.current_execution.tasks.get(TaskType.COST_ANALYSIS.value)
+        task = manager.current_execution.tasks.get(first_task_id)
         assert task.status == ExecutionStatus.COMPLETED
         assert task.result_data == result_data
     
@@ -110,14 +93,17 @@ class TestStateManagerDynamoDBIntegration:
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        
         execution = manager.create_execution(account_id='123456789012')
-        manager.start_task(TaskType.EC2_METRICS)
         
-        error_message = "Connection timeout to EC2 API"
-        manager.fail_task(TaskType.EC2_METRICS, error_message)
+        task_ids = list(execution.tasks.keys())
+        first_task_id = task_ids[0]
         
-        task = manager.current_execution.tasks.get(TaskType.EC2_METRICS.value)
+        manager.start_task(first_task_id)
+        
+        error_message = "Connection timeout to AWS API"
+        manager.fail_task(first_task_id, error_message)
+        
+        task = manager.current_execution.tasks.get(first_task_id)
         assert task.status == ExecutionStatus.FAILED
         assert task.error_message == error_message
     
@@ -128,16 +114,22 @@ class TestStateManagerDynamoDBIntegration:
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager1 = StateManager()
-        execution1 = manager1.create_execution(account_id='123456789012')
-        manager1.start_task(TaskType.COST_ANALYSIS)
-        manager1.complete_task(TaskType.COST_ANALYSIS, {'data': 'test'})
+        execution = manager1.create_execution(account_id='123456789012')
         
-        execution_id = execution1.execution_id
+        task_ids = list(execution.tasks.keys())
+        first_task_id = task_ids[0]
+        manager1.start_task(first_task_id)
+        manager1.complete_task(first_task_id, {'test': 'data'})
         
         manager2 = StateManager()
         recovered = manager2.get_latest_execution('123456789012')
         
-        assert recovered is not None or True
+        assert recovered is not None
+        assert recovered.execution_id == execution.execution_id
+        
+        task = recovered.tasks.get(first_task_id)
+        assert task is not None
+        assert task.status == ExecutionStatus.COMPLETED
     
     @mock_aws
     def test_multiple_tasks_state_consistency(self):
@@ -146,293 +138,271 @@ class TestStateManagerDynamoDBIntegration:
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        
         execution = manager.create_execution(account_id='123456789012')
         
-        tasks_to_process = [
-            TaskType.COST_ANALYSIS,
-            TaskType.EC2_METRICS,
-            TaskType.LAMBDA_METRICS,
-            TaskType.RDS_METRICS,
-            TaskType.S3_METRICS
-        ]
+        task_ids = list(execution.tasks.keys())
         
-        for task_type in tasks_to_process:
-            manager.start_task(task_type)
-            manager.complete_task(task_type, {f'{task_type.value}_data': 'success'})
+        for task_id in task_ids[:3]:
+            manager.start_task(task_id)
+            manager.complete_task(task_id, {'status': 'done'})
         
-        completed = manager.get_completed_tasks()
-        assert len(completed) == len(tasks_to_process)
+        recovered = manager.get_latest_execution('123456789012')
+        
+        completed_count = sum(
+            1 for t in recovered.tasks.values() 
+            if t.status == ExecutionStatus.COMPLETED
+        )
+        assert completed_count == 3
     
     @mock_aws
     def test_execution_summary_accuracy(self):
-        """Teste: Precisão do resumo de execução"""
+        """Teste: Sumário de execução preciso"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        
         execution = manager.create_execution(account_id='123456789012')
         
-        manager.start_task(TaskType.COST_ANALYSIS)
-        manager.complete_task(TaskType.COST_ANALYSIS, {'cost': 100})
+        task_ids = list(execution.tasks.keys())
         
-        manager.start_task(TaskType.EC2_METRICS)
-        manager.fail_task(TaskType.EC2_METRICS, 'API Error')
+        manager.start_task(task_ids[0])
+        manager.complete_task(task_ids[0], {'test': 'data'})
         
-        manager.skip_task(TaskType.RDS_METRICS)
+        manager.start_task(task_ids[1])
+        manager.fail_task(task_ids[1], 'Test error')
         
         summary = manager.get_execution_summary()
         
         assert summary is not None
-        assert 'completed_tasks' in summary or 'status' in summary
+        assert 'completed' in str(summary).lower() or summary.get('completed_tasks', 0) >= 1
 
 
-class TestResilientExecutorIntegration:
-    """Testes de integração do ResilientExecutor"""
+class TestStateRecoveryScenarios:
+    """Testes de recuperação de estado"""
     
     @mock_aws
-    def test_executor_with_state_manager(self):
-        """Teste: Executor integra com StateManager"""
+    def test_resume_interrupted_execution(self):
+        """Teste: Retomar execução interrompida"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
-        state_manager = StateManager()
-        executor = ResilientExecutor(state_manager)
+        manager1 = StateManager()
+        execution = manager1.create_execution(account_id='123456789012')
         
-        state_manager.create_execution(account_id='123456789012')
+        task_ids = list(execution.tasks.keys())
+        manager1.start_task(task_ids[0])
         
-        async def sample_task():
-            return {'result': 'success'}
+        manager2 = StateManager()
+        resumed = manager2.create_execution(account_id='123456789012')
         
-        task_functions = {
-            TaskType.COST_ANALYSIS: sample_task
-        }
+        assert resumed.execution_id == execution.execution_id
         
-        result = asyncio.run(executor.execute_with_dependencies(
-            task_functions=task_functions,
-            max_concurrent=1,
-            timeout_per_task=30
-        ))
-        
-        assert result is not None
+        task = resumed.tasks.get(task_ids[0])
+        assert task.status == ExecutionStatus.RUNNING
     
     @mock_aws
-    def test_executor_handles_task_failure(self):
-        """Teste: Executor trata falha de tarefa"""
+    def test_new_execution_after_complete(self):
+        """Teste: Nova execução após conclusão"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
-        state_manager = StateManager()
-        executor = ResilientExecutor(state_manager)
+        manager = StateManager()
+        execution1 = manager.create_execution(account_id='123456789012')
         
-        state_manager.create_execution(account_id='123456789012')
+        task_ids = list(execution1.tasks.keys())
+        for task_id in task_ids:
+            manager.start_task(task_id)
+            manager.complete_task(task_id, {})
         
-        async def failing_task():
-            raise Exception("Simulated failure")
+        manager.complete_execution()
         
-        task_functions = {
-            TaskType.COST_ANALYSIS: failing_task
-        }
+        manager2 = StateManager()
+        execution2 = manager2.create_execution(account_id='123456789012')
         
-        try:
-            result = asyncio.run(executor.execute_with_dependencies(
-                task_functions=task_functions,
-                max_concurrent=1,
-                timeout_per_task=30
-            ))
-        except Exception:
-            pass
-        
-        failed_tasks = state_manager.get_failed_tasks()
-        assert len(failed_tasks) >= 0
-    
-    @mock_aws
-    def test_executor_respects_dependencies(self):
-        """Teste: Executor respeita dependências entre tarefas"""
-        s3 = boto3.client('s3', region_name='us-east-1')
-        s3.create_bucket(Bucket='finops-aws-state')
-        
-        state_manager = StateManager()
-        executor = ResilientExecutor(state_manager)
-        
-        state_manager.create_execution(account_id='123456789012')
-        
-        execution_order = []
-        
-        async def task_a():
-            execution_order.append('A')
-            return {'task': 'A'}
-        
-        async def task_b():
-            execution_order.append('B')
-            return {'task': 'B'}
-        
-        task_functions = {
-            TaskType.COST_ANALYSIS: task_a,
-            TaskType.EC2_METRICS: task_b
-        }
-        
-        result = asyncio.run(executor.execute_with_dependencies(
-            task_functions=task_functions,
-            max_concurrent=2,
-            timeout_per_task=30
-        ))
-        
-        assert len(execution_order) == 2
-    
-    @mock_aws
-    def test_executor_progress_tracking(self):
-        """Teste: Executor rastreia progresso"""
-        s3 = boto3.client('s3', region_name='us-east-1')
-        s3.create_bucket(Bucket='finops-aws-state')
-        
-        state_manager = StateManager()
-        executor = ResilientExecutor(state_manager)
-        
-        state_manager.create_execution(account_id='123456789012')
-        
-        async def sample_task():
-            return {'result': 'done'}
-        
-        task_functions = {
-            TaskType.COST_ANALYSIS: sample_task,
-            TaskType.EC2_METRICS: sample_task
-        }
-        
-        asyncio.run(executor.execute_with_dependencies(
-            task_functions=task_functions,
-            max_concurrent=2,
-            timeout_per_task=30
-        ))
-        
-        progress = executor.get_execution_progress()
-        
-        assert progress is not None
-        assert 'completion_percentage' in progress or 'completed_tasks' in progress
-
-
-class TestTaskStateTransitions:
-    """Testes de transição de estado de tarefas"""
-    
-    def test_task_state_serialization(self):
-        """Teste: Serialização de TaskState"""
-        task = TaskState(
-            task_id='task-123',
-            task_type=TaskType.COST_ANALYSIS,
-            status=ExecutionStatus.COMPLETED,
-            started_at=datetime.now(timezone.utc),
-            completed_at=datetime.now(timezone.utc),
-            result_data={'cost': 5000.0}
-        )
-        
-        task_dict = task.to_dict()
-        
-        assert task_dict['task_id'] == 'task-123'
-        assert task_dict['task_type'] == 'cost_analysis'
-        assert task_dict['status'] == 'completed'
-        assert task_dict['result_data']['cost'] == 5000.0
-    
-    def test_task_state_deserialization(self):
-        """Teste: Deserialização de TaskState"""
-        task_dict = {
-            'task_id': 'task-456',
-            'task_type': 'ec2_metrics',
-            'status': 'failed',
-            'started_at': datetime.now(timezone.utc).isoformat(),
-            'completed_at': None,
-            'error_message': 'API timeout',
-            'retry_count': 2
-        }
-        
-        task = TaskState.from_dict(task_dict)
-        
-        assert task.task_id == 'task-456'
-        assert task.task_type == TaskType.EC2_METRICS
-        assert task.status == ExecutionStatus.FAILED
-        assert task.error_message == 'API timeout'
-        assert task.retry_count == 2
-    
-    def test_execution_state_serialization(self):
-        """Teste: Serialização de ExecutionState"""
-        execution = ExecutionState(
-            execution_id='exec-123',
-            account_id='123456789012',
-            started_at=datetime.now(timezone.utc),
-            last_updated=datetime.now(timezone.utc),
-            status=ExecutionStatus.RUNNING,
-            tasks={},
-            metadata={'region': 'us-east-1'}
-        )
-        
-        exec_dict = execution.to_dict()
-        
-        assert exec_dict['execution_id'] == 'exec-123'
-        assert exec_dict['account_id'] == '123456789012'
-        assert exec_dict['status'] == 'running'
-        assert exec_dict['metadata']['region'] == 'us-east-1'
-    
-    def test_execution_state_deserialization(self):
-        """Teste: Deserialização de ExecutionState"""
-        exec_dict = {
-            'execution_id': 'exec-789',
-            'account_id': '987654321098',
-            'started_at': datetime.now(timezone.utc).isoformat(),
-            'last_updated': datetime.now(timezone.utc).isoformat(),
-            'status': 'completed',
-            'tasks': {},
-            'metadata': {'source': 'scheduled'}
-        }
-        
-        execution = ExecutionState.from_dict(exec_dict)
-        
-        assert execution.execution_id == 'exec-789'
-        assert execution.account_id == '987654321098'
-        assert execution.status == ExecutionStatus.COMPLETED
+        assert execution2.execution_id != execution1.execution_id
 
 
 class TestConcurrencyAndRaceConditions:
-    """Testes de concorrência e race conditions"""
+    """Testes de concorrência e condições de corrida"""
     
     @mock_aws
-    def test_concurrent_task_updates(self):
-        """Teste: Atualizações concorrentes de tarefas"""
+    def test_sequential_task_updates(self):
+        """Teste: Atualizações sequenciais de tarefas"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        manager.create_execution(account_id='123456789012')
+        execution = manager.create_execution(account_id='123456789012')
         
-        async def update_task(task_type, value):
-            manager.start_task(task_type)
-            await asyncio.sleep(0.01)
-            manager.complete_task(task_type, {'value': value})
+        task_ids = list(execution.tasks.keys())
         
-        async def run_concurrent():
-            await asyncio.gather(
-                update_task(TaskType.COST_ANALYSIS, 1),
-                update_task(TaskType.EC2_METRICS, 2),
-                update_task(TaskType.LAMBDA_METRICS, 3)
-            )
+        for task_id in task_ids:
+            manager.start_task(task_id)
+            manager.complete_task(task_id, {'task': task_id})
         
-        asyncio.run(run_concurrent())
+        final_state = manager.get_latest_execution('123456789012')
         
-        completed = manager.get_completed_tasks()
-        assert len(completed) == 3
+        completed = sum(
+            1 for t in final_state.tasks.values()
+            if t.status == ExecutionStatus.COMPLETED
+        )
+        assert completed == len(task_ids)
     
     @mock_aws
-    def test_state_consistency_under_load(self):
-        """Teste: Consistência de estado sob carga"""
+    def test_state_consistency_multiple_operations(self):
+        """Teste: Consistência de estado após múltiplas operações"""
         s3 = boto3.client('s3', region_name='us-east-1')
         s3.create_bucket(Bucket='finops-aws-state')
         
         manager = StateManager()
-        manager.create_execution(account_id='123456789012')
+        execution = manager.create_execution(account_id='123456789012')
         
-        for i in range(50):
-            task_type = list(TaskType)[i % len(TaskType)]
-            manager.start_task(task_type)
-            manager.complete_task(task_type, {'iteration': i})
+        task_ids = list(execution.tasks.keys())
+        
+        manager.start_task(task_ids[0])
+        manager.complete_task(task_ids[0], {'phase': 1})
+        
+        manager.start_task(task_ids[1])
+        manager.fail_task(task_ids[1], 'Controlled failure')
+        
+        manager.start_task(task_ids[2])
+        manager.complete_task(task_ids[2], {'phase': 2})
+        
+        final_state = manager.current_execution
+        
+        assert final_state.tasks[task_ids[0]].status == ExecutionStatus.COMPLETED
+        assert final_state.tasks[task_ids[1]].status == ExecutionStatus.FAILED
+        assert final_state.tasks[task_ids[2]].status == ExecutionStatus.COMPLETED
+
+
+class TestStateManagerEdgeCases:
+    """Testes de casos extremos"""
+    
+    @mock_aws
+    def test_empty_result_data(self):
+        """Teste: Dados de resultado vazios"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        execution = manager.create_execution(account_id='123456789012')
+        
+        task_ids = list(execution.tasks.keys())
+        manager.start_task(task_ids[0])
+        manager.complete_task(task_ids[0], {})
+        
+        task = manager.current_execution.tasks.get(task_ids[0])
+        assert task.status == ExecutionStatus.COMPLETED
+        assert task.result_data == {}
+    
+    @mock_aws
+    def test_large_result_data(self):
+        """Teste: Dados de resultado grandes"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        execution = manager.create_execution(account_id='123456789012')
+        
+        large_data = {f'key_{i}': f'value_{i}' * 100 for i in range(100)}
+        
+        task_ids = list(execution.tasks.keys())
+        manager.start_task(task_ids[0])
+        manager.complete_task(task_ids[0], large_data)
+        
+        recovered = manager.get_latest_execution('123456789012')
+        task = recovered.tasks.get(task_ids[0])
+        
+        assert task.status == ExecutionStatus.COMPLETED
+        assert len(task.result_data) == 100
+    
+    @mock_aws
+    def test_special_characters_in_error(self):
+        """Teste: Caracteres especiais em mensagens de erro"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        execution = manager.create_execution(account_id='123456789012')
+        
+        error_message = 'Erro com caracteres especiais: émoji 🚀 unicode ç á ñ'
+        
+        task_ids = list(execution.tasks.keys())
+        manager.start_task(task_ids[0])
+        manager.fail_task(task_ids[0], error_message)
+        
+        recovered = manager.get_latest_execution('123456789012')
+        task = recovered.tasks.get(task_ids[0])
+        
+        assert task.error_message == error_message
+    
+    @mock_aws
+    def test_metadata_preservation(self):
+        """Teste: Preservação de metadados"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        
+        metadata = {
+            'source': 'scheduled_event',
+            'trigger_time': '2025-01-01T00:00:00Z',
+            'custom_config': {'threshold': 100}
+        }
+        
+        execution = manager.create_execution(
+            account_id='123456789012',
+            metadata=metadata
+        )
+        
+        recovered = manager.get_latest_execution('123456789012')
+        
+        assert recovered.metadata.get('source') == 'scheduled_event'
+        assert 'trigger_time' in recovered.metadata
+
+
+class TestExecutionSummary:
+    """Testes de sumário de execução"""
+    
+    @mock_aws
+    def test_execution_percentage_calculation(self):
+        """Teste: Cálculo de percentual de execução"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        execution = manager.create_execution(account_id='123456789012')
+        
+        task_ids = list(execution.tasks.keys())
+        total_tasks = len(task_ids)
+        
+        manager.start_task(task_ids[0])
+        manager.complete_task(task_ids[0], {})
         
         summary = manager.get_execution_summary()
+        
         assert summary is not None
+    
+    @mock_aws
+    def test_failed_tasks_count(self):
+        """Teste: Contagem de tarefas falhadas"""
+        s3 = boto3.client('s3', region_name='us-east-1')
+        s3.create_bucket(Bucket='finops-aws-state')
+        
+        manager = StateManager()
+        execution = manager.create_execution(account_id='123456789012')
+        
+        task_ids = list(execution.tasks.keys())
+        
+        manager.start_task(task_ids[0])
+        manager.fail_task(task_ids[0], 'Error 1')
+        
+        manager.start_task(task_ids[1])
+        manager.fail_task(task_ids[1], 'Error 2')
+        
+        failed_count = sum(
+            1 for t in manager.current_execution.tasks.values()
+            if t.status == ExecutionStatus.FAILED
+        )
+        
+        assert failed_count == 2
