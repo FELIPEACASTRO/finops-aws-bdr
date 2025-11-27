@@ -175,6 +175,118 @@ class AWSServiceType(Enum):
     LOOKOUTEQUIPMENT = "lookoutequipment"
     S3OUTPOSTS = "s3outposts"
     SNOW = "snow"
+    AMPLIFY = "amplify"
+    APPSYNC = "appsync"
+    SAM = "sam"
+    LAMBDAEDGE = "lambdaedge"
+    STACKSETS = "stacksets"
+    SERVICEQUOTAS = "servicequotas"
+    LICENSEMANAGER = "licensemanager"
+    RESOURCEGROUPS = "resourcegroups"
+    TAGEDITOR = "tageditor"
+    RAM = "ram"
+    OUTPOSTS = "outposts"
+    LOCALZONES = "localzones"
+    WAVELENGTH = "wavelength"
+    PRIVATE5G = "private5g"
+    CLOUDWATCHLOGS = "cloudwatchlogs"
+    CLOUDWATCHINSIGHTS = "cloudwatchinsights"
+    SYNTHETICS = "synthetics"
+    RUM = "rum"
+    EVIDENTLY = "evidently"
+    SERVICELENS = "servicelens"
+    CONTAINERINSIGHTS = "containerinsights"
+    LAMBDAINSIGHTS = "lambdainsights"
+    CONTRIBUTORINSIGHTS = "contributorinsights"
+    APPLICATIONINSIGHTS = "applicationinsights"
+    INTERNETMONITOR = "internetmonitor"
+    NETWORKMONITOR = "networkmonitor"
+    COSTEXPLORER = "costexplorer"
+    BUDGETS = "budgets"
+    SAVINGSPLANS = "savingsplans"
+    RESERVEDINSTANCES = "reservedinstances"
+    COSTANOMALYDETECTION = "costanomalydetection"
+    COSTCATEGORIES = "costcategories"
+    COSTALLOCATIONTAGS = "costallocationtags"
+    BILLINGCONDUCTOR = "billingconductor"
+    MARKETPLACEMETERING = "marketplacemetering"
+    DATAEXPORTS = "dataexports"
+    SECRETSMANAGERADV = "secretsmanageradv"
+    PRIVATECA = "privateca"
+    CLOUDHSM = "cloudhsm"
+    DIRECTORYSERVICE = "directoryservice"
+    IDENTITYCENTER = "identitycenter"
+    ACCESSANALYZER = "accessanalyzer"
+    FIREWALLMANAGER = "firewallmanager"
+    SHIELD = "shield"
+    NETWORKFIREWALL = "networkfirewall"
+    AUDITMANAGER = "auditmanager"
+    DETECTIVE = "detective"
+    SECURITYLAKE = "securitylake"
+    APPMESH = "appmesh"
+    CLOUDMAP = "cloudmap"
+    PRIVATELINK = "privatelink"
+    VPCLATTICE = "vpclattice"
+    VERIFIEDACCESS = "verifiedaccess"
+    CLIENTVPN = "clientvpn"
+    SITETOSITEVPN = "sitetositevpn"
+    NETWORKMANAGER = "networkmanager"
+    REACHABILITYANALYZER = "reachabilityanalyzer"
+    TRAFFICMIRRORING = "trafficmirroring"
+    ELASTICACHEGLOBAL = "elasticacheglobal"
+    DYNAMODBGLOBAL = "dynamodbglobal"
+    AURORASERVERLESS = "auroraserverless"
+    RDSPROXY = "rdsproxy"
+    DMSMIGRATION = "dmsmigration"
+    SCHEMACONVERSION = "schemaconversion"
+    REDSHIFTSERVERLESS = "redshiftserverless"
+    OPENSEARCHSERVERLESS = "opensearchserverless"
+    MSKCONNECT = "mskconnect"
+    GLUEDATABREW = "gluedatabrew"
+    DATAZONE = "datazone"
+    CLEANROOMS = "cleanrooms"
+    SAGEMAKERSTUDIO = "sagemakerstudio"
+    SAGEMAKERPIPELINES = "sagemakerpipelines"
+    SAGEMAKERFEATURESTORE = "sagemakerfeaturestore"
+    SAGEMAKERMODELREGISTRY = "sagemakermodelregistry"
+    SAGEMAKEREXPERIMENTS = "sagemakerexperiments"
+    SAGEMAKERDEBUGGER = "sagemakerdebugger"
+    SAGEMAKERCLARIFY = "sagemakerclarify"
+    SAGEMAKERGROUNDTRUTH = "sagemakergroundtruth"
+    PANORAMA = "panorama"
+    DEEPRACER = "deepracer"
+    DEEPCOMPOSER = "deepcomposer"
+    HEALTHLAKE = "healthlake"
+    CODEARTIFACT = "codeartifact"
+    CODEGURU = "codeguru"
+    FIS = "fis"
+    PATCHMANAGER = "patchmanager"
+    STATEMANAGER = "statemanager"
+    SSMAUTOMATION = "ssmautomation"
+    OPSCENTER = "opscenter"
+    INCIDENTMANAGER = "incidentmanager"
+    AUTOSCALING = "autoscaling"
+    LAUNCHWIZARD = "launchwizard"
+    WORKSPACESWEB = "workspacesweb"
+    APPSTREAMADV = "appstreamadv"
+    WORKMAIL = "workmail"
+    WICKR = "wickr"
+    CHIMESDK = "chimesdk"
+    HONEYCODE = "honeycode"
+    MANAGEDGRAFANA = "managedgrafana"
+    MANAGEDPROMETHEUS = "managedprometheus"
+    MANAGEDFLINK = "managedflink"
+    MWAA = "mwaa"
+    GROUNDSTATION = "groundstation"
+    NIMBLESTUDIO = "nimblestudio"
+    SIMSPACEWEAVER = "simspaceweaver"
+    IOTTWINMAKER = "iottwinmaker"
+    IOTFLEETWISE = "iotfleetwise"
+    IOTSITEWISE = "iotsitewise"
+    LOCATIONSERVICE = "locationservice"
+    GEOSPATIAL = "geospatial"
+    HEALTHOMICS = "healthomics"
+    SUPPLYCHAIN = "supplychain"
 
 
 @dataclass
@@ -2100,6 +2212,1024 @@ class ServiceFactory:
             self._services['snow'] = SnowService(self.client_factory)
         return self._services['snow']
     
+
+    def get_amplify_service(self):
+        """Obtém instância do AmplifyService"""
+        if 'amplify' in self._mocks:
+            return self._mocks['amplify']
+        if 'amplify' not in self._services:
+            from ..services.amplify_service import AmplifyService
+            self._services['amplify'] = AmplifyService(self.client_factory)
+        return self._services['amplify']
+
+    def get_appsync_service(self):
+        """Obtém instância do AppSyncService"""
+        if 'appsync' in self._mocks:
+            return self._mocks['appsync']
+        if 'appsync' not in self._services:
+            from ..services.appsync_service import AppSyncService
+            self._services['appsync'] = AppSyncService(self.client_factory)
+        return self._services['appsync']
+
+    def get_apigatewayv2_service(self):
+        """Obtém instância do ApiGatewayV2Service"""
+        if 'apigatewayv2' in self._mocks:
+            return self._mocks['apigatewayv2']
+        if 'apigatewayv2' not in self._services:
+            from ..services.apigatewayv2_service import ApiGatewayV2Service
+            self._services['apigatewayv2'] = ApiGatewayV2Service(self.client_factory)
+        return self._services['apigatewayv2']
+
+    def get_sam_service(self):
+        """Obtém instância do SAMService"""
+        if 'sam' in self._mocks:
+            return self._mocks['sam']
+        if 'sam' not in self._services:
+            from ..services.sam_service import SAMService
+            self._services['sam'] = SAMService(self.client_factory)
+        return self._services['sam']
+
+    def get_lambdaedge_service(self):
+        """Obtém instância do LambdaEdgeService"""
+        if 'lambdaedge' in self._mocks:
+            return self._mocks['lambdaedge']
+        if 'lambdaedge' not in self._services:
+            from ..services.lambdaedge_service import LambdaEdgeService
+            self._services['lambdaedge'] = LambdaEdgeService(self.client_factory)
+        return self._services['lambdaedge']
+
+    def get_stacksets_service(self):
+        """Obtém instância do StackSetsService"""
+        if 'stacksets' in self._mocks:
+            return self._mocks['stacksets']
+        if 'stacksets' not in self._services:
+            from ..services.stacksets_service import StackSetsService
+            self._services['stacksets'] = StackSetsService(self.client_factory)
+        return self._services['stacksets']
+
+    def get_servicequotas_service(self):
+        """Obtém instância do ServiceQuotasService"""
+        if 'servicequotas' in self._mocks:
+            return self._mocks['servicequotas']
+        if 'servicequotas' not in self._services:
+            from ..services.servicequotas_service import ServiceQuotasService
+            self._services['servicequotas'] = ServiceQuotasService(self.client_factory)
+        return self._services['servicequotas']
+
+    def get_licensemanager_service(self):
+        """Obtém instância do LicenseManagerService"""
+        if 'licensemanager' in self._mocks:
+            return self._mocks['licensemanager']
+        if 'licensemanager' not in self._services:
+            from ..services.licensemanager_service import LicenseManagerService
+            self._services['licensemanager'] = LicenseManagerService(self.client_factory)
+        return self._services['licensemanager']
+
+    def get_resourcegroups_service(self):
+        """Obtém instância do ResourceGroupsService"""
+        if 'resourcegroups' in self._mocks:
+            return self._mocks['resourcegroups']
+        if 'resourcegroups' not in self._services:
+            from ..services.resourcegroups_service import ResourceGroupsService
+            self._services['resourcegroups'] = ResourceGroupsService(self.client_factory)
+        return self._services['resourcegroups']
+
+    def get_tageditor_service(self):
+        """Obtém instância do TagEditorService"""
+        if 'tageditor' in self._mocks:
+            return self._mocks['tageditor']
+        if 'tageditor' not in self._services:
+            from ..services.tageditor_service import TagEditorService
+            self._services['tageditor'] = TagEditorService(self.client_factory)
+        return self._services['tageditor']
+
+    def get_ram_service(self):
+        """Obtém instância do RAMService"""
+        if 'ram' in self._mocks:
+            return self._mocks['ram']
+        if 'ram' not in self._services:
+            from ..services.ram_service import RAMService
+            self._services['ram'] = RAMService(self.client_factory)
+        return self._services['ram']
+
+    def get_outposts_service(self):
+        """Obtém instância do OutpostsService"""
+        if 'outposts' in self._mocks:
+            return self._mocks['outposts']
+        if 'outposts' not in self._services:
+            from ..services.outposts_service import OutpostsService
+            self._services['outposts'] = OutpostsService(self.client_factory)
+        return self._services['outposts']
+
+    def get_localzones_service(self):
+        """Obtém instância do LocalZonesService"""
+        if 'localzones' in self._mocks:
+            return self._mocks['localzones']
+        if 'localzones' not in self._services:
+            from ..services.localzones_service import LocalZonesService
+            self._services['localzones'] = LocalZonesService(self.client_factory)
+        return self._services['localzones']
+
+    def get_wavelength_service(self):
+        """Obtém instância do WavelengthService"""
+        if 'wavelength' in self._mocks:
+            return self._mocks['wavelength']
+        if 'wavelength' not in self._services:
+            from ..services.wavelength_service import WavelengthService
+            self._services['wavelength'] = WavelengthService(self.client_factory)
+        return self._services['wavelength']
+
+    def get_private5g_service(self):
+        """Obtém instância do Private5GService"""
+        if 'private5g' in self._mocks:
+            return self._mocks['private5g']
+        if 'private5g' not in self._services:
+            from ..services.private5g_service import Private5GService
+            self._services['private5g'] = Private5GService(self.client_factory)
+        return self._services['private5g']
+
+    def get_cloudwatchlogs_service(self):
+        """Obtém instância do CloudWatchLogsService"""
+        if 'cloudwatchlogs' in self._mocks:
+            return self._mocks['cloudwatchlogs']
+        if 'cloudwatchlogs' not in self._services:
+            from ..services.cloudwatchlogs_service import CloudWatchLogsService
+            self._services['cloudwatchlogs'] = CloudWatchLogsService(self.client_factory)
+        return self._services['cloudwatchlogs']
+
+    def get_cloudwatchinsights_service(self):
+        """Obtém instância do CloudWatchInsightsService"""
+        if 'cloudwatchinsights' in self._mocks:
+            return self._mocks['cloudwatchinsights']
+        if 'cloudwatchinsights' not in self._services:
+            from ..services.cloudwatchinsights_service import CloudWatchInsightsService
+            self._services['cloudwatchinsights'] = CloudWatchInsightsService(self.client_factory)
+        return self._services['cloudwatchinsights']
+
+    def get_synthetics_service(self):
+        """Obtém instância do SyntheticsService"""
+        if 'synthetics' in self._mocks:
+            return self._mocks['synthetics']
+        if 'synthetics' not in self._services:
+            from ..services.synthetics_service import SyntheticsService
+            self._services['synthetics'] = SyntheticsService(self.client_factory)
+        return self._services['synthetics']
+
+    def get_rum_service(self):
+        """Obtém instância do RUMService"""
+        if 'rum' in self._mocks:
+            return self._mocks['rum']
+        if 'rum' not in self._services:
+            from ..services.rum_service import RUMService
+            self._services['rum'] = RUMService(self.client_factory)
+        return self._services['rum']
+
+    def get_evidently_service(self):
+        """Obtém instância do EvidentlyService"""
+        if 'evidently' in self._mocks:
+            return self._mocks['evidently']
+        if 'evidently' not in self._services:
+            from ..services.evidently_service import EvidentlyService
+            self._services['evidently'] = EvidentlyService(self.client_factory)
+        return self._services['evidently']
+
+    def get_servicelens_service(self):
+        """Obtém instância do ServiceLensService"""
+        if 'servicelens' in self._mocks:
+            return self._mocks['servicelens']
+        if 'servicelens' not in self._services:
+            from ..services.servicelens_service import ServiceLensService
+            self._services['servicelens'] = ServiceLensService(self.client_factory)
+        return self._services['servicelens']
+
+    def get_containerinsights_service(self):
+        """Obtém instância do ContainerInsightsService"""
+        if 'containerinsights' in self._mocks:
+            return self._mocks['containerinsights']
+        if 'containerinsights' not in self._services:
+            from ..services.containerinsights_service import ContainerInsightsService
+            self._services['containerinsights'] = ContainerInsightsService(self.client_factory)
+        return self._services['containerinsights']
+
+    def get_lambdainsights_service(self):
+        """Obtém instância do LambdaInsightsService"""
+        if 'lambdainsights' in self._mocks:
+            return self._mocks['lambdainsights']
+        if 'lambdainsights' not in self._services:
+            from ..services.lambdainsights_service import LambdaInsightsService
+            self._services['lambdainsights'] = LambdaInsightsService(self.client_factory)
+        return self._services['lambdainsights']
+
+    def get_contributorinsights_service(self):
+        """Obtém instância do ContributorInsightsService"""
+        if 'contributorinsights' in self._mocks:
+            return self._mocks['contributorinsights']
+        if 'contributorinsights' not in self._services:
+            from ..services.contributorinsights_service import ContributorInsightsService
+            self._services['contributorinsights'] = ContributorInsightsService(self.client_factory)
+        return self._services['contributorinsights']
+
+    def get_applicationinsights_service(self):
+        """Obtém instância do ApplicationInsightsService"""
+        if 'applicationinsights' in self._mocks:
+            return self._mocks['applicationinsights']
+        if 'applicationinsights' not in self._services:
+            from ..services.applicationinsights_service import ApplicationInsightsService
+            self._services['applicationinsights'] = ApplicationInsightsService(self.client_factory)
+        return self._services['applicationinsights']
+
+    def get_internetmonitor_service(self):
+        """Obtém instância do InternetMonitorService"""
+        if 'internetmonitor' in self._mocks:
+            return self._mocks['internetmonitor']
+        if 'internetmonitor' not in self._services:
+            from ..services.internetmonitor_service import InternetMonitorService
+            self._services['internetmonitor'] = InternetMonitorService(self.client_factory)
+        return self._services['internetmonitor']
+
+    def get_networkmonitor_service(self):
+        """Obtém instância do NetworkMonitorService"""
+        if 'networkmonitor' in self._mocks:
+            return self._mocks['networkmonitor']
+        if 'networkmonitor' not in self._services:
+            from ..services.networkmonitor_service import NetworkMonitorService
+            self._services['networkmonitor'] = NetworkMonitorService(self.client_factory)
+        return self._services['networkmonitor']
+
+    def get_costexplorer_service(self):
+        """Obtém instância do CostExplorerService"""
+        if 'costexplorer' in self._mocks:
+            return self._mocks['costexplorer']
+        if 'costexplorer' not in self._services:
+            from ..services.costexplorer_service import CostExplorerService
+            self._services['costexplorer'] = CostExplorerService(self.client_factory)
+        return self._services['costexplorer']
+
+    def get_budgets_service(self):
+        """Obtém instância do BudgetsService"""
+        if 'budgets' in self._mocks:
+            return self._mocks['budgets']
+        if 'budgets' not in self._services:
+            from ..services.budgets_service import BudgetsService
+            self._services['budgets'] = BudgetsService(self.client_factory)
+        return self._services['budgets']
+
+    def get_savingsplans_service(self):
+        """Obtém instância do SavingsPlansService"""
+        if 'savingsplans' in self._mocks:
+            return self._mocks['savingsplans']
+        if 'savingsplans' not in self._services:
+            from ..services.savingsplans_service import SavingsPlansService
+            self._services['savingsplans'] = SavingsPlansService(self.client_factory)
+        return self._services['savingsplans']
+
+    def get_reservedinstances_service(self):
+        """Obtém instância do ReservedInstancesService"""
+        if 'reservedinstances' in self._mocks:
+            return self._mocks['reservedinstances']
+        if 'reservedinstances' not in self._services:
+            from ..services.reservedinstances_service import ReservedInstancesService
+            self._services['reservedinstances'] = ReservedInstancesService(self.client_factory)
+        return self._services['reservedinstances']
+
+    def get_costanomalydetection_service(self):
+        """Obtém instância do CostAnomalyDetectionService"""
+        if 'costanomalydetection' in self._mocks:
+            return self._mocks['costanomalydetection']
+        if 'costanomalydetection' not in self._services:
+            from ..services.costanomalydetection_service import CostAnomalyDetectionService
+            self._services['costanomalydetection'] = CostAnomalyDetectionService(self.client_factory)
+        return self._services['costanomalydetection']
+
+    def get_costcategories_service(self):
+        """Obtém instância do CostCategoriesService"""
+        if 'costcategories' in self._mocks:
+            return self._mocks['costcategories']
+        if 'costcategories' not in self._services:
+            from ..services.costcategories_service import CostCategoriesService
+            self._services['costcategories'] = CostCategoriesService(self.client_factory)
+        return self._services['costcategories']
+
+    def get_costallocationtags_service(self):
+        """Obtém instância do CostAllocationTagsService"""
+        if 'costallocationtags' in self._mocks:
+            return self._mocks['costallocationtags']
+        if 'costallocationtags' not in self._services:
+            from ..services.costallocationtags_service import CostAllocationTagsService
+            self._services['costallocationtags'] = CostAllocationTagsService(self.client_factory)
+        return self._services['costallocationtags']
+
+    def get_billingconductor_service(self):
+        """Obtém instância do BillingConductorService"""
+        if 'billingconductor' in self._mocks:
+            return self._mocks['billingconductor']
+        if 'billingconductor' not in self._services:
+            from ..services.billingconductor_service import BillingConductorService
+            self._services['billingconductor'] = BillingConductorService(self.client_factory)
+        return self._services['billingconductor']
+
+    def get_marketplacemetering_service(self):
+        """Obtém instância do MarketplaceMeteringService"""
+        if 'marketplacemetering' in self._mocks:
+            return self._mocks['marketplacemetering']
+        if 'marketplacemetering' not in self._services:
+            from ..services.marketplacemetering_service import MarketplaceMeteringService
+            self._services['marketplacemetering'] = MarketplaceMeteringService(self.client_factory)
+        return self._services['marketplacemetering']
+
+    def get_dataexports_service(self):
+        """Obtém instância do DataExportsService"""
+        if 'dataexports' in self._mocks:
+            return self._mocks['dataexports']
+        if 'dataexports' not in self._services:
+            from ..services.dataexports_service import DataExportsService
+            self._services['dataexports'] = DataExportsService(self.client_factory)
+        return self._services['dataexports']
+
+    def get_secretsmanageradv_service(self):
+        """Obtém instância do SecretsManagerAdvService"""
+        if 'secretsmanageradv' in self._mocks:
+            return self._mocks['secretsmanageradv']
+        if 'secretsmanageradv' not in self._services:
+            from ..services.secretsmanageradv_service import SecretsManagerAdvService
+            self._services['secretsmanageradv'] = SecretsManagerAdvService(self.client_factory)
+        return self._services['secretsmanageradv']
+
+    def get_privateca_service(self):
+        """Obtém instância do PrivateCAService"""
+        if 'privateca' in self._mocks:
+            return self._mocks['privateca']
+        if 'privateca' not in self._services:
+            from ..services.privateca_service import PrivateCAService
+            self._services['privateca'] = PrivateCAService(self.client_factory)
+        return self._services['privateca']
+
+    def get_cloudhsm_service(self):
+        """Obtém instância do CloudHSMService"""
+        if 'cloudhsm' in self._mocks:
+            return self._mocks['cloudhsm']
+        if 'cloudhsm' not in self._services:
+            from ..services.cloudhsm_service import CloudHSMService
+            self._services['cloudhsm'] = CloudHSMService(self.client_factory)
+        return self._services['cloudhsm']
+
+    def get_directoryservice_service(self):
+        """Obtém instância do DirectoryServiceService"""
+        if 'directoryservice' in self._mocks:
+            return self._mocks['directoryservice']
+        if 'directoryservice' not in self._services:
+            from ..services.directoryservice_service import DirectoryServiceService
+            self._services['directoryservice'] = DirectoryServiceService(self.client_factory)
+        return self._services['directoryservice']
+
+    def get_identitycenter_service(self):
+        """Obtém instância do IdentityCenterService"""
+        if 'identitycenter' in self._mocks:
+            return self._mocks['identitycenter']
+        if 'identitycenter' not in self._services:
+            from ..services.identitycenter_service import IdentityCenterService
+            self._services['identitycenter'] = IdentityCenterService(self.client_factory)
+        return self._services['identitycenter']
+
+    def get_accessanalyzer_service(self):
+        """Obtém instância do AccessAnalyzerService"""
+        if 'accessanalyzer' in self._mocks:
+            return self._mocks['accessanalyzer']
+        if 'accessanalyzer' not in self._services:
+            from ..services.accessanalyzer_service import AccessAnalyzerService
+            self._services['accessanalyzer'] = AccessAnalyzerService(self.client_factory)
+        return self._services['accessanalyzer']
+
+    def get_firewallmanager_service(self):
+        """Obtém instância do FirewallManagerService"""
+        if 'firewallmanager' in self._mocks:
+            return self._mocks['firewallmanager']
+        if 'firewallmanager' not in self._services:
+            from ..services.firewallmanager_service import FirewallManagerService
+            self._services['firewallmanager'] = FirewallManagerService(self.client_factory)
+        return self._services['firewallmanager']
+
+    def get_shield_service(self):
+        """Obtém instância do ShieldService"""
+        if 'shield' in self._mocks:
+            return self._mocks['shield']
+        if 'shield' not in self._services:
+            from ..services.shield_service import ShieldService
+            self._services['shield'] = ShieldService(self.client_factory)
+        return self._services['shield']
+
+    def get_networkfirewall_service(self):
+        """Obtém instância do NetworkFirewallService"""
+        if 'networkfirewall' in self._mocks:
+            return self._mocks['networkfirewall']
+        if 'networkfirewall' not in self._services:
+            from ..services.networkfirewall_service import NetworkFirewallService
+            self._services['networkfirewall'] = NetworkFirewallService(self.client_factory)
+        return self._services['networkfirewall']
+
+    def get_auditmanager_service(self):
+        """Obtém instância do AuditManagerService"""
+        if 'auditmanager' in self._mocks:
+            return self._mocks['auditmanager']
+        if 'auditmanager' not in self._services:
+            from ..services.auditmanager_service import AuditManagerService
+            self._services['auditmanager'] = AuditManagerService(self.client_factory)
+        return self._services['auditmanager']
+
+    def get_detective_service(self):
+        """Obtém instância do DetectiveService"""
+        if 'detective' in self._mocks:
+            return self._mocks['detective']
+        if 'detective' not in self._services:
+            from ..services.detective_service import DetectiveService
+            self._services['detective'] = DetectiveService(self.client_factory)
+        return self._services['detective']
+
+    def get_securitylake_service(self):
+        """Obtém instância do SecurityLakeService"""
+        if 'securitylake' in self._mocks:
+            return self._mocks['securitylake']
+        if 'securitylake' not in self._services:
+            from ..services.securitylake_service import SecurityLakeService
+            self._services['securitylake'] = SecurityLakeService(self.client_factory)
+        return self._services['securitylake']
+
+    def get_appmesh_service(self):
+        """Obtém instância do AppMeshService"""
+        if 'appmesh' in self._mocks:
+            return self._mocks['appmesh']
+        if 'appmesh' not in self._services:
+            from ..services.appmesh_service import AppMeshService
+            self._services['appmesh'] = AppMeshService(self.client_factory)
+        return self._services['appmesh']
+
+    def get_cloudmap_service(self):
+        """Obtém instância do CloudMapService"""
+        if 'cloudmap' in self._mocks:
+            return self._mocks['cloudmap']
+        if 'cloudmap' not in self._services:
+            from ..services.cloudmap_service import CloudMapService
+            self._services['cloudmap'] = CloudMapService(self.client_factory)
+        return self._services['cloudmap']
+
+    def get_privatelink_service(self):
+        """Obtém instância do PrivateLinkService"""
+        if 'privatelink' in self._mocks:
+            return self._mocks['privatelink']
+        if 'privatelink' not in self._services:
+            from ..services.privatelink_service import PrivateLinkService
+            self._services['privatelink'] = PrivateLinkService(self.client_factory)
+        return self._services['privatelink']
+
+    def get_vpclattice_service(self):
+        """Obtém instância do VPCLatticeService"""
+        if 'vpclattice' in self._mocks:
+            return self._mocks['vpclattice']
+        if 'vpclattice' not in self._services:
+            from ..services.vpclattice_service import VPCLatticeService
+            self._services['vpclattice'] = VPCLatticeService(self.client_factory)
+        return self._services['vpclattice']
+
+    def get_verifiedaccess_service(self):
+        """Obtém instância do VerifiedAccessService"""
+        if 'verifiedaccess' in self._mocks:
+            return self._mocks['verifiedaccess']
+        if 'verifiedaccess' not in self._services:
+            from ..services.verifiedaccess_service import VerifiedAccessService
+            self._services['verifiedaccess'] = VerifiedAccessService(self.client_factory)
+        return self._services['verifiedaccess']
+
+    def get_clientvpn_service(self):
+        """Obtém instância do ClientVPNService"""
+        if 'clientvpn' in self._mocks:
+            return self._mocks['clientvpn']
+        if 'clientvpn' not in self._services:
+            from ..services.clientvpn_service import ClientVPNService
+            self._services['clientvpn'] = ClientVPNService(self.client_factory)
+        return self._services['clientvpn']
+
+    def get_sitetositevpn_service(self):
+        """Obtém instância do SiteToSiteVPNService"""
+        if 'sitetositevpn' in self._mocks:
+            return self._mocks['sitetositevpn']
+        if 'sitetositevpn' not in self._services:
+            from ..services.sitetositevpn_service import SiteToSiteVPNService
+            self._services['sitetositevpn'] = SiteToSiteVPNService(self.client_factory)
+        return self._services['sitetositevpn']
+
+    def get_networkmanager_service(self):
+        """Obtém instância do NetworkManagerService"""
+        if 'networkmanager' in self._mocks:
+            return self._mocks['networkmanager']
+        if 'networkmanager' not in self._services:
+            from ..services.networkmanager_service import NetworkManagerService
+            self._services['networkmanager'] = NetworkManagerService(self.client_factory)
+        return self._services['networkmanager']
+
+    def get_reachabilityanalyzer_service(self):
+        """Obtém instância do ReachabilityAnalyzerService"""
+        if 'reachabilityanalyzer' in self._mocks:
+            return self._mocks['reachabilityanalyzer']
+        if 'reachabilityanalyzer' not in self._services:
+            from ..services.reachabilityanalyzer_service import ReachabilityAnalyzerService
+            self._services['reachabilityanalyzer'] = ReachabilityAnalyzerService(self.client_factory)
+        return self._services['reachabilityanalyzer']
+
+    def get_trafficmirroring_service(self):
+        """Obtém instância do TrafficMirroringService"""
+        if 'trafficmirroring' in self._mocks:
+            return self._mocks['trafficmirroring']
+        if 'trafficmirroring' not in self._services:
+            from ..services.trafficmirroring_service import TrafficMirroringService
+            self._services['trafficmirroring'] = TrafficMirroringService(self.client_factory)
+        return self._services['trafficmirroring']
+
+    def get_elasticacheglobal_service(self):
+        """Obtém instância do ElastiCacheGlobalService"""
+        if 'elasticacheglobal' in self._mocks:
+            return self._mocks['elasticacheglobal']
+        if 'elasticacheglobal' not in self._services:
+            from ..services.elasticacheglobal_service import ElastiCacheGlobalService
+            self._services['elasticacheglobal'] = ElastiCacheGlobalService(self.client_factory)
+        return self._services['elasticacheglobal']
+
+    def get_dynamodbglobal_service(self):
+        """Obtém instância do DynamoDBGlobalService"""
+        if 'dynamodbglobal' in self._mocks:
+            return self._mocks['dynamodbglobal']
+        if 'dynamodbglobal' not in self._services:
+            from ..services.dynamodbglobal_service import DynamoDBGlobalService
+            self._services['dynamodbglobal'] = DynamoDBGlobalService(self.client_factory)
+        return self._services['dynamodbglobal']
+
+    def get_auroraserverless_service(self):
+        """Obtém instância do AuroraServerlessService"""
+        if 'auroraserverless' in self._mocks:
+            return self._mocks['auroraserverless']
+        if 'auroraserverless' not in self._services:
+            from ..services.auroraserverless_service import AuroraServerlessService
+            self._services['auroraserverless'] = AuroraServerlessService(self.client_factory)
+        return self._services['auroraserverless']
+
+    def get_rdsproxy_service(self):
+        """Obtém instância do RDSProxyService"""
+        if 'rdsproxy' in self._mocks:
+            return self._mocks['rdsproxy']
+        if 'rdsproxy' not in self._services:
+            from ..services.rdsproxy_service import RDSProxyService
+            self._services['rdsproxy'] = RDSProxyService(self.client_factory)
+        return self._services['rdsproxy']
+
+    def get_dmsmigration_service(self):
+        """Obtém instância do DMSMigrationService"""
+        if 'dmsmigration' in self._mocks:
+            return self._mocks['dmsmigration']
+        if 'dmsmigration' not in self._services:
+            from ..services.dmsmigration_service import DMSMigrationService
+            self._services['dmsmigration'] = DMSMigrationService(self.client_factory)
+        return self._services['dmsmigration']
+
+    def get_schemaconversion_service(self):
+        """Obtém instância do SchemaConversionService"""
+        if 'schemaconversion' in self._mocks:
+            return self._mocks['schemaconversion']
+        if 'schemaconversion' not in self._services:
+            from ..services.schemaconversion_service import SchemaConversionService
+            self._services['schemaconversion'] = SchemaConversionService(self.client_factory)
+        return self._services['schemaconversion']
+
+    def get_redshiftserverless_service(self):
+        """Obtém instância do RedshiftServerlessService"""
+        if 'redshiftserverless' in self._mocks:
+            return self._mocks['redshiftserverless']
+        if 'redshiftserverless' not in self._services:
+            from ..services.redshiftserverless_service import RedshiftServerlessService
+            self._services['redshiftserverless'] = RedshiftServerlessService(self.client_factory)
+        return self._services['redshiftserverless']
+
+    def get_opensearchserverless_service(self):
+        """Obtém instância do OpenSearchServerlessService"""
+        if 'opensearchserverless' in self._mocks:
+            return self._mocks['opensearchserverless']
+        if 'opensearchserverless' not in self._services:
+            from ..services.opensearchserverless_service import OpenSearchServerlessService
+            self._services['opensearchserverless'] = OpenSearchServerlessService(self.client_factory)
+        return self._services['opensearchserverless']
+
+    def get_mskconnect_service(self):
+        """Obtém instância do MSKConnectService"""
+        if 'mskconnect' in self._mocks:
+            return self._mocks['mskconnect']
+        if 'mskconnect' not in self._services:
+            from ..services.mskconnect_service import MSKConnectService
+            self._services['mskconnect'] = MSKConnectService(self.client_factory)
+        return self._services['mskconnect']
+
+    def get_gluedatabrew_service(self):
+        """Obtém instância do GlueDataBrewService"""
+        if 'gluedatabrew' in self._mocks:
+            return self._mocks['gluedatabrew']
+        if 'gluedatabrew' not in self._services:
+            from ..services.gluedatabrew_service import GlueDataBrewService
+            self._services['gluedatabrew'] = GlueDataBrewService(self.client_factory)
+        return self._services['gluedatabrew']
+
+    def get_datazone_service(self):
+        """Obtém instância do DataZoneService"""
+        if 'datazone' in self._mocks:
+            return self._mocks['datazone']
+        if 'datazone' not in self._services:
+            from ..services.datazone_service import DataZoneService
+            self._services['datazone'] = DataZoneService(self.client_factory)
+        return self._services['datazone']
+
+    def get_cleanrooms_service(self):
+        """Obtém instância do CleanRoomsService"""
+        if 'cleanrooms' in self._mocks:
+            return self._mocks['cleanrooms']
+        if 'cleanrooms' not in self._services:
+            from ..services.cleanrooms_service import CleanRoomsService
+            self._services['cleanrooms'] = CleanRoomsService(self.client_factory)
+        return self._services['cleanrooms']
+
+    def get_sagemakerstudio_service(self):
+        """Obtém instância do SageMakerStudioService"""
+        if 'sagemakerstudio' in self._mocks:
+            return self._mocks['sagemakerstudio']
+        if 'sagemakerstudio' not in self._services:
+            from ..services.sagemakerstudio_service import SageMakerStudioService
+            self._services['sagemakerstudio'] = SageMakerStudioService(self.client_factory)
+        return self._services['sagemakerstudio']
+
+    def get_sagemakerpipelines_service(self):
+        """Obtém instância do SageMakerPipelinesService"""
+        if 'sagemakerpipelines' in self._mocks:
+            return self._mocks['sagemakerpipelines']
+        if 'sagemakerpipelines' not in self._services:
+            from ..services.sagemakerpipelines_service import SageMakerPipelinesService
+            self._services['sagemakerpipelines'] = SageMakerPipelinesService(self.client_factory)
+        return self._services['sagemakerpipelines']
+
+    def get_sagemakerfeaturestore_service(self):
+        """Obtém instância do SageMakerFeatureStoreService"""
+        if 'sagemakerfeaturestore' in self._mocks:
+            return self._mocks['sagemakerfeaturestore']
+        if 'sagemakerfeaturestore' not in self._services:
+            from ..services.sagemakerfeaturestore_service import SageMakerFeatureStoreService
+            self._services['sagemakerfeaturestore'] = SageMakerFeatureStoreService(self.client_factory)
+        return self._services['sagemakerfeaturestore']
+
+    def get_sagemakermodelregistry_service(self):
+        """Obtém instância do SageMakerModelRegistryService"""
+        if 'sagemakermodelregistry' in self._mocks:
+            return self._mocks['sagemakermodelregistry']
+        if 'sagemakermodelregistry' not in self._services:
+            from ..services.sagemakermodelregistry_service import SageMakerModelRegistryService
+            self._services['sagemakermodelregistry'] = SageMakerModelRegistryService(self.client_factory)
+        return self._services['sagemakermodelregistry']
+
+    def get_sagemakerexperiments_service(self):
+        """Obtém instância do SageMakerExperimentsService"""
+        if 'sagemakerexperiments' in self._mocks:
+            return self._mocks['sagemakerexperiments']
+        if 'sagemakerexperiments' not in self._services:
+            from ..services.sagemakerexperiments_service import SageMakerExperimentsService
+            self._services['sagemakerexperiments'] = SageMakerExperimentsService(self.client_factory)
+        return self._services['sagemakerexperiments']
+
+    def get_sagemakerdebugger_service(self):
+        """Obtém instância do SageMakerDebuggerService"""
+        if 'sagemakerdebugger' in self._mocks:
+            return self._mocks['sagemakerdebugger']
+        if 'sagemakerdebugger' not in self._services:
+            from ..services.sagemakerdebugger_service import SageMakerDebuggerService
+            self._services['sagemakerdebugger'] = SageMakerDebuggerService(self.client_factory)
+        return self._services['sagemakerdebugger']
+
+    def get_sagemakerclarify_service(self):
+        """Obtém instância do SageMakerClarifyService"""
+        if 'sagemakerclarify' in self._mocks:
+            return self._mocks['sagemakerclarify']
+        if 'sagemakerclarify' not in self._services:
+            from ..services.sagemakerclarify_service import SageMakerClarifyService
+            self._services['sagemakerclarify'] = SageMakerClarifyService(self.client_factory)
+        return self._services['sagemakerclarify']
+
+    def get_sagemakergroundtruth_service(self):
+        """Obtém instância do SageMakerGroundTruthService"""
+        if 'sagemakergroundtruth' in self._mocks:
+            return self._mocks['sagemakergroundtruth']
+        if 'sagemakergroundtruth' not in self._services:
+            from ..services.sagemakergroundtruth_service import SageMakerGroundTruthService
+            self._services['sagemakergroundtruth'] = SageMakerGroundTruthService(self.client_factory)
+        return self._services['sagemakergroundtruth']
+
+    def get_panorama_service(self):
+        """Obtém instância do PanoramaService"""
+        if 'panorama' in self._mocks:
+            return self._mocks['panorama']
+        if 'panorama' not in self._services:
+            from ..services.panorama_service import PanoramaService
+            self._services['panorama'] = PanoramaService(self.client_factory)
+        return self._services['panorama']
+
+    def get_deepracer_service(self):
+        """Obtém instância do DeepRacerService"""
+        if 'deepracer' in self._mocks:
+            return self._mocks['deepracer']
+        if 'deepracer' not in self._services:
+            from ..services.deepracer_service import DeepRacerService
+            self._services['deepracer'] = DeepRacerService(self.client_factory)
+        return self._services['deepracer']
+
+    def get_deepcomposer_service(self):
+        """Obtém instância do DeepComposerService"""
+        if 'deepcomposer' in self._mocks:
+            return self._mocks['deepcomposer']
+        if 'deepcomposer' not in self._services:
+            from ..services.deepcomposer_service import DeepComposerService
+            self._services['deepcomposer'] = DeepComposerService(self.client_factory)
+        return self._services['deepcomposer']
+
+    def get_healthlake_service(self):
+        """Obtém instância do HealthLakeService"""
+        if 'healthlake' in self._mocks:
+            return self._mocks['healthlake']
+        if 'healthlake' not in self._services:
+            from ..services.healthlake_service import HealthLakeService
+            self._services['healthlake'] = HealthLakeService(self.client_factory)
+        return self._services['healthlake']
+
+    def get_codeartifact_service(self):
+        """Obtém instância do CodeArtifactService"""
+        if 'codeartifact' in self._mocks:
+            return self._mocks['codeartifact']
+        if 'codeartifact' not in self._services:
+            from ..services.codeartifact_service import CodeArtifactService
+            self._services['codeartifact'] = CodeArtifactService(self.client_factory)
+        return self._services['codeartifact']
+
+    def get_codeguru_service(self):
+        """Obtém instância do CodeGuruService"""
+        if 'codeguru' in self._mocks:
+            return self._mocks['codeguru']
+        if 'codeguru' not in self._services:
+            from ..services.codeguru_service import CodeGuruService
+            self._services['codeguru'] = CodeGuruService(self.client_factory)
+        return self._services['codeguru']
+
+    def get_fis_service(self):
+        """Obtém instância do FISService"""
+        if 'fis' in self._mocks:
+            return self._mocks['fis']
+        if 'fis' not in self._services:
+            from ..services.fis_service import FISService
+            self._services['fis'] = FISService(self.client_factory)
+        return self._services['fis']
+
+    def get_patchmanager_service(self):
+        """Obtém instância do PatchManagerService"""
+        if 'patchmanager' in self._mocks:
+            return self._mocks['patchmanager']
+        if 'patchmanager' not in self._services:
+            from ..services.patchmanager_service import PatchManagerService
+            self._services['patchmanager'] = PatchManagerService(self.client_factory)
+        return self._services['patchmanager']
+
+    def get_statemanager_service(self):
+        """Obtém instância do StateManagerService"""
+        if 'statemanager' in self._mocks:
+            return self._mocks['statemanager']
+        if 'statemanager' not in self._services:
+            from ..services.statemanager_service import StateManagerService
+            self._services['statemanager'] = StateManagerService(self.client_factory)
+        return self._services['statemanager']
+
+    def get_ssmautomation_service(self):
+        """Obtém instância do SSMAutomationService"""
+        if 'ssmautomation' in self._mocks:
+            return self._mocks['ssmautomation']
+        if 'ssmautomation' not in self._services:
+            from ..services.ssmautomation_service import SSMAutomationService
+            self._services['ssmautomation'] = SSMAutomationService(self.client_factory)
+        return self._services['ssmautomation']
+
+    def get_opscenter_service(self):
+        """Obtém instância do OpsCenterService"""
+        if 'opscenter' in self._mocks:
+            return self._mocks['opscenter']
+        if 'opscenter' not in self._services:
+            from ..services.opscenter_service import OpsCenterService
+            self._services['opscenter'] = OpsCenterService(self.client_factory)
+        return self._services['opscenter']
+
+    def get_incidentmanager_service(self):
+        """Obtém instância do IncidentManagerService"""
+        if 'incidentmanager' in self._mocks:
+            return self._mocks['incidentmanager']
+        if 'incidentmanager' not in self._services:
+            from ..services.incidentmanager_service import IncidentManagerService
+            self._services['incidentmanager'] = IncidentManagerService(self.client_factory)
+        return self._services['incidentmanager']
+
+    def get_autoscaling_service(self):
+        """Obtém instância do AutoScalingService"""
+        if 'autoscaling' in self._mocks:
+            return self._mocks['autoscaling']
+        if 'autoscaling' not in self._services:
+            from ..services.autoscaling_service import AutoScalingService
+            self._services['autoscaling'] = AutoScalingService(self.client_factory)
+        return self._services['autoscaling']
+
+    def get_launchwizard_service(self):
+        """Obtém instância do LaunchWizardService"""
+        if 'launchwizard' in self._mocks:
+            return self._mocks['launchwizard']
+        if 'launchwizard' not in self._services:
+            from ..services.launchwizard_service import LaunchWizardService
+            self._services['launchwizard'] = LaunchWizardService(self.client_factory)
+        return self._services['launchwizard']
+
+    def get_workspacesweb_service(self):
+        """Obtém instância do WorkSpacesWebService"""
+        if 'workspacesweb' in self._mocks:
+            return self._mocks['workspacesweb']
+        if 'workspacesweb' not in self._services:
+            from ..services.workspacesweb_service import WorkSpacesWebService
+            self._services['workspacesweb'] = WorkSpacesWebService(self.client_factory)
+        return self._services['workspacesweb']
+
+    def get_appstreamadv_service(self):
+        """Obtém instância do AppStreamAdvService"""
+        if 'appstreamadv' in self._mocks:
+            return self._mocks['appstreamadv']
+        if 'appstreamadv' not in self._services:
+            from ..services.appstreamadv_service import AppStreamAdvService
+            self._services['appstreamadv'] = AppStreamAdvService(self.client_factory)
+        return self._services['appstreamadv']
+
+    def get_workmail_service(self):
+        """Obtém instância do WorkMailService"""
+        if 'workmail' in self._mocks:
+            return self._mocks['workmail']
+        if 'workmail' not in self._services:
+            from ..services.workmail_service import WorkMailService
+            self._services['workmail'] = WorkMailService(self.client_factory)
+        return self._services['workmail']
+
+    def get_wickr_service(self):
+        """Obtém instância do WickrService"""
+        if 'wickr' in self._mocks:
+            return self._mocks['wickr']
+        if 'wickr' not in self._services:
+            from ..services.wickr_service import WickrService
+            self._services['wickr'] = WickrService(self.client_factory)
+        return self._services['wickr']
+
+    def get_chimesdk_service(self):
+        """Obtém instância do ChimeSDKService"""
+        if 'chimesdk' in self._mocks:
+            return self._mocks['chimesdk']
+        if 'chimesdk' not in self._services:
+            from ..services.chimesdk_service import ChimeSDKService
+            self._services['chimesdk'] = ChimeSDKService(self.client_factory)
+        return self._services['chimesdk']
+
+    def get_honeycode_service(self):
+        """Obtém instância do HoneycodeService"""
+        if 'honeycode' in self._mocks:
+            return self._mocks['honeycode']
+        if 'honeycode' not in self._services:
+            from ..services.honeycode_service import HoneycodeService
+            self._services['honeycode'] = HoneycodeService(self.client_factory)
+        return self._services['honeycode']
+
+    def get_managedgrafana_service(self):
+        """Obtém instância do ManagedGrafanaService"""
+        if 'managedgrafana' in self._mocks:
+            return self._mocks['managedgrafana']
+        if 'managedgrafana' not in self._services:
+            from ..services.managedgrafana_service import ManagedGrafanaService
+            self._services['managedgrafana'] = ManagedGrafanaService(self.client_factory)
+        return self._services['managedgrafana']
+
+    def get_managedprometheus_service(self):
+        """Obtém instância do ManagedPrometheusService"""
+        if 'managedprometheus' in self._mocks:
+            return self._mocks['managedprometheus']
+        if 'managedprometheus' not in self._services:
+            from ..services.managedprometheus_service import ManagedPrometheusService
+            self._services['managedprometheus'] = ManagedPrometheusService(self.client_factory)
+        return self._services['managedprometheus']
+
+    def get_managedflink_service(self):
+        """Obtém instância do ManagedFlinkService"""
+        if 'managedflink' in self._mocks:
+            return self._mocks['managedflink']
+        if 'managedflink' not in self._services:
+            from ..services.managedflink_service import ManagedFlinkService
+            self._services['managedflink'] = ManagedFlinkService(self.client_factory)
+        return self._services['managedflink']
+
+    def get_mwaa_service(self):
+        """Obtém instância do MWAAService"""
+        if 'mwaa' in self._mocks:
+            return self._mocks['mwaa']
+        if 'mwaa' not in self._services:
+            from ..services.mwaa_service import MWAAService
+            self._services['mwaa'] = MWAAService(self.client_factory)
+        return self._services['mwaa']
+
+    def get_groundstation_service(self):
+        """Obtém instância do GroundStationService"""
+        if 'groundstation' in self._mocks:
+            return self._mocks['groundstation']
+        if 'groundstation' not in self._services:
+            from ..services.groundstation_service import GroundStationService
+            self._services['groundstation'] = GroundStationService(self.client_factory)
+        return self._services['groundstation']
+
+    def get_nimblestudio_service(self):
+        """Obtém instância do NimbleStudioService"""
+        if 'nimblestudio' in self._mocks:
+            return self._mocks['nimblestudio']
+        if 'nimblestudio' not in self._services:
+            from ..services.nimblestudio_service import NimbleStudioService
+            self._services['nimblestudio'] = NimbleStudioService(self.client_factory)
+        return self._services['nimblestudio']
+
+    def get_simspaceweaver_service(self):
+        """Obtém instância do SimSpaceWeaverService"""
+        if 'simspaceweaver' in self._mocks:
+            return self._mocks['simspaceweaver']
+        if 'simspaceweaver' not in self._services:
+            from ..services.simspaceweaver_service import SimSpaceWeaverService
+            self._services['simspaceweaver'] = SimSpaceWeaverService(self.client_factory)
+        return self._services['simspaceweaver']
+
+    def get_iottwinmaker_service(self):
+        """Obtém instância do IoTTwinMakerService"""
+        if 'iottwinmaker' in self._mocks:
+            return self._mocks['iottwinmaker']
+        if 'iottwinmaker' not in self._services:
+            from ..services.iottwinmaker_service import IoTTwinMakerService
+            self._services['iottwinmaker'] = IoTTwinMakerService(self.client_factory)
+        return self._services['iottwinmaker']
+
+    def get_iotfleetwise_service(self):
+        """Obtém instância do IoTFleetWiseService"""
+        if 'iotfleetwise' in self._mocks:
+            return self._mocks['iotfleetwise']
+        if 'iotfleetwise' not in self._services:
+            from ..services.iotfleetwise_service import IoTFleetWiseService
+            self._services['iotfleetwise'] = IoTFleetWiseService(self.client_factory)
+        return self._services['iotfleetwise']
+
+    def get_iotsitewise_service(self):
+        """Obtém instância do IoTSiteWiseService"""
+        if 'iotsitewise' in self._mocks:
+            return self._mocks['iotsitewise']
+        if 'iotsitewise' not in self._services:
+            from ..services.iotsitewise_service import IoTSiteWiseService
+            self._services['iotsitewise'] = IoTSiteWiseService(self.client_factory)
+        return self._services['iotsitewise']
+
+    def get_locationservice_service(self):
+        """Obtém instância do LocationServiceService"""
+        if 'locationservice' in self._mocks:
+            return self._mocks['locationservice']
+        if 'locationservice' not in self._services:
+            from ..services.locationservice_service import LocationServiceService
+            self._services['locationservice'] = LocationServiceService(self.client_factory)
+        return self._services['locationservice']
+
+    def get_geospatial_service(self):
+        """Obtém instância do GeoSpatialService"""
+        if 'geospatial' in self._mocks:
+            return self._mocks['geospatial']
+        if 'geospatial' not in self._services:
+            from ..services.geospatial_service import GeoSpatialService
+            self._services['geospatial'] = GeoSpatialService(self.client_factory)
+        return self._services['geospatial']
+
+    def get_healthomics_service(self):
+        """Obtém instância do HealthOmicsService"""
+        if 'healthomics' in self._mocks:
+            return self._mocks['healthomics']
+        if 'healthomics' not in self._services:
+            from ..services.healthomics_service import HealthOmicsService
+            self._services['healthomics'] = HealthOmicsService(self.client_factory)
+        return self._services['healthomics']
+
+    def get_supplychain_service(self):
+        """Obtém instância do SupplyChainService"""
+        if 'supplychain' in self._mocks:
+            return self._mocks['supplychain']
+        if 'supplychain' not in self._services:
+            from ..services.supplychain_service import SupplyChainService
+            self._services['supplychain'] = SupplyChainService(self.client_factory)
+        return self._services['supplychain']
+
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -2249,6 +3379,119 @@ class ServiceFactory:
             'rds_custom': self.get_rds_custom_service(),
             's3outposts': self.get_s3outposts_service(),
             'snow': self.get_snow_service(),
+            'amplify': self.get_amplify_service(),
+            'appsync': self.get_appsync_service(),
+            'apigatewayv2': self.get_apigatewayv2_service(),
+            'sam': self.get_sam_service(),
+            'lambdaedge': self.get_lambdaedge_service(),
+            'stacksets': self.get_stacksets_service(),
+            'servicequotas': self.get_servicequotas_service(),
+            'licensemanager': self.get_licensemanager_service(),
+            'resourcegroups': self.get_resourcegroups_service(),
+            'tageditor': self.get_tageditor_service(),
+            'ram': self.get_ram_service(),
+            'outposts': self.get_outposts_service(),
+            'localzones': self.get_localzones_service(),
+            'wavelength': self.get_wavelength_service(),
+            'private5g': self.get_private5g_service(),
+            'cloudwatchlogs': self.get_cloudwatchlogs_service(),
+            'cloudwatchinsights': self.get_cloudwatchinsights_service(),
+            'synthetics': self.get_synthetics_service(),
+            'rum': self.get_rum_service(),
+            'evidently': self.get_evidently_service(),
+            'servicelens': self.get_servicelens_service(),
+            'containerinsights': self.get_containerinsights_service(),
+            'lambdainsights': self.get_lambdainsights_service(),
+            'contributorinsights': self.get_contributorinsights_service(),
+            'applicationinsights': self.get_applicationinsights_service(),
+            'internetmonitor': self.get_internetmonitor_service(),
+            'networkmonitor': self.get_networkmonitor_service(),
+            'costexplorer': self.get_costexplorer_service(),
+            'budgets': self.get_budgets_service(),
+            'savingsplans': self.get_savingsplans_service(),
+            'reservedinstances': self.get_reservedinstances_service(),
+            'costanomalydetection': self.get_costanomalydetection_service(),
+            'costcategories': self.get_costcategories_service(),
+            'costallocationtags': self.get_costallocationtags_service(),
+            'billingconductor': self.get_billingconductor_service(),
+            'marketplacemetering': self.get_marketplacemetering_service(),
+            'dataexports': self.get_dataexports_service(),
+            'secretsmanageradv': self.get_secretsmanageradv_service(),
+            'privateca': self.get_privateca_service(),
+            'cloudhsm': self.get_cloudhsm_service(),
+            'directoryservice': self.get_directoryservice_service(),
+            'identitycenter': self.get_identitycenter_service(),
+            'accessanalyzer': self.get_accessanalyzer_service(),
+            'firewallmanager': self.get_firewallmanager_service(),
+            'shield': self.get_shield_service(),
+            'networkfirewall': self.get_networkfirewall_service(),
+            'auditmanager': self.get_auditmanager_service(),
+            'detective': self.get_detective_service(),
+            'securitylake': self.get_securitylake_service(),
+            'appmesh': self.get_appmesh_service(),
+            'cloudmap': self.get_cloudmap_service(),
+            'privatelink': self.get_privatelink_service(),
+            'vpclattice': self.get_vpclattice_service(),
+            'verifiedaccess': self.get_verifiedaccess_service(),
+            'clientvpn': self.get_clientvpn_service(),
+            'sitetositevpn': self.get_sitetositevpn_service(),
+            'networkmanager': self.get_networkmanager_service(),
+            'reachabilityanalyzer': self.get_reachabilityanalyzer_service(),
+            'trafficmirroring': self.get_trafficmirroring_service(),
+            'elasticacheglobal': self.get_elasticacheglobal_service(),
+            'dynamodbglobal': self.get_dynamodbglobal_service(),
+            'auroraserverless': self.get_auroraserverless_service(),
+            'rdsproxy': self.get_rdsproxy_service(),
+            'dmsmigration': self.get_dmsmigration_service(),
+            'schemaconversion': self.get_schemaconversion_service(),
+            'redshiftserverless': self.get_redshiftserverless_service(),
+            'opensearchserverless': self.get_opensearchserverless_service(),
+            'mskconnect': self.get_mskconnect_service(),
+            'gluedatabrew': self.get_gluedatabrew_service(),
+            'datazone': self.get_datazone_service(),
+            'cleanrooms': self.get_cleanrooms_service(),
+            'sagemakerstudio': self.get_sagemakerstudio_service(),
+            'sagemakerpipelines': self.get_sagemakerpipelines_service(),
+            'sagemakerfeaturestore': self.get_sagemakerfeaturestore_service(),
+            'sagemakermodelregistry': self.get_sagemakermodelregistry_service(),
+            'sagemakerexperiments': self.get_sagemakerexperiments_service(),
+            'sagemakerdebugger': self.get_sagemakerdebugger_service(),
+            'sagemakerclarify': self.get_sagemakerclarify_service(),
+            'sagemakergroundtruth': self.get_sagemakergroundtruth_service(),
+            'panorama': self.get_panorama_service(),
+            'deepracer': self.get_deepracer_service(),
+            'deepcomposer': self.get_deepcomposer_service(),
+            'healthlake': self.get_healthlake_service(),
+            'codeartifact': self.get_codeartifact_service(),
+            'codeguru': self.get_codeguru_service(),
+            'fis': self.get_fis_service(),
+            'patchmanager': self.get_patchmanager_service(),
+            'statemanager': self.get_statemanager_service(),
+            'ssmautomation': self.get_ssmautomation_service(),
+            'opscenter': self.get_opscenter_service(),
+            'incidentmanager': self.get_incidentmanager_service(),
+            'autoscaling': self.get_autoscaling_service(),
+            'launchwizard': self.get_launchwizard_service(),
+            'workspacesweb': self.get_workspacesweb_service(),
+            'appstreamadv': self.get_appstreamadv_service(),
+            'workmail': self.get_workmail_service(),
+            'wickr': self.get_wickr_service(),
+            'chimesdk': self.get_chimesdk_service(),
+            'honeycode': self.get_honeycode_service(),
+            'managedgrafana': self.get_managedgrafana_service(),
+            'managedprometheus': self.get_managedprometheus_service(),
+            'managedflink': self.get_managedflink_service(),
+            'mwaa': self.get_mwaa_service(),
+            'groundstation': self.get_groundstation_service(),
+            'nimblestudio': self.get_nimblestudio_service(),
+            'simspaceweaver': self.get_simspaceweaver_service(),
+            'iottwinmaker': self.get_iottwinmaker_service(),
+            'iotfleetwise': self.get_iotfleetwise_service(),
+            'iotsitewise': self.get_iotsitewise_service(),
+            'locationservice': self.get_locationservice_service(),
+            'geospatial': self.get_geospatial_service(),
+            'healthomics': self.get_healthomics_service(),
+            'supplychain': self.get_supplychain_service()
         }
     
     def clear_cache(self):
