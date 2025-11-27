@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -177,7 +177,7 @@ class SageMakerService(BaseAWSService):
         """Lista Training Jobs recentes"""
         jobs = []
         
-        creation_time_after = datetime.utcnow() - timedelta(days=days)
+        creation_time_after = datetime.now(timezone.utc) - timedelta(days=days)
         
         paginator = self.sagemaker_client.get_paginator('list_training_jobs')
         
@@ -247,7 +247,7 @@ class SageMakerService(BaseAWSService):
                 'total_training_hours_30d': round(total_training_hours, 2)
             },
             period_days=30,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:
@@ -259,7 +259,7 @@ class SageMakerService(BaseAWSService):
         for nb in notebooks:
             if nb.notebook_instance_status == 'InService':
                 if nb.last_modified_time:
-                    idle_hours = (datetime.utcnow() - nb.last_modified_time.replace(tzinfo=None)).total_seconds() / 3600
+                    idle_hours = (datetime.now(timezone.utc) - nb.last_modified_time.replace(tzinfo=None)).total_seconds() / 3600
                     if idle_hours > 24:
                         recommendations.append(ServiceRecommendation(
                             resource_id=nb.notebook_instance_name,

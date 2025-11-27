@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -198,7 +198,7 @@ class KinesisService(BaseAWSService):
     
     def get_stream_metrics(self, stream_name: str, days: int = 7) -> Dict[str, Any]:
         """Obtém métricas de um Data Stream"""
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics = {}
@@ -280,7 +280,7 @@ class KinesisService(BaseAWSService):
                 'streams_with_consumers': len([s for s in data_streams if s.consumer_count > 0])
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

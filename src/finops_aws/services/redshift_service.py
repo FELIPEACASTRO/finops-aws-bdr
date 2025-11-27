@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -249,7 +249,7 @@ class RedshiftService(BaseAWSService):
     
     def get_cluster_metrics(self, cluster_id: str, days: int = 7) -> Dict[str, Any]:
         """Obtém métricas de um cluster"""
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics = {}
@@ -337,7 +337,7 @@ class RedshiftService(BaseAWSService):
                 'reserved_node_count': sum(rn.node_count for rn in reserved)
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

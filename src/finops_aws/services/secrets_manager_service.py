@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -132,7 +132,7 @@ class SecretsManagerService(BaseAWSService):
                 'never_accessed': never_accessed
             },
             period_days=30,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:
@@ -167,7 +167,7 @@ class SecretsManagerService(BaseAWSService):
                     action='Remover secret não utilizado'
                 ))
             elif secret.last_accessed_date:
-                days_since_access = (datetime.utcnow() - secret.last_accessed_date.replace(tzinfo=None)).days
+                days_since_access = (datetime.now(timezone.utc) - secret.last_accessed_date.replace(tzinfo=None)).days
                 if days_since_access > 90:
                     recommendations.append(ServiceRecommendation(
                         resource_id=secret.name,

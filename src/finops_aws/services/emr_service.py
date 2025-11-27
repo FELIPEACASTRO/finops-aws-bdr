@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -289,7 +289,7 @@ class EMRService(BaseAWSService):
                 'auto_terminate_enabled': len([c for c in clusters if c.auto_terminate])
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:
@@ -353,7 +353,7 @@ class EMRService(BaseAWSService):
             
             if cluster.status == 'WAITING':
                 if cluster.created_time:
-                    age_hours = (datetime.utcnow() - cluster.created_time.replace(tzinfo=None)).total_seconds() / 3600
+                    age_hours = (datetime.now(timezone.utc) - cluster.created_time.replace(tzinfo=None)).total_seconds() / 3600
                     if age_hours > 24:
                         recommendations.append(ServiceRecommendation(
                             resource_id=cluster.cluster_id,

@@ -14,7 +14,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -276,7 +276,7 @@ class EC2FinOpsService(BaseAWSService):
         Returns:
             Dicionário com métricas de CPU, Network, Disk
         """
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics = {}
@@ -356,7 +356,7 @@ class EC2FinOpsService(BaseAWSService):
                 'total_reserved_count': sum(ri.instance_count for ri in reserved)
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:
@@ -370,7 +370,7 @@ class EC2FinOpsService(BaseAWSService):
         
         for inst in stopped:
             if inst.launch_time:
-                stopped_days = (datetime.utcnow() - inst.launch_time.replace(tzinfo=None)).days
+                stopped_days = (datetime.now(timezone.utc) - inst.launch_time.replace(tzinfo=None)).days
                 if stopped_days > 7:
                     recommendations.append(ServiceRecommendation(
                         resource_id=inst.instance_id,
@@ -466,7 +466,7 @@ class EC2FinOpsService(BaseAWSService):
                 pass
         
         for ri in reserved:
-            days_until_expiry = (ri.end.replace(tzinfo=None) - datetime.utcnow()).days
+            days_until_expiry = (ri.end.replace(tzinfo=None) - datetime.now(timezone.utc)).days
             if 0 < days_until_expiry <= 30:
                 recommendations.append(ServiceRecommendation(
                     resource_id=ri.reserved_instance_id,

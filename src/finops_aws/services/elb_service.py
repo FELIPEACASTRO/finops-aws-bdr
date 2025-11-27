@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -228,7 +228,7 @@ class ELBService(BaseAWSService):
     
     def get_lb_metrics(self, lb_arn: str, lb_type: str, days: int = 7) -> Dict[str, Any]:
         """Obtém métricas de um Load Balancer"""
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics = {}
@@ -310,7 +310,7 @@ class ELBService(BaseAWSService):
                 'orphan_target_groups': len([tg for tg in target_groups if not tg.load_balancer_arns])
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

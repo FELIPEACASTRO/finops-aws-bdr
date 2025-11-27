@@ -13,7 +13,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 from ..utils.logger import setup_logger
@@ -501,8 +501,8 @@ class AuroraService(BaseAWSService):
                 Dimensions=[
                     {'Name': 'DBClusterIdentifier', 'Value': cluster_id}
                 ],
-                StartTime=datetime.utcnow() - timedelta(hours=1),
-                EndTime=datetime.utcnow(),
+                StartTime=datetime.now(timezone.utc) - timedelta(hours=1),
+                EndTime=datetime.now(timezone.utc),
                 Period=3600,
                 Statistics=['Average']
             )

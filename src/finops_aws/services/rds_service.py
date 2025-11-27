@@ -3,7 +3,7 @@ RDS Service - Exemplo de expansão para todos os serviços AWS
 Coleta custos, uso, métricas e recomendações do Amazon RDS
 """
 import boto3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
@@ -193,7 +193,7 @@ class RDSService:
         Obtém métricas detalhadas de uma instância RDS
         """
         try:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             start_time = end_time - timedelta(days=period_days)
             
             metrics_to_collect = [

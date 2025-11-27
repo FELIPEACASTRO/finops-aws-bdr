@@ -13,7 +13,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 from ..utils.logger import setup_logger
@@ -382,7 +382,7 @@ class DocumentDBService(BaseAWSService):
     def get_metrics(self, cluster_identifier: Optional[str] = None, period_hours: int = 24) -> Dict[str, Any]:
         """Obtém métricas de utilização do DocumentDB"""
         metrics = {}
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(hours=period_hours)
         
         clusters = self.get_clusters()

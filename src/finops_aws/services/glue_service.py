@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -236,7 +236,7 @@ class GlueService(BaseAWSService):
         
         response = self.glue_client.get_job_runs(JobName=job_name, MaxResults=100)
         
-        cutoff = datetime.utcnow() - timedelta(days=days)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         
         for run in response.get('JobRuns', []):
             started = run.get('StartedOn')
@@ -313,7 +313,7 @@ class GlueService(BaseAWSService):
                 'flex_jobs': len([j for j in jobs if j.execution_class == 'FLEX'])
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

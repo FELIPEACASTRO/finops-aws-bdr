@@ -13,7 +13,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -158,7 +158,7 @@ class LambdaFinOpsService(BaseAWSService):
         Returns:
             LambdaMetricsData com métricas agregadas
         """
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics_data = LambdaMetricsData(function_name=function_name)
@@ -279,7 +279,7 @@ class LambdaFinOpsService(BaseAWSService):
                 'memory_distribution': memory_distribution
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

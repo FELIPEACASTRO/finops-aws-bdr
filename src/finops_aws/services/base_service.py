@@ -9,7 +9,7 @@ Data: Novembro 2025
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional, Protocol
 from botocore.exceptions import ClientError
 
@@ -276,7 +276,7 @@ class BaseAWSService(ABC):
             statistics = ['Average', 'Maximum']
         
         try:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             start_time = end_time - timedelta(days=period_days)
             
             response = self.cloudwatch_client.get_metric_statistics(
@@ -331,7 +331,7 @@ class BaseAWSService(ABC):
         """
         return {
             'service': self.SERVICE_NAME,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'costs': self.get_costs(period_days).to_dict(),
             'metrics': self.get_metrics().to_dict(),
             'recommendations': [r.to_dict() for r in self.get_recommendations()],

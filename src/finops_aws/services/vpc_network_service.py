@@ -12,7 +12,7 @@ Funcionalidades:
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 
@@ -304,7 +304,7 @@ class VPCNetworkService(BaseAWSService):
     
     def get_nat_gateway_metrics(self, nat_id: str, days: int = 7) -> Dict[str, Any]:
         """Obtém métricas de um NAT Gateway"""
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days)
         
         metrics = {}
@@ -406,7 +406,7 @@ class VPCNetworkService(BaseAWSService):
                 'unassociated_elastic_ips': unassociated_eips
             },
             period_days=7,
-            collected_at=datetime.utcnow()
+            collected_at=datetime.now(timezone.utc)
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

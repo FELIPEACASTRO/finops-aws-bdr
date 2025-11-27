@@ -8,7 +8,7 @@ Autor: FinOps AWS Team
 Data: Novembro 2025
 """
 import boto3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from botocore.exceptions import ClientError
@@ -303,7 +303,7 @@ class EBSService(BaseAWSService):
                 }
             ))
         
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         old_snapshots = [
             s for s in snapshots
             if s.start_time and (now - s.start_time.replace(tzinfo=None)).days > 90
