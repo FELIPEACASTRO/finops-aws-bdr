@@ -134,6 +134,9 @@ class AWSServiceType(Enum):
     APPCONFIG = "appconfig"
     SECURITYHUB = "securityhub"
     MACIE = "macie2"
+    TRUSTEDADVISOR = "support"
+    ORGANIZATIONS = "organizations"
+    CONTROLTOWER = "controltower"
 
 
 @dataclass
@@ -1629,6 +1632,39 @@ class ServiceFactory:
             self._services['macie'] = MacieService(self.client_factory)
         
         return self._services['macie']
+    
+    def get_trustedadvisor_service(self):
+        """Obtém instância do TrustedAdvisorService"""
+        if 'trustedadvisor' in self._mocks:
+            return self._mocks['trustedadvisor']
+        
+        if 'trustedadvisor' not in self._services:
+            from ..services.trustedadvisor_service import TrustedAdvisorService
+            self._services['trustedadvisor'] = TrustedAdvisorService(self.client_factory)
+        
+        return self._services['trustedadvisor']
+    
+    def get_organizations_service(self):
+        """Obtém instância do OrganizationsService"""
+        if 'organizations' in self._mocks:
+            return self._mocks['organizations']
+        
+        if 'organizations' not in self._services:
+            from ..services.organizations_service import OrganizationsService
+            self._services['organizations'] = OrganizationsService(self.client_factory)
+        
+        return self._services['organizations']
+    
+    def get_controltower_service(self):
+        """Obtém instância do ControlTowerService"""
+        if 'controltower' in self._mocks:
+            return self._mocks['controltower']
+        
+        if 'controltower' not in self._services:
+            from ..services.controltower_service import ControlTowerService
+            self._services['controltower'] = ControlTowerService(self.client_factory)
+        
+        return self._services['controltower']
     
     def get_all_services(self) -> Dict[str, Any]:
         """
