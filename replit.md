@@ -133,6 +133,15 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 - **Multi-Account Support:** Organizations, Control Tower, cross-account analysis
 - **Security & Compliance:** Security Hub, Macie, GuardDuty, Detective integration
 
+## Documentation
+
+The project includes comprehensive documentation in the `docs/` folder:
+
+- **[TECHNICAL_GUIDE.md](docs/TECHNICAL_GUIDE.md)**: Detailed architecture, design patterns, Mermaid diagrams
+- **[FUNCTIONAL_GUIDE.md](docs/FUNCTIONAL_GUIDE.md)**: Capabilities, modules, use cases
+- **[USER_MANUAL.md](docs/USER_MANUAL.md)**: Installation, configuration, troubleshooting
+- **[APPENDIX_SERVICES.md](docs/APPENDIX_SERVICES.md)**: Complete catalog of 252 AWS services
+
 ## External Dependencies
 
 - **AWS SDK for Python (boto3):** Core AWS interaction library
