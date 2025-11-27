@@ -116,6 +116,13 @@ class AWSServiceType(Enum):
     MEDIALIVE = "medialive"
     MEDIAPACKAGE = "mediapackage"
     IVS = "ivs"
+    DMS = "dms"
+    MGN = "mgn"
+    SNOWBALL = "snowball"
+    DATAPIPELINE = "datapipeline"
+    APPSTREAM = "appstream"
+    WORKDOCS = "workdocs"
+    CHIME = "chime"
 
 
 @dataclass
@@ -1392,6 +1399,83 @@ class ServiceFactory:
         
         return self._services['ivs']
     
+    def get_dms_service(self):
+        """Obtém instância do DMSService"""
+        if 'dms' in self._mocks:
+            return self._mocks['dms']
+        
+        if 'dms' not in self._services:
+            from ..services.dms_service import DMSService
+            self._services['dms'] = DMSService(self.client_factory)
+        
+        return self._services['dms']
+    
+    def get_mgn_service(self):
+        """Obtém instância do MGNService"""
+        if 'mgn' in self._mocks:
+            return self._mocks['mgn']
+        
+        if 'mgn' not in self._services:
+            from ..services.mgn_service import MGNService
+            self._services['mgn'] = MGNService(self.client_factory)
+        
+        return self._services['mgn']
+    
+    def get_snowfamily_service(self):
+        """Obtém instância do SnowFamilyService"""
+        if 'snowfamily' in self._mocks:
+            return self._mocks['snowfamily']
+        
+        if 'snowfamily' not in self._services:
+            from ..services.snowfamily_service import SnowFamilyService
+            self._services['snowfamily'] = SnowFamilyService(self.client_factory)
+        
+        return self._services['snowfamily']
+    
+    def get_datapipeline_service(self):
+        """Obtém instância do DataPipelineService"""
+        if 'datapipeline' in self._mocks:
+            return self._mocks['datapipeline']
+        
+        if 'datapipeline' not in self._services:
+            from ..services.datapipeline_service import DataPipelineService
+            self._services['datapipeline'] = DataPipelineService(self.client_factory)
+        
+        return self._services['datapipeline']
+    
+    def get_appstream_service(self):
+        """Obtém instância do AppStreamService"""
+        if 'appstream' in self._mocks:
+            return self._mocks['appstream']
+        
+        if 'appstream' not in self._services:
+            from ..services.appstream_service import AppStreamService
+            self._services['appstream'] = AppStreamService(self.client_factory)
+        
+        return self._services['appstream']
+    
+    def get_workdocs_service(self):
+        """Obtém instância do WorkDocsService"""
+        if 'workdocs' in self._mocks:
+            return self._mocks['workdocs']
+        
+        if 'workdocs' not in self._services:
+            from ..services.workdocs_service import WorkDocsService
+            self._services['workdocs'] = WorkDocsService(self.client_factory)
+        
+        return self._services['workdocs']
+    
+    def get_chime_service(self):
+        """Obtém instância do ChimeService"""
+        if 'chime' in self._mocks:
+            return self._mocks['chime']
+        
+        if 'chime' not in self._services:
+            from ..services.chime_service import ChimeService
+            self._services['chime'] = ChimeService(self.client_factory)
+        
+        return self._services['chime']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1473,7 +1557,14 @@ class ServiceFactory:
             'mediaconvert': self.get_mediaconvert_service(),
             'medialive': self.get_medialive_service(),
             'mediapackage': self.get_mediapackage_service(),
-            'ivs': self.get_ivs_service()
+            'ivs': self.get_ivs_service(),
+            'dms': self.get_dms_service(),
+            'mgn': self.get_mgn_service(),
+            'snowfamily': self.get_snowfamily_service(),
+            'datapipeline': self.get_datapipeline_service(),
+            'appstream': self.get_appstream_service(),
+            'workdocs': self.get_workdocs_service(),
+            'chime': self.get_chime_service()
         }
     
     def clear_cache(self):
