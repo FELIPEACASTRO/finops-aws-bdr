@@ -152,11 +152,11 @@ resource "aws_iam_role_policy" "lambda_s3" {
 }
 
 ################################################################################
-# DynamoDB Access Policy
+# SQS Access Policy (for DLQ and processing queues)
 ################################################################################
 
-resource "aws_iam_role_policy" "lambda_dynamodb" {
-  name = "${local.lambda_name}-dynamodb-policy"
+resource "aws_iam_role_policy" "lambda_sqs" {
+  name = "${local.lambda_name}-sqs-policy"
   role = aws_iam_role.lambda_execution.id
 
   policy = jsonencode({
@@ -165,16 +165,14 @@ resource "aws_iam_role_policy" "lambda_dynamodb" {
       {
         Effect = "Allow"
         Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:Query",
-          "dynamodb:Scan"
+          "sqs:SendMessage",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl"
         ]
         Resource = [
-          aws_dynamodb_table.state.arn,
-          "${aws_dynamodb_table.state.arn}/index/*"
+          aws_sqs_queue.dlq.arn
         ]
       }
     ]

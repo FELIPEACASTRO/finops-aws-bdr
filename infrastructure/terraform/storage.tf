@@ -1,18 +1,21 @@
 ################################################################################
-# FinOps AWS - S3 and DynamoDB Storage Configuration
+# FinOps AWS - S3 Storage Configuration
+# Armazenamento unificado para estado, relatorios e checkpoints
+# OTIMIZADO: Sem DynamoDB - usando apenas S3 para reducao de custo
 ################################################################################
 
 ################################################################################
-# S3 Bucket - Reports and State Storage
+# S3 Bucket - Reports, State and Checkpoints
 ################################################################################
 
 resource "aws_s3_bucket" "reports" {
-  bucket = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.lambda_name}-reports-${local.account_id}"
+  bucket = var.s3_bucket_name != "" ? var.s3_bucket_name : "${local.lambda_name}-storage-${local.account_id}"
   
   force_destroy = var.environment != "prod"
 
   tags = merge(local.common_tags, {
-    Name = "${local.lambda_name}-reports"
+    Name = "${local.lambda_name}-storage"
+    Purpose = "Reports, State, Checkpoints"
   })
 }
 
@@ -46,11 +49,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
   }
 
   rule {
-    id     = "expire-old-states"
+    id     = "expire-execution-state"
     status = "Enabled"
 
     filter {
-      prefix = "state/"
+      prefix = "state/executions/"
     }
 
     expiration {
@@ -59,7 +62,20 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
   }
 
   rule {
-    id     = "intelligent-tiering"
+    id     = "expire-checkpoints"
+    status = "Enabled"
+
+    filter {
+      prefix = "checkpoints/"
+    }
+
+    expiration {
+      days = 3
+    }
+  }
+
+  rule {
+    id     = "intelligent-tiering-archives"
     status = "Enabled"
 
     filter {
@@ -78,6 +94,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
 
     expiration {
       days = 365
+    }
+  }
+
+  rule {
+    id     = "abort-incomplete-multipart"
+    status = "Enabled"
+
+    filter {
+      prefix = ""
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 1
     }
   }
 }
@@ -144,107 +173,28 @@ resource "aws_s3_bucket_policy" "reports" {
 }
 
 ################################################################################
-# DynamoDB Table - Execution State
+# S3 Bucket Metrics (para dashboard)
 ################################################################################
 
-resource "aws_dynamodb_table" "state" {
-  name         = "${local.lambda_name}-state"
-  billing_mode = var.dynamodb_billing_mode
-  
-  read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_read_capacity : null
-  write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_write_capacity : null
-
-  hash_key  = "pk"
-  range_key = "sk"
-
-  attribute {
-    name = "pk"
-    type = "S"
-  }
-
-  attribute {
-    name = "sk"
-    type = "S"
-  }
-
-  attribute {
-    name = "gsi1pk"
-    type = "S"
-  }
-
-  attribute {
-    name = "gsi1sk"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "gsi1"
-    hash_key        = "gsi1pk"
-    range_key       = "gsi1sk"
-    projection_type = "ALL"
-    
-    read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_read_capacity : null
-    write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_write_capacity : null
-  }
-
-  ttl {
-    attribute_name = "ttl"
-    enabled        = true
-  }
-
-  point_in_time_recovery {
-    enabled = var.environment == "prod"
-  }
-
-  server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.enable_kms_encryption ? aws_kms_key.main[0].arn : null
-  }
-
-  tags = merge(local.common_tags, {
-    Name = "${local.lambda_name}-state"
-  })
+resource "aws_s3_bucket_metric" "reports" {
+  bucket = aws_s3_bucket.reports.id
+  name   = "EntireBucket"
 }
 
-################################################################################
-# DynamoDB Table - Cost History (optional - for trend analysis)
-################################################################################
-
-resource "aws_dynamodb_table" "cost_history" {
-  name         = "${local.lambda_name}-cost-history"
-  billing_mode = var.dynamodb_billing_mode
+resource "aws_s3_bucket_metric" "state" {
+  bucket = aws_s3_bucket.reports.id
+  name   = "StatePrefix"
   
-  read_capacity  = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_read_capacity : null
-  write_capacity = var.dynamodb_billing_mode == "PROVISIONED" ? var.dynamodb_write_capacity : null
-
-  hash_key  = "account_id"
-  range_key = "date_service"
-
-  attribute {
-    name = "account_id"
-    type = "S"
+  filter {
+    prefix = "state/"
   }
+}
 
-  attribute {
-    name = "date_service"
-    type = "S"
+resource "aws_s3_bucket_metric" "reports_prefix" {
+  bucket = aws_s3_bucket.reports.id
+  name   = "ReportsPrefix"
+  
+  filter {
+    prefix = "reports/"
   }
-
-  ttl {
-    attribute_name = "ttl"
-    enabled        = true
-  }
-
-  point_in_time_recovery {
-    enabled = var.environment == "prod"
-  }
-
-  server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.enable_kms_encryption ? aws_kms_key.main[0].arn : null
-  }
-
-  tags = merge(local.common_tags, {
-    Name = "${local.lambda_name}-cost-history"
-  })
 }

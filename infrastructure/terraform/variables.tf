@@ -114,7 +114,7 @@ variable "schedule_expression" {
 }
 
 variable "schedule_expressions" {
-  description = "Lista de expressoes cron para multiplas execucoes diarias (maximo 5)"
+  description = "Lista de expressoes cron para multiplas execucoes diarias"
   type        = list(string)
   default     = [
     "cron(0 6 * * ? *)",
@@ -123,11 +123,49 @@ variable "schedule_expressions" {
     "cron(0 15 * * ? *)",
     "cron(0 18 * * ? *)"
   ]
+}
+
+################################################################################
+# Configuracoes Step Functions
+################################################################################
+
+variable "stepfunctions_max_concurrency" {
+  description = "Maximo de batches processados em paralelo pelo Step Functions"
+  type        = number
+  default     = 20
 
   validation {
-    condition     = length(var.schedule_expressions) <= 5
-    error_message = "Maximo de 5 execucoes diarias permitidas."
+    condition     = var.stepfunctions_max_concurrency >= 1 && var.stepfunctions_max_concurrency <= 40
+    error_message = "Step Functions max concurrency deve estar entre 1 e 40."
   }
+}
+
+variable "stepfunctions_log_level" {
+  description = "Nivel de log do Step Functions (OFF, ALL, ERROR, FATAL)"
+  type        = string
+  default     = "ERROR"
+
+  validation {
+    condition     = contains(["OFF", "ALL", "ERROR", "FATAL"], var.stepfunctions_log_level)
+    error_message = "Step Functions log level deve ser: OFF, ALL, ERROR ou FATAL."
+  }
+}
+
+variable "batch_size" {
+  description = "Numero de servicos por batch"
+  type        = number
+  default     = 20
+
+  validation {
+    condition     = var.batch_size >= 5 && var.batch_size <= 50
+    error_message = "Batch size deve estar entre 5 e 50."
+  }
+}
+
+variable "enable_sqs_processing" {
+  description = "Habilitar fila SQS para processamento assincrono (alem do Step Functions)"
+  type        = bool
+  default     = false
 }
 
 variable "use_docker_for_layer" {
@@ -222,32 +260,6 @@ variable "enable_s3_versioning" {
   default     = true
 }
 
-################################################################################
-# Configuracoes de Estado (DynamoDB)
-################################################################################
-
-variable "dynamodb_billing_mode" {
-  description = "Modo de billing do DynamoDB (PAY_PER_REQUEST ou PROVISIONED)"
-  type        = string
-  default     = "PAY_PER_REQUEST"
-
-  validation {
-    condition     = contains(["PAY_PER_REQUEST", "PROVISIONED"], var.dynamodb_billing_mode)
-    error_message = "Billing mode deve ser PAY_PER_REQUEST ou PROVISIONED."
-  }
-}
-
-variable "dynamodb_read_capacity" {
-  description = "Capacidade de leitura (apenas se PROVISIONED)"
-  type        = number
-  default     = 5
-}
-
-variable "dynamodb_write_capacity" {
-  description = "Capacidade de escrita (apenas se PROVISIONED)"
-  type        = number
-  default     = 5
-}
 
 ################################################################################
 # Configuracoes de Logging e Monitoring

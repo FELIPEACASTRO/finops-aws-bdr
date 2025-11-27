@@ -14,9 +14,10 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 
 - **Test Suite**: 1,842+ unit tests passing
 - **Services Implemented**: 252 AWS services - **100% COMPLETE**
-- **Infrastructure**: Terraform complete for AWS deployment
-- **Documentation**: 7,000+ lines across 6 comprehensive guides
-- **Code Quality**: Zero LSP errors, Zero deprecation warnings
+- **Infrastructure**: Terraform complete for AWS deployment (Step Functions + S3)
+- **Documentation**: 7,000+ lines across 7 comprehensive guides
+- **Code Quality**: Zero critical LSP errors
+- **Architecture**: Optimized for 100 executions/day
 
 ### Project Metrics
 
@@ -25,21 +26,33 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 | AWS Services | 252 |
 | Unit Tests | 1,842+ |
 | Categories | 16 |
-| Terraform Files | 13 |
-| Documentation Files | 6 |
+| Terraform Files | 15 |
+| Documentation Files | 7 |
 
 ## System Architecture
 
 Python 3.11, Clean Architecture, Domain-Driven Design (DDD).
 
+**Architecture: Step Functions + S3 (Optimized for 100 runs/day)**
+
+```
+EventBridge → Step Functions → Lambda Workers (parallel) → S3
+                    ↓
+              Lambda Mapper → Lambda Aggregator
+                    ↓
+                 SQS DLQ
+```
+
 **Core Components:**
 
+- `Step Functions` - Orchestrates execution with parallel processing
+- `Lambda Mapper` - Divides 252 services into batches
+- `Lambda Worker` - Processes service batches in parallel
+- `Lambda Aggregator` - Consolidates results and generates reports
+- `S3StateManager` - State and reports storage (no DynamoDB)
 - `ServiceFactory` - Creates and caches 252 AWS service instances
-- `AWSClientFactory` - Manages boto3 client creation
-- `DynamoDBStateManager` - Persistent state and checkpointing
 - `ResilientExecutor` - Circuit breaker pattern
 - `RetryHandler` - Exponential backoff retry
-- `CleanupManager` - Automatic temporary file cleanup
 
 **Key Capabilities:**
 
@@ -47,6 +60,7 @@ Python 3.11, Clean Architecture, Domain-Driven Design (DDD).
 - Optimization: AWS Compute Optimizer integration, right-sizing
 - Multi-Account: Organizations, Control Tower support
 - Security: Security Hub, Macie, GuardDuty integration
+- Scalability: 100 executions/day with high reliability
 
 ## Project Structure
 

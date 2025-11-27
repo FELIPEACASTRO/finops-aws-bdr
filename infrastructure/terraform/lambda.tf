@@ -127,8 +127,9 @@ resource "aws_lambda_function" "main" {
       LOG_LEVEL                = var.log_level
       ENVIRONMENT              = var.environment
       
-      STATE_TABLE_NAME         = aws_dynamodb_table.state.name
       REPORTS_BUCKET_NAME      = aws_s3_bucket.reports.id
+      STATE_PREFIX             = "state/"
+      REPORTS_PREFIX           = "reports/"
       
       ENABLE_MULTI_ACCOUNT     = tostring(var.enable_multi_account)
       ENABLE_MULTI_REGION      = tostring(var.enable_multi_region)
@@ -163,7 +164,7 @@ resource "aws_lambda_function" "main" {
     aws_cloudwatch_log_group.lambda,
     aws_iam_role_policy.lambda_logs,
     aws_iam_role_policy.lambda_s3,
-    aws_iam_role_policy.lambda_dynamodb
+    aws_iam_role_policy.lambda_sqs
   ]
 
   tags = merge(local.common_tags, {
