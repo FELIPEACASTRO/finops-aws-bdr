@@ -52,7 +52,7 @@ pie title Distribuição dos 252 Serviços por Categoria
 | **Total de Serviços** | 252 |
 | **Categorias** | 16 |
 | **Métodos por Serviço** | 5 (mínimo) |
-| **Testes Unitários** | 1,877 |
+| **Testes Unitários** | 1,842+ |
 | **Cobertura de Código** | ~90% |
 
 ---

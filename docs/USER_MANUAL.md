@@ -265,12 +265,12 @@ pytest tests/unit/ -v
 **Saída esperada:**
 ```
 ============================= test session starts =============================
-collected 1933 items
+collected 1842 items
 
 tests/unit/test_cleanup_manager.py ............................ [  1%]
 tests/unit/test_cost_service.py ............................... [  2%]
 ...
-============================= 1877 passed, 1 skipped ==========================
+============================= 1841 passed, 1 skipped ==========================
 ```
 
 ---

@@ -46,7 +46,7 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 │                                                                 │
 │  ✅ 252 Serviços AWS     ✅ Análise Automática                 │
 │  ✅ Clean Architecture   ✅ Recomendações ML                   │
-│  ✅ 1877 Testes          ✅ Multi-Conta                        │
+│  ✅ 1842+ Testes         ✅ Multi-Conta                        │
 │  ✅ Serverless           ✅ Enterprise-Ready                   │
 │  ✅ Deploy Terraform     ✅ 5 Execuções/Dia                    │
 │                                                                 │
@@ -72,7 +72,7 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 | Métrica | Valor |
 |---------|-------|
 | **Serviços AWS Implementados** | 252 (100% do catálogo) |
-| **Testes Automatizados** | 1,877 passando |
+| **Testes Automatizados** | 1,842+ passando |
 | **Cobertura de Código** | ~90% |
 | **Categorias Cobertas** | 16 categorias completas |
 | **Arquitetura** | Clean Architecture + DDD |
@@ -425,5 +425,5 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 ---
 
 *FinOps AWS - Solução Enterprise de Otimização de Custos*
-*252 serviços AWS | 1,877 testes | Clean Architecture | Terraform*
+*252 serviços AWS | 1,842+ testes | Clean Architecture | Terraform*
 *Versão 1.0 - Novembro 2025*
