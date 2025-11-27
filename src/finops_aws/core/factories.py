@@ -132,7 +132,6 @@ class AWSServiceType(Enum):
     CLOUDFORMATION = "cloudformation"
     SSM = "ssm"
     APPCONFIG = "appconfig"
-    IAM = "iam"
     SECURITYHUB = "securityhub"
     MACIE = "macie2"
 
