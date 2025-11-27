@@ -191,3 +191,23 @@ attached_assets/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+*.orig
+*.tmp
+*.swp
+*.swo
+
+# Editor files
+*.sublime-workspace
+*.sublime-project
+
+# Replit internal (keep .replit)
+.upm/
+.cache/
+.local/
+.pythonlibs/

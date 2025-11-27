@@ -625,7 +625,7 @@ class TestServiceFactoryIntegration:
         service_factory = ServiceFactory(client_factory=mock_client_factory)
         all_services = service_factory.get_all_services()
         
-        assert 'cloudwatch_logs' in all_services
+        assert 'cloudwatchlogs' in all_services
         assert 'waf' in all_services
         assert 'cognito' in all_services
         assert 'eventbridge' in all_services
@@ -638,8 +638,8 @@ class TestServiceFactoryIntegration:
         
         service_factory = ServiceFactory(client_factory=mock_client_factory)
         
-        cw1 = service_factory.get_cloudwatch_logs_service()
-        cw2 = service_factory.get_cloudwatch_logs_service()
+        cw1 = service_factory.get_cloudwatchlogs_service()
+        cw2 = service_factory.get_cloudwatchlogs_service()
         assert cw1 is cw2
         
         waf1 = service_factory.get_waf_service()
