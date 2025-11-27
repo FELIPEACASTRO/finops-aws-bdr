@@ -112,6 +112,10 @@ class AWSServiceType(Enum):
     IOTANALYTICS = "iotanalytics"
     GREENGRASSV2 = "greengrassv2"
     IOTEVENTS = "iotevents"
+    MEDIACONVERT = "mediaconvert"
+    MEDIALIVE = "medialive"
+    MEDIAPACKAGE = "mediapackage"
+    IVS = "ivs"
 
 
 @dataclass
@@ -1344,6 +1348,50 @@ class ServiceFactory:
         
         return self._services['iotevents']
     
+    def get_mediaconvert_service(self):
+        """Obtém instância do MediaConvertService"""
+        if 'mediaconvert' in self._mocks:
+            return self._mocks['mediaconvert']
+        
+        if 'mediaconvert' not in self._services:
+            from ..services.mediaconvert_service import MediaConvertService
+            self._services['mediaconvert'] = MediaConvertService(self.client_factory)
+        
+        return self._services['mediaconvert']
+    
+    def get_medialive_service(self):
+        """Obtém instância do MediaLiveService"""
+        if 'medialive' in self._mocks:
+            return self._mocks['medialive']
+        
+        if 'medialive' not in self._services:
+            from ..services.medialive_service import MediaLiveService
+            self._services['medialive'] = MediaLiveService(self.client_factory)
+        
+        return self._services['medialive']
+    
+    def get_mediapackage_service(self):
+        """Obtém instância do MediaPackageService"""
+        if 'mediapackage' in self._mocks:
+            return self._mocks['mediapackage']
+        
+        if 'mediapackage' not in self._services:
+            from ..services.mediapackage_service import MediaPackageService
+            self._services['mediapackage'] = MediaPackageService(self.client_factory)
+        
+        return self._services['mediapackage']
+    
+    def get_ivs_service(self):
+        """Obtém instância do IVSService"""
+        if 'ivs' in self._mocks:
+            return self._mocks['ivs']
+        
+        if 'ivs' not in self._services:
+            from ..services.ivs_service import IVSService
+            self._services['ivs'] = IVSService(self.client_factory)
+        
+        return self._services['ivs']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1421,7 +1469,11 @@ class ServiceFactory:
             'iot': self.get_iot_service(),
             'iotanalytics': self.get_iotanalytics_service(),
             'greengrass': self.get_greengrass_service(),
-            'iotevents': self.get_iotevents_service()
+            'iotevents': self.get_iotevents_service(),
+            'mediaconvert': self.get_mediaconvert_service(),
+            'medialive': self.get_medialive_service(),
+            'mediapackage': self.get_mediapackage_service(),
+            'ivs': self.get_ivs_service()
         }
     
     def clear_cache(self):
