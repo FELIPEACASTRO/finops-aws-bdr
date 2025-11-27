@@ -92,6 +92,15 @@ class AWSServiceType(Enum):
     CONFIG = "config"
     CLOUDTRAIL = "cloudtrail"
     ACM = "acm"
+    BEDROCK = "bedrock"
+    BEDROCK_RUNTIME = "bedrock-runtime"
+    COMPREHEND = "comprehend"
+    REKOGNITION = "rekognition"
+    TEXTRACT = "textract"
+    ATHENA = "athena"
+    QUICKSIGHT = "quicksight"
+    DATASYNC = "datasync"
+    LAKEFORMATION = "lakeformation"
 
 
 @dataclass
@@ -1115,6 +1124,94 @@ class ServiceFactory:
         
         return self._services['acm']
     
+    def get_bedrock_service(self):
+        """Obtém instância do BedrockService"""
+        if 'bedrock' in self._mocks:
+            return self._mocks['bedrock']
+        
+        if 'bedrock' not in self._services:
+            from ..services.bedrock_service import BedrockService
+            self._services['bedrock'] = BedrockService(self.client_factory)
+        
+        return self._services['bedrock']
+    
+    def get_comprehend_service(self):
+        """Obtém instância do ComprehendService"""
+        if 'comprehend' in self._mocks:
+            return self._mocks['comprehend']
+        
+        if 'comprehend' not in self._services:
+            from ..services.comprehend_service import ComprehendService
+            self._services['comprehend'] = ComprehendService(self.client_factory)
+        
+        return self._services['comprehend']
+    
+    def get_rekognition_service(self):
+        """Obtém instância do RekognitionService"""
+        if 'rekognition' in self._mocks:
+            return self._mocks['rekognition']
+        
+        if 'rekognition' not in self._services:
+            from ..services.rekognition_service import RekognitionService
+            self._services['rekognition'] = RekognitionService(self.client_factory)
+        
+        return self._services['rekognition']
+    
+    def get_textract_service(self):
+        """Obtém instância do TextractService"""
+        if 'textract' in self._mocks:
+            return self._mocks['textract']
+        
+        if 'textract' not in self._services:
+            from ..services.textract_service import TextractService
+            self._services['textract'] = TextractService(self.client_factory)
+        
+        return self._services['textract']
+    
+    def get_athena_service(self):
+        """Obtém instância do AthenaService"""
+        if 'athena' in self._mocks:
+            return self._mocks['athena']
+        
+        if 'athena' not in self._services:
+            from ..services.athena_service import AthenaService
+            self._services['athena'] = AthenaService(self.client_factory)
+        
+        return self._services['athena']
+    
+    def get_quicksight_service(self):
+        """Obtém instância do QuickSightService"""
+        if 'quicksight' in self._mocks:
+            return self._mocks['quicksight']
+        
+        if 'quicksight' not in self._services:
+            from ..services.quicksight_service import QuickSightService
+            self._services['quicksight'] = QuickSightService(self.client_factory)
+        
+        return self._services['quicksight']
+    
+    def get_datasync_service(self):
+        """Obtém instância do DataSyncService"""
+        if 'datasync' in self._mocks:
+            return self._mocks['datasync']
+        
+        if 'datasync' not in self._services:
+            from ..services.datasync_service import DataSyncService
+            self._services['datasync'] = DataSyncService(self.client_factory)
+        
+        return self._services['datasync']
+    
+    def get_lakeformation_service(self):
+        """Obtém instância do LakeFormationService"""
+        if 'lakeformation' in self._mocks:
+            return self._mocks['lakeformation']
+        
+        if 'lakeformation' not in self._services:
+            from ..services.lakeformation_service import LakeFormationService
+            self._services['lakeformation'] = LakeFormationService(self.client_factory)
+        
+        return self._services['lakeformation']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1173,7 +1270,15 @@ class ServiceFactory:
             'config': self.get_config_service(),
             'cloudtrail': self.get_cloudtrail_service(),
             'kms': self.get_kms_service(),
-            'acm': self.get_acm_service()
+            'acm': self.get_acm_service(),
+            'bedrock': self.get_bedrock_service(),
+            'comprehend': self.get_comprehend_service(),
+            'rekognition': self.get_rekognition_service(),
+            'textract': self.get_textract_service(),
+            'athena': self.get_athena_service(),
+            'quicksight': self.get_quicksight_service(),
+            'datasync': self.get_datasync_service(),
+            'lakeformation': self.get_lakeformation_service()
         }
     
     def clear_cache(self):
