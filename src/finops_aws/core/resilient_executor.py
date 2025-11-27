@@ -60,7 +60,7 @@ class CircuitBreaker:
         if self.state == CircuitBreakerState.CLOSED:
             return True
         elif self.state == CircuitBreakerState.OPEN:
-            if now >= self.next_attempt_time:
+            if self.next_attempt_time is not None and now >= self.next_attempt_time:
                 self.state = CircuitBreakerState.HALF_OPEN
                 return True
             return False
@@ -229,7 +229,9 @@ class ResilientExecutor:
         self.state_manager.fail_task(task_id, error_msg)
         
         logger.error(error_msg)
-        raise last_exception
+        if last_exception is not None:
+            raise last_exception
+        raise RuntimeError(error_msg)
 
     async def _run_task_function(self, task_func: Callable) -> Any:
         """Executa função da tarefa (sync ou async)"""
@@ -345,7 +347,7 @@ class ResilientExecutor:
     async def execute_with_dependencies(
         self,
         task_functions: Dict[TaskType, Callable],
-        dependencies: Dict[TaskType, List[TaskType]] = None,
+        dependencies: Optional[Dict[TaskType, List[TaskType]]] = None,
         max_concurrent: int = 5,
         timeout_per_task: Optional[float] = None
     ) -> Dict[str, Any]:

@@ -165,7 +165,7 @@ class FinOpsResilientHandler:
         
         return costs
 
-    async def _collect_ec2_metrics(self) -> Dict[str, Any]:
+    async def _collect_ec2_metrics(self) -> Any:
         """Coleta métricas do EC2"""
         logger.info("Collecting EC2 metrics...")
         
@@ -177,7 +177,7 @@ class FinOpsResilientHandler:
             logger.error(f"Failed to collect EC2 metrics: {e}")
             return []
 
-    async def _collect_lambda_metrics(self) -> Dict[str, Any]:
+    async def _collect_lambda_metrics(self) -> Any:
         """Coleta métricas do Lambda"""
         logger.info("Collecting Lambda metrics...")
         
@@ -189,31 +189,29 @@ class FinOpsResilientHandler:
             logger.error(f"Failed to collect Lambda metrics: {e}")
             return []
 
-    async def _collect_rds_metrics(self) -> Dict[str, Any]:
+    async def _collect_rds_metrics(self) -> Any:
         """Coleta métricas do RDS"""
         logger.info("Collecting RDS metrics...")
         
         try:
-            # Implementação futura do RDS
             logger.info("RDS metrics collection not implemented yet")
             return []
         except Exception as e:
             logger.error(f"Failed to collect RDS metrics: {e}")
             return []
 
-    async def _collect_s3_metrics(self) -> Dict[str, Any]:
+    async def _collect_s3_metrics(self) -> Any:
         """Coleta métricas do S3"""
         logger.info("Collecting S3 metrics...")
         
         try:
-            # Implementação futura do S3
             logger.info("S3 metrics collection not implemented yet")
             return []
         except Exception as e:
             logger.error(f"Failed to collect S3 metrics: {e}")
             return []
 
-    async def _get_ec2_recommendations(self) -> Dict[str, Any]:
+    async def _get_ec2_recommendations(self) -> Any:
         """Obtém recomendações do EC2"""
         logger.info("Getting EC2 recommendations...")
         
@@ -225,7 +223,7 @@ class FinOpsResilientHandler:
             logger.error(f"Failed to get EC2 recommendations: {e}")
             return []
 
-    async def _get_lambda_recommendations(self) -> Dict[str, Any]:
+    async def _get_lambda_recommendations(self) -> Any:
         """Obtém recomendações do Lambda"""
         logger.info("Getting Lambda recommendations...")
         
@@ -237,12 +235,11 @@ class FinOpsResilientHandler:
             logger.error(f"Failed to get Lambda recommendations: {e}")
             return []
 
-    async def _get_rds_recommendations(self) -> Dict[str, Any]:
+    async def _get_rds_recommendations(self) -> Any:
         """Obtém recomendações do RDS"""
         logger.info("Getting RDS recommendations...")
         
         try:
-            # Implementação futura do RDS
             logger.info("RDS recommendations not implemented yet")
             return []
         except Exception as e:
@@ -283,8 +280,10 @@ class FinOpsResilientHandler:
                     recommendations['rds_recommendations'] = task.result_data
 
             # Cria relatório consolidado
+            current_exec = self.state_manager.current_execution
+            account_id = current_exec.account_id if current_exec else 'unknown'
             report = FinOpsReport(
-                account_id=self.state_manager.current_execution.account_id,
+                account_id=account_id,
                 generated_at=datetime.now(),
                 costs=costs,
                 usage=usage,
@@ -442,9 +441,11 @@ class FinOpsResilientHandler:
 
         # Adiciona metadados de execução
         duration = (datetime.now() - start_time).total_seconds()
+        current_exec = self.state_manager.current_execution
+        execution_id = current_exec.execution_id if current_exec else 'unknown'
         report_data['execution_metadata'] = {
             'duration_seconds': duration,
-            'execution_id': self.state_manager.current_execution.execution_id,
+            'execution_id': execution_id,
             'request_id': request_id,
             'completed_at': datetime.now().isoformat()
         }
@@ -454,7 +455,7 @@ class FinOpsResilientHandler:
             'headers': {
                 'Content-Type': 'application/json',
                 'X-Request-ID': request_id,
-                'X-Execution-ID': self.state_manager.current_execution.execution_id
+                'X-Execution-ID': execution_id
             },
             'body': json.dumps(report_data, default=str, indent=2)
         }
