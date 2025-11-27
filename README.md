@@ -8,10 +8,12 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 
 | Documento | Descrição | Link |
 |-----------|-----------|------|
+| **Guia Didático** | Tutorial "Use a Cabeça" com analogias | [docs/HEAD_FIRST_FINOPS.md](docs/HEAD_FIRST_FINOPS.md) |
 | **Guia Técnico** | Arquitetura, padrões de projeto, diagramas | [docs/TECHNICAL_GUIDE.md](docs/TECHNICAL_GUIDE.md) |
 | **Guia Funcional** | Capacidades, módulos, casos de uso | [docs/FUNCTIONAL_GUIDE.md](docs/FUNCTIONAL_GUIDE.md) |
 | **Manual do Usuário** | Instalação, configuração, uso | [docs/USER_MANUAL.md](docs/USER_MANUAL.md) |
 | **Catálogo de Serviços** | Lista completa dos 252 serviços | [docs/APPENDIX_SERVICES.md](docs/APPENDIX_SERVICES.md) |
+| **Deploy Terraform** | Infraestrutura como código | [infrastructure/terraform/README_TERRAFORM.md](infrastructure/terraform/README_TERRAFORM.md) |
 
 ---
 
@@ -44,8 +46,9 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 │                                                                 │
 │  ✅ 252 Serviços AWS     ✅ Análise Automática                 │
 │  ✅ Clean Architecture   ✅ Recomendações ML                   │
-│  ✅ 1842 Testes         ✅ Multi-Conta                         │
-│  ✅ Serverless          ✅ Enterprise-Ready                    │
+│  ✅ 1877 Testes          ✅ Multi-Conta                        │
+│  ✅ Serverless           ✅ Enterprise-Ready                   │
+│  ✅ Deploy Terraform     ✅ 5 Execuções/Dia                    │
 │                                                                 │
 │  ECONOMIA TÍPICA: 20-40% em custos AWS                         │
 │                                                                 │
@@ -69,10 +72,11 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 | Métrica | Valor |
 |---------|-------|
 | **Serviços AWS Implementados** | 252 (100% do catálogo) |
-| **Testes Automatizados** | 1,842 passando |
+| **Testes Automatizados** | 1,877 passando |
 | **Cobertura de Código** | ~90% |
 | **Categorias Cobertas** | 16 categorias completas |
 | **Arquitetura** | Clean Architecture + DDD |
+| **Infraestrutura** | Terraform completo |
 
 ### Cobertura por Categoria
 
@@ -81,8 +85,8 @@ Compute & Serverless ███████████████████�
 Storage              ███████████████         15
 Database             ████████████████████████ 25
 Networking           ████████████████████     20
-Security & Identity  ████████████████████     20
-AI/ML                ████████████████████████ 25
+Security & Identity  ████████████████████     22
+AI/ML                ████████████████████████ 26
 Analytics            ████████████████████     20
 Developer Tools      ███████████████         15
 Management           ███████████████         15
@@ -105,7 +109,7 @@ Specialty            ███████████████         15
 │                     TRIGGERS (Gatilhos)                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
 │  │  EventBridge │  │ API Gateway  │  │   CLI Local  │          │
-│  │  (Agendado)  │  │  (HTTP/REST) │  │   (Demo)     │          │
+│  │ (5x por dia) │  │  (HTTP/REST) │  │   (Demo)     │          │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘          │
 └─────────┼─────────────────┼─────────────────┼───────────────────┘
           │                 │                 │
@@ -136,7 +140,7 @@ Specialty            ███████████████         15
 ┌─────────────────────────────────────────────────────────────────┐
 │                       AWS CLOUD                                 │
 │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │
-│  │   EC2   │ │   RDS   │ │   S3    │ │ Lambda  │ │  253+   │  │
+│  │   EC2   │ │   RDS   │ │   S3    │ │ Lambda  │ │  252+   │  │
 │  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -150,6 +154,7 @@ Specialty            ███████████████         15
 | `ResilientExecutor` | Execução com circuit breaker |
 | `RetryHandler` | Retry com exponential backoff |
 | `DynamoDBStateManager` | Persistência de estado |
+| `CleanupManager` | Limpeza automática de arquivos temporários |
 
 ---
 
@@ -184,6 +189,7 @@ Specialty            ███████████████         15
 - Python 3.11+
 - Conta AWS com permissões de leitura
 - AWS CLI configurado (opcional)
+- Terraform 1.5+ (para deploy)
 
 ### Instalação
 
@@ -201,6 +207,9 @@ pip install -r requirements.txt
 ```bash
 # Executar com serviços mockados (sem AWS real)
 python run_local_demo.py 1
+
+# Executar testes unitários
+python run_local_demo.py 2
 
 # Executar com sua conta AWS
 export AWS_ACCESS_KEY_ID="sua-key"
@@ -243,9 +252,10 @@ finops-aws/
 ├── src/finops_aws/           # Código fonte principal
 │   ├── core/                 # Núcleo da aplicação
 │   │   ├── factories.py      # ServiceFactory + AWSClientFactory
-│   │   ├── dynamodb_state_manager.py
+│   │   ├── state_manager.py  # DynamoDBStateManager
 │   │   ├── resilient_executor.py
-│   │   └── retry_handler.py
+│   │   ├── retry_handler.py
+│   │   └── cleanup_manager.py
 │   ├── models/               # Modelos de domínio
 │   │   └── finops_models.py
 │   ├── services/             # 252 serviços AWS
@@ -255,14 +265,23 @@ finops-aws/
 │   │   └── ... (249 outros)
 │   └── utils/                # Utilitários
 │       └── logger.py
-├── tests/                    # 1,842 testes
-│   └── unit/
+├── tests/                    # Suíte de testes
+│   ├── unit/                 # 1,877 testes unitários
+│   ├── integration/          # Testes de integração
+│   └── e2e/                  # Testes end-to-end
 ├── docs/                     # Documentação completa
+│   ├── HEAD_FIRST_FINOPS.md  # Guia didático
 │   ├── TECHNICAL_GUIDE.md
 │   ├── FUNCTIONAL_GUIDE.md
 │   ├── USER_MANUAL.md
 │   └── APPENDIX_SERVICES.md
-├── infrastructure/           # CloudFormation + IAM
+├── infrastructure/           # Infraestrutura como Código
+│   └── terraform/            # Deploy Terraform completo
+│       ├── main.tf
+│       ├── lambda.tf
+│       ├── iam.tf
+│       ├── eventbridge.tf
+│       └── README_TERRAFORM.md
 ├── example_events/           # Eventos de exemplo
 ├── requirements.txt
 ├── run_local_demo.py         # Demo local
@@ -274,28 +293,45 @@ finops-aws/
 
 ## Deploy na AWS
 
-### Via CloudFormation
+### Via Terraform (Recomendado)
 
 ```bash
-# Preparar pacote
-./deploy.sh package
+cd infrastructure/terraform
 
-# Deploy
-aws cloudformation deploy \
-  --template-file infrastructure/cloudformation-template.yaml \
-  --stack-name finops-aws-production \
-  --capabilities CAPABILITY_IAM
+# Configurar variáveis
+cp terraform.tfvars.example terraform.tfvars
+# Editar terraform.tfvars com suas configurações
+
+# Inicializar e aplicar
+terraform init
+terraform plan
+terraform apply
 ```
+
+**Recursos criados pelo Terraform:**
+- Lambda Function com Layer de dependências
+- IAM Role com permissões ReadOnly
+- EventBridge Rules (5 execuções diárias)
+- S3 Bucket para relatórios
+- DynamoDB Table para estado
+- KMS Key para criptografia
+- SNS Topic para alertas
+
+**Custo estimado:** < $1/mês para uso padrão
+
+Ver [Guia Completo de Terraform](infrastructure/terraform/README_TERRAFORM.md)
 
 ### Configurar Agendamento
 
-O Lambda é automaticamente agendado para execução diária às 6h UTC.
+Por padrão, o Lambda executa 5 vezes por dia (6h, 9h, 12h, 15h, 18h UTC).
 
-```bash
-# Alterar para semanal
-aws events put-rule \
-  --name finops-aws-schedule \
-  --schedule-expression "cron(0 8 ? * SUN *)"
+```hcl
+# Alterar em terraform.tfvars
+schedule_expressions = [
+  "cron(0 6 * * ? *)",   # 6:00 UTC
+  "cron(0 12 * * ? *)",  # 12:00 UTC
+  "cron(0 18 * * ? *)"   # 18:00 UTC
+]
 ```
 
 ---
@@ -313,19 +349,25 @@ pytest tests/unit/ -v
 
 # Com cobertura
 pytest tests/unit/ --cov=src/finops_aws --cov-report=html
+
+# Testes de integração
+pytest tests/integration/ -v
+
+# Testes E2E
+pytest tests/e2e/ -v
 ```
 
 ### Estatísticas de Testes
 
 ```
 ============================= test session starts =============================
-collected 1842 items
+collected 1933 items
 
-tests/unit/test_cleanup_manager.py ............................ [  1%]
-tests/unit/test_cost_service.py ............................... [  2%]
-tests/unit/test_dynamodb_state_manager.py ..................... [  4%]
-...
-============================= 1841 passed, 1 skipped ==========================
+tests/unit/ .................................................... [ 97%]
+tests/integration/ ............................................. [ 98%]
+tests/e2e/ ..................................................... [100%]
+
+============================= 1877 passed, 1 skipped ==========================
 ```
 
 ---
@@ -340,8 +382,10 @@ tests/unit/test_dynamodb_state_manager.py ..................... [  4%]
 | **moto** | Mock de serviços AWS |
 | **AWS Lambda** | Execução serverless |
 | **DynamoDB** | Persistência de estado |
-| **CloudFormation** | Infrastructure as Code |
-| **EventBridge** | Agendamento |
+| **Terraform** | Infrastructure as Code |
+| **EventBridge** | Agendamento (5x/dia) |
+| **KMS** | Criptografia |
+| **SNS** | Alertas |
 
 ---
 
@@ -381,5 +425,5 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 ---
 
 *FinOps AWS - Solução Enterprise de Otimização de Custos*
-*252 serviços AWS | 1,842 testes | Clean Architecture*
+*252 serviços AWS | 1,877 testes | Clean Architecture | Terraform*
 *Versão 1.0 - Novembro 2025*
