@@ -47,7 +47,7 @@ graph TB
     subgraph "Camada de Infraestrutura"
         L --> M[AWSClientFactory]
         M --> N[boto3 Clients]
-        I --> O[DynamoDB State]
+        I --> O[S3 State]
     end
     
     subgraph "AWS Cloud"
@@ -73,8 +73,7 @@ graph LR
         end
         
         subgraph "Storage"
-            B[DynamoDB<br/>State Management]
-            C[S3<br/>Reports/Logs]
+            B[S3 Bucket<br/>State + Reports]
         end
         
         subgraph "Triggers"
@@ -121,7 +120,7 @@ graph LR
 | **Singleton** | `ServiceFactory._instance` | Instância única com cache |
 | **Template Method** | `BaseAWSService` | Interface comum para serviços |
 | **Strategy** | `RetryPolicy` | Políticas de retry configuráveis |
-| **State** | `DynamoDBStateManager` | Gerenciamento de estado de execução |
+| **State** | `S3StateManager` | Gerenciamento de estado de execução |
 | **Circuit Breaker** | `ResilientExecutor` | Proteção contra falhas em cascata |
 | **Decorator** | `@with_retry` | Retry automático em funções |
 
@@ -188,7 +187,7 @@ src/finops_aws/
 ├── core/                       # Núcleo da aplicação
 │   ├── __init__.py
 │   ├── factories.py            # ServiceFactory + AWSClientFactory
-│   ├── dynamodb_state_manager.py  # Gerenciamento de estado
+│   ├── s3_state_manager.py        # Gerenciamento de estado (S3)
 │   ├── resilient_executor.py   # Executor com resiliência
 │   ├── retry_handler.py        # Políticas de retry
 │   ├── state_manager.py        # State manager local
@@ -230,7 +229,7 @@ graph TD
     
     subgraph "Camada de Infraestrutura"
         H[AWSClientFactory]
-        I[DynamoDB Client]
+        I[S3 Client]
         J[boto3]
     end
     
@@ -515,12 +514,12 @@ sequenceDiagram
     participant State as StateManager
     participant Factory as ServiceFactory
     participant Services as AWS Services
-    participant DynamoDB as DynamoDB
+    participant S3 as S3 Bucket
     
     Trigger->>Lambda: Invoke (scheduled/API)
     Lambda->>State: Create/Resume Execution
-    State->>DynamoDB: Load state
-    DynamoDB-->>State: Previous state
+    State->>S3: Load state
+    S3-->>State: Previous state
     
     Lambda->>Executor: Execute analysis
     
@@ -539,7 +538,7 @@ sequenceDiagram
             Services-->>Executor: recommendations
             
             Executor->>State: Update checkpoint
-            State->>DynamoDB: Save progress
+            State->>S3: Save progress
         else Service unhealthy
             Executor->>State: Mark failed
             Executor->>Executor: Apply retry policy
@@ -547,7 +546,7 @@ sequenceDiagram
     end
     
     Lambda->>State: Complete execution
-    State->>DynamoDB: Save final state
+    State->>S3: Save final state
     Lambda-->>Trigger: Return results
 ```
 
@@ -590,13 +589,13 @@ flowchart TD
 
 ## 7. Gerenciamento de Estado
 
-### 7.1 DynamoDBStateManager
+### 7.1 S3StateManager
 
 ```python
 @dataclass
 class ExecutionRecord:
     """
-    Registro de execução no DynamoDB.
+    Registro de execução no S3.
     
     Campos:
     - execution_id: ID único da execução
@@ -645,26 +644,31 @@ stateDiagram-v2
     end note
 ```
 
-### 7.3 Schema DynamoDB
+### 7.3 Estrutura S3
 
 ```
-Table: finops-execution-state
-├── PK: execution_id (String)
-├── SK: timestamp (String)
-├── status: String (pending|running|completed|failed)
-├── services_completed: List<String>
-├── current_service: String
-├── checkpoint_data: Map
-│   ├── last_processed_index: Number
-│   ├── partial_results: Map
-│   └── retry_counts: Map
-├── results: Map
-│   ├── analysis: Map
-│   ├── recommendations: List
-│   └── metrics: Map
-├── ttl: Number (expiration timestamp)
-└── GSI: status-index (status, started_at)
+s3://finops-aws-{account-id}/
+├── state/
+│   └── executions/{execution_id}/
+│       └── state.json              # Estado da execução
+├── checkpoints/
+│   └── {execution_id}/
+│       └── {service}.json          # Checkpoint por serviço
+├── reports/
+│   ├── YYYY/MM/DD/{execution_id}/
+│   │   ├── report.json             # Relatório completo
+│   │   └── summary.json            # Resumo executivo
+│   └── latest/
+│       └── report.json             # Último relatório
+└── archives/
+    └── (relatórios antigos)
 ```
+
+**Lifecycle Rules:**
+- `state/`: Expira em 7 dias
+- `checkpoints/`: Expira em 3 dias
+- `reports/`: Expira em 90 dias
+- `archives/`: Glacier após 90 dias, deleta após 365 dias
 
 ---
 
@@ -766,7 +770,7 @@ def lambda_handler(event: Dict, context: Any) -> Dict:
         # Inicialização
         client_factory = AWSClientFactory(region=os.environ.get('AWS_REGION', 'us-east-1'))
         service_factory = ServiceFactory(client_factory)
-        state_manager = DynamoDBStateManager(client_factory)
+        state_manager = S3StateManager(client_factory)
         executor = ResilientExecutor(service_factory, state_manager)
         
         # Verificar execução anterior
@@ -814,7 +818,7 @@ graph TB
         H[RDS Read Access]
         I[S3 Read Access]
         J[Cost Explorer Access]
-        K[DynamoDB Access]
+        K[S3 Access]
     end
     
     subgraph "Environment Variables"
@@ -847,7 +851,7 @@ graph TB
 | Princípio | Implementação |
 |-----------|---------------|
 | **Least Privilege** | IAM policies mínimas por serviço |
-| **Encryption at Rest** | DynamoDB com KMS |
+| **Encryption at Rest** | S3 com KMS (SSE-KMS) |
 | **Encryption in Transit** | TLS 1.2+ obrigatório |
 | **No Hardcoded Secrets** | AWS Secrets Manager / Env vars |
 | **Audit Trail** | CloudTrail logging |
@@ -876,15 +880,18 @@ graph TB
             "Resource": "*"
         },
         {
-            "Sid": "DynamoDBState",
+            "Sid": "S3State",
             "Effect": "Allow",
             "Action": [
-                "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:UpdateItem",
-                "dynamodb:Query"
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:DeleteObject"
             ],
-            "Resource": "arn:aws:dynamodb:*:*:table/finops-*"
+            "Resource": [
+                "arn:aws:s3:::finops-aws-*",
+                "arn:aws:s3:::finops-aws-*/*"
+            ]
         }
     ]
 }
@@ -1449,7 +1456,7 @@ sequenceDiagram
     participant F as ServiceFactory
     participant C as AWSClientFactory
     participant AWS as AWS APIs
-    participant D as DynamoDB
+    participant S3 as S3 Bucket
     
     L->>F: get_all_services()
     F->>C: get_client(ec2) [cached]
@@ -1462,8 +1469,8 @@ sequenceDiagram
     end
     
     AWS-->>F: responses
-    F->>D: save_state(checkpoint)
-    D-->>F: ok
+    F->>S3: save_state(checkpoint)
+    S3-->>F: ok
     F-->>L: services dict
 ```
 

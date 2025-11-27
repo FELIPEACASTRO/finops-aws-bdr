@@ -603,7 +603,7 @@ O FinOps AWS usa **Clean Architecture**, uma forma de organizar código que:
 │  │    ┌─────────────────────────────────────────────────────────────┐  │   │
 │  │    │  🔌 Instalações (Infrastructure Layer)                       │  │   │
 │  │    │     • Conexões com o mundo exterior                         │  │   │
-│  │    │     • AWSClientFactory, DynamoDB                            │  │   │
+│  │    │     • AWSClientFactory, S3StateManager                       │  │   │
 │  │    └─────────────────────────────────────────────────────────────┘  │   │
 │  │                         CAMADA INTERNA                               │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
@@ -648,7 +648,7 @@ O FinOps AWS usa **Clean Architecture**, uma forma de organizar código que:
 │    │  CAMADA DE INFRAESTRUTURA (External Interfaces)                    │ │
 │    │  ┌──────────────────────────────────────────────────────────────┐  │ │
 │    │  │  • AWSClientFactory (cria clientes boto3)                    │  │ │
-│    │  │  • DynamoDB Client (persistência)                            │  │ │
+│    │  │  • S3 Client (persistência de estado)                        │  │ │
 │    │  │  • CloudWatch Client (métricas)                              │  │ │
 │    │  └──────────────────────────────────────────────────────────────┘  │ │
 │    │                                                                     │ │
@@ -682,7 +682,7 @@ Vamos acompanhar uma execução do início ao fim:
 │    │      # "Bom dia! Vou preparar tudo..."                           │  │
 │    │      client_factory = AWSClientFactory()                          │  │
 │    │      service_factory = ServiceFactory(client_factory)             │  │
-│    │      state_manager = DynamoDBStateManager()                       │  │
+│    │      state_manager = S3StateManager()                             │  │
 │    │      executor = ResilientExecutor(service_factory, state_manager) │  │
 │    └────────────────────────────────────────────────────────────────────┘  │
 │                              │                                              │
@@ -760,7 +760,7 @@ Por que precisamos salvar o estado?
     │  O Lambda tem limite de 15 minutos.                        │
     │  Se tiver muitos recursos, pode não dar tempo!             │
     │                                                             │
-    │  SOLUÇÃO: Salvar progresso no DynamoDB                     │
+    │  SOLUÇÃO: Salvar progresso no S3                            │
     │                                                             │
     │  Se o Lambda parar no meio:                                │
     │  • O próximo Lambda continua de onde parou                 │
@@ -823,7 +823,7 @@ Por que precisamos salvar o estado?
 │                                                                             │
 │  5. Progresso é salvo no → ____________                                     │
 │                                                                             │
-│  RESPOSTAS: 1-Lambda, 2-Service, 3-Services, 4-analyze_usage, 5-DynamoDB   │
+│  RESPOSTAS: 1-Lambda, 2-Service, 3-Services, 4-analyze_usage, 5-S3         │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```

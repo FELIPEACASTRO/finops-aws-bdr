@@ -153,7 +153,7 @@ Specialty            ███████████████         15
 | `BaseAWSService` | Interface comum para todos os serviços |
 | `ResilientExecutor` | Execução com circuit breaker |
 | `RetryHandler` | Retry com exponential backoff |
-| `DynamoDBStateManager` | Persistência de estado |
+| `S3StateManager` | Persistência de estado (S3) |
 | `CleanupManager` | Limpeza automática de arquivos temporários |
 
 ---
@@ -252,7 +252,7 @@ finops-aws/
 ├── src/finops_aws/           # Código fonte principal
 │   ├── core/                 # Núcleo da aplicação
 │   │   ├── factories.py      # ServiceFactory + AWSClientFactory
-│   │   ├── state_manager.py  # DynamoDBStateManager
+│   │   ├── state_manager.py  # S3StateManager
 │   │   ├── resilient_executor.py
 │   │   ├── retry_handler.py
 │   │   └── cleanup_manager.py
@@ -312,8 +312,7 @@ terraform apply
 - Lambda Function com Layer de dependências
 - IAM Role com permissões ReadOnly
 - EventBridge Rules (5 execuções diárias)
-- S3 Bucket para relatórios
-- DynamoDB Table para estado
+- S3 Bucket para estado e relatórios
 - KMS Key para criptografia
 - SNS Topic para alertas
 
@@ -381,7 +380,7 @@ tests/e2e/ ..................................................... [100%]
 | **pytest** | Framework de testes |
 | **moto** | Mock de serviços AWS |
 | **AWS Lambda** | Execução serverless |
-| **DynamoDB** | Persistência de estado |
+| **S3** | Persistência de estado e relatórios |
 | **Terraform** | Infrastructure as Code |
 | **EventBridge** | Agendamento (5x/dia) |
 | **KMS** | Criptografia |

@@ -284,9 +284,8 @@ graph TB
     subgraph "Sua Conta AWS"
         A[Terraform] --> B[Lambda Function]
         A --> C[IAM Role]
-        A --> D[DynamoDB Table]
+        A --> D[S3 Bucket]
         A --> E[EventBridge Rules]
-        A --> G[S3 Bucket]
         A --> H[KMS Key]
         
         E -->|5x por dia| B
@@ -394,8 +393,7 @@ terraform apply
 | Lambda Function | Função principal do FinOps |
 | Lambda Layer | Dependências Python |
 | IAM Role | Permissões ReadOnly |
-| DynamoDB Table | Estado da execução |
-| S3 Bucket | Relatórios e logs |
+| S3 Bucket | Estado e relatórios |
 | EventBridge Rules | 5 agendamentos diários |
 | KMS Key | Criptografia |
 | SNS Topic | Alertas |
@@ -511,7 +509,7 @@ pie title Distribuição de Custos por Serviço
 |----------|-----------|--------|
 | `AWS_REGION` | Região AWS principal | `us-east-1` |
 | `LOG_LEVEL` | Nível de log (DEBUG, INFO, WARN) | `INFO` |
-| `DYNAMODB_TABLE` | Nome da tabela de estado | `finops-state` |
+| `S3_BUCKET` | Nome do bucket S3 para estado | `finops-aws-{account}` |
 | `EXECUTION_TIMEOUT` | Timeout em segundos | `840` |
 | `MAX_RETRIES` | Tentativas de retry | `3` |
 | `SERVICES_TO_ANALYZE` | Lista de serviços (CSV) | Todos |
@@ -626,9 +624,10 @@ python run_with_aws.py
 **P: Quanto custa executar o FinOps AWS?**
 > R: O custo é mínimo:
 > - Lambda: ~$0.50/mês (execução diária)
-> - DynamoDB: ~$1.00/mês (estado)
-> - API calls: ~$2.00/mês
-> - **Total estimado: $3-5/mês**
+> - S3: ~$0.05/mês (estado e relatórios)
+> - Step Functions: ~$1.50/mês (100 execuções/dia)
+> - API calls: ~$1.00/mês
+> - **Total estimado: ~$3.16/mês**
 
 **P: Posso analisar apenas alguns serviços?**
 > R: Sim. Use a variável `SERVICES_TO_ANALYZE` para especificar quais serviços analisar.
@@ -800,7 +799,7 @@ python run_with_aws.py
 │ LOG_FORMAT                 │ json               │ json, text                 │
 ├────────────────────────────┼────────────────────┼────────────────────────────┤
 │ ENABLE_CHECKPOINTING       │ true               │ Habilitar checkpoints      │
-│ CHECKPOINT_TABLE           │ finops-state       │ Nome da tabela DynamoDB    │
+│ S3_STATE_BUCKET            │ finops-aws-{acct}  │ Bucket S3 para estado      │
 ├────────────────────────────┼────────────────────┼────────────────────────────┤
 │ SERVICES_FILTER            │ (todos)            │ Lista de serviços: ec2,rds │
 │ REGION_FILTER              │ (todas)            │ Lista de regiões           │

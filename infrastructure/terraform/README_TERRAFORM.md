@@ -4,11 +4,12 @@
 
 Este guia descreve como fazer o deploy do **FinOps AWS** na AWS usando Terraform. A infraestrutura inclui:
 
-- **AWS Lambda** - Função principal de análise de custos
+- **Step Functions** - Orquestração do fluxo de execução
+- **AWS Lambda** - Funções de análise (Mapper, Worker, Aggregator)
 - **EventBridge** - Agendamento de execuções automáticas
-- **DynamoDB** - Armazenamento de estado e histórico
-- **S3** - Relatórios e arquivos de estado
-- **CloudWatch** - Logs e métricas
+- **S3** - Estado e relatórios (substituindo DynamoDB)
+- **SQS DLQ** - Dead Letter Queue para erros
+- **CloudWatch** - Logs, métricas e dashboard
 - **SNS** - Alertas e notificações
 - **KMS** - Criptografia de dados sensíveis
 - **IAM** - Permissões mínimas necessárias
@@ -38,7 +39,7 @@ O usuário/role que executar o Terraform precisa das seguintes permissões:
 - `iam:*` - Para criar roles e policies
 - `lambda:*` - Para criar a função Lambda
 - `s3:*` - Para criar buckets
-- `dynamodb:*` - Para criar tabelas
+- `states:*` - Para criar Step Functions
 - `events:*` - Para criar regras EventBridge
 - `logs:*` - Para criar log groups
 - `kms:*` - Para criar chaves KMS
@@ -166,7 +167,7 @@ infrastructure/terraform/
 ├── iam.tf               # Roles e policies IAM
 ├── lambda.tf            # Função Lambda e layer
 ├── eventbridge.tf       # Agendamentos
-├── storage.tf           # S3 e DynamoDB
+├── storage.tf           # S3 Bucket (estado e relatórios)
 ├── security.tf          # KMS e SNS
 ├── outputs.tf           # Outputs do deploy
 ├── terraform.tfvars.example  # Exemplo de configuração
@@ -230,12 +231,13 @@ Para 5 execuções diárias com configuração padrão:
 
 | Serviço | Custo Mensal Estimado |
 |---------|----------------------|
-| Lambda (512MB, 5min, 150 exec/mês) | ~$0.50 |
-| DynamoDB (PAY_PER_REQUEST) | ~$1.00 |
-| S3 (relatórios) | ~$0.50 |
-| CloudWatch Logs | ~$0.50 |
+| Step Functions (100 exec/dia) | ~$1.50 |
+| Lambda (Mapper, Worker, Aggregator) | ~$0.35 |
+| S3 (estado + relatórios) | ~$0.05 |
+| CloudWatch Logs/Dashboard | ~$1.00 |
+| SQS DLQ | ~$0.01 |
 | EventBridge | ~$0.00 |
-| **Total** | **~$2.50/mês** |
+| **Total** | **~$3.16/mês** (100 exec/dia) |
 
 ---
 
