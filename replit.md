@@ -150,12 +150,24 @@ terraform apply
 ## Quick Commands
 
 ```bash
+# Teste rápido (com mocks)
+python scripts/quick_test.py
+
+# Teste todos os 252 serviços (com mocks)
+python scripts/test_all_services.py
+
+# Teste com AWS real
+python scripts/test_all_services.py --aws
+
+# Teste apenas uma categoria
+python scripts/test_all_services.py --category compute
+
+# Deploy e teste completo
+./scripts/deploy_and_test.sh
+
 # Run local demo (mocked)
 python run_local_demo.py 1
 
 # Run tests
 python run_local_demo.py 2
-
-# Run with real AWS
-python run_with_aws.py
 ```
