@@ -265,12 +265,12 @@ pytest tests/unit/ -v
 **Saída esperada:**
 ```
 ============================= test session starts =============================
-collected 1842 items
+collected 1933 items
 
 tests/unit/test_cleanup_manager.py ............................ [  1%]
 tests/unit/test_cost_service.py ............................... [  2%]
 ...
-============================= 1841 passed, 1 skipped ==========================
+============================= 1877 passed, 1 skipped ==========================
 ```
 
 ---
@@ -282,71 +282,79 @@ tests/unit/test_cost_service.py ............................... [  2%]
 ```mermaid
 graph TB
     subgraph "Sua Conta AWS"
-        A[CloudFormation] --> B[Lambda Function]
+        A[Terraform] --> B[Lambda Function]
         A --> C[IAM Role]
         A --> D[DynamoDB Table]
-        A --> E[EventBridge Rule]
+        A --> E[EventBridge Rules]
+        A --> G[S3 Bucket]
+        A --> H[KMS Key]
         
-        E -->|Cron: 0 6 * * *| B
+        E -->|5x por dia| B
         B --> F[Seus Recursos AWS]
         B --> D
+        B --> G
     end
 ```
 
 ### 6.2 Passo a Passo: Deploy para Lambda
 
-**Passo 1: Preparar o pacote**
+**Passo 1: Configurar variáveis**
 
 ```bash
-# Criar pacote de deployment
-./deploy.sh package
+cd infrastructure/terraform
+cp terraform.tfvars.example terraform.tfvars
 ```
 
-**Passo 2: Configurar parâmetros**
+Edite `terraform.tfvars`:
 
-Edite `infrastructure/cloudformation-template.yaml`:
+```hcl
+# Configurações básicas
+aws_region  = "us-east-1"
+environment = "production"
+project     = "finops-aws"
 
-```yaml
-Parameters:
-  Environment:
-    Type: String
-    Default: production
-  
-  ScheduleExpression:
-    Type: String
-    Default: cron(0 6 * * ? *)  # Diariamente às 6h UTC
-  
-  MemorySize:
-    Type: Number
-    Default: 1024
-  
-  Timeout:
-    Type: Number
-    Default: 900  # 15 minutos
+# Configurações do Lambda
+lambda_memory_size = 1024
+lambda_timeout     = 900  # 15 minutos
+
+# Agendamento (5 execuções diárias)
+schedule_expressions = [
+  "cron(0 6 * * ? *)",   # 6:00 UTC
+  "cron(0 9 * * ? *)",   # 9:00 UTC
+  "cron(0 12 * * ? *)",  # 12:00 UTC
+  "cron(0 15 * * ? *)",  # 15:00 UTC
+  "cron(0 18 * * ? *)"   # 18:00 UTC
+]
+
+# Alertas
+alert_email = "finops-alerts@sua-empresa.com"
 ```
 
-**Passo 3: Deploy via CloudFormation**
+**Passo 2: Inicializar Terraform**
 
 ```bash
-# Deploy completo
-./deploy.sh deploy
+terraform init
+```
 
-# Ou via AWS CLI
-aws cloudformation deploy \
-  --template-file infrastructure/cloudformation-template.yaml \
-  --stack-name finops-aws-production \
-  --capabilities CAPABILITY_IAM
+**Passo 3: Revisar e aplicar**
+
+```bash
+# Revisar mudanças
+terraform plan
+
+# Aplicar infraestrutura
+terraform apply
 ```
 
 ### 6.3 Verificar Deploy
 
 ```bash
-# Verificar status da stack
-aws cloudformation describe-stacks --stack-name finops-aws-production
+# Verificar outputs do Terraform
+terraform output
 
 # Testar Lambda manualmente
 aws lambda invoke \
-  --function-name finops-aws-handler \
+  --function-name finops-aws-production \
   --payload '{}' \
   response.json
 
@@ -355,16 +363,20 @@ cat response.json
 
 ### 6.4 Configurar Agendamento
 
-O EventBridge já é configurado pelo CloudFormation. Para alterar:
+O agendamento é configurado via variável `schedule_expressions` no Terraform:
 
+```hcl
+# Em terraform.tfvars
+schedule_expressions = [
+  "cron(0 6 * * ? *)",   # 6:00 UTC
+  "cron(0 12 * * ? *)",  # 12:00 UTC
+  "cron(0 18 * * ? *)"   # 18:00 UTC
+]
+```
+
+Após alterar, execute:
 ```bash
-# Ver regra atual
-aws events describe-rule --name finops-aws-schedule
-
-# Alterar para semanal (domingos às 8h)
-aws events put-rule \
-  --name finops-aws-schedule \
-  --schedule-expression "cron(0 8 ? * SUN *)"
+terraform apply
 ```
 
 **Exemplos de Cron:**
@@ -374,6 +386,20 @@ aws events put-rule \
 | `cron(0 8 ? * SUN *)` | Domingos às 8h UTC |
 | `cron(0 0 1 * ? *)` | Dia 1 de cada mês |
 | `rate(4 hours)` | A cada 4 horas |
+
+### 6.5 Recursos Criados pelo Terraform
+
+| Recurso | Descrição |
+|---------|-----------|
+| Lambda Function | Função principal do FinOps |
+| Lambda Layer | Dependências Python |
+| IAM Role | Permissões ReadOnly |
+| DynamoDB Table | Estado da execução |
+| S3 Bucket | Relatórios e logs |
+| EventBridge Rules | 5 agendamentos diários |
+| KMS Key | Criptografia |
+| SNS Topic | Alertas |
+| CloudWatch Log Group | Logs da Lambda |
 
 ---
 
