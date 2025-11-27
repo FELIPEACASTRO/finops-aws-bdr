@@ -137,6 +137,7 @@ The project is built with Python 3.11, adhering to Clean Architecture and Domain
 
 The project includes comprehensive documentation in the `docs/` folder:
 
+- **[HEAD_FIRST_FINOPS.md](docs/HEAD_FIRST_FINOPS.md)**: Guia didático "Use a Cabeça" com situações reais, diagramas ASCII e analogias do dia a dia
 - **[TECHNICAL_GUIDE.md](docs/TECHNICAL_GUIDE.md)**: Detailed architecture, design patterns, Mermaid diagrams
 - **[FUNCTIONAL_GUIDE.md](docs/FUNCTIONAL_GUIDE.md)**: Capabilities, modules, use cases
 - **[USER_MANUAL.md](docs/USER_MANUAL.md)**: Installation, configuration, troubleshooting
