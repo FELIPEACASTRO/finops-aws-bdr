@@ -128,6 +128,13 @@ class AWSServiceType(Enum):
     QLDB = "qldb"
     MANAGEDBLOCKCHAIN = "managedblockchain"
     BRAKET = "braket"
+    XRAY = "xray"
+    CLOUDFORMATION = "cloudformation"
+    SSM = "ssm"
+    APPCONFIG = "appconfig"
+    IAM = "iam"
+    SECURITYHUB = "securityhub"
+    MACIE = "macie2"
 
 
 @dataclass
@@ -1536,6 +1543,94 @@ class ServiceFactory:
         
         return self._services['braket']
     
+    def get_xray_service(self):
+        """Obtém instância do XRayService"""
+        if 'xray' in self._mocks:
+            return self._mocks['xray']
+        
+        if 'xray' not in self._services:
+            from ..services.xray_service import XRayService
+            self._services['xray'] = XRayService(self.client_factory)
+        
+        return self._services['xray']
+    
+    def get_cloudformation_service(self):
+        """Obtém instância do CloudFormationService"""
+        if 'cloudformation' in self._mocks:
+            return self._mocks['cloudformation']
+        
+        if 'cloudformation' not in self._services:
+            from ..services.cloudformation_service import CloudFormationService
+            self._services['cloudformation'] = CloudFormationService(self.client_factory)
+        
+        return self._services['cloudformation']
+    
+    def get_ssm_service(self):
+        """Obtém instância do SSMService"""
+        if 'ssm' in self._mocks:
+            return self._mocks['ssm']
+        
+        if 'ssm' not in self._services:
+            from ..services.ssm_service import SSMService
+            self._services['ssm'] = SSMService(self.client_factory)
+        
+        return self._services['ssm']
+    
+    def get_appconfig_service(self):
+        """Obtém instância do AppConfigService"""
+        if 'appconfig' in self._mocks:
+            return self._mocks['appconfig']
+        
+        if 'appconfig' not in self._services:
+            from ..services.appconfig_service import AppConfigService
+            self._services['appconfig'] = AppConfigService(self.client_factory)
+        
+        return self._services['appconfig']
+    
+    def get_sqs_service(self):
+        """Obtém instância do SQSService"""
+        if 'sqs' in self._mocks:
+            return self._mocks['sqs']
+        
+        if 'sqs' not in self._services:
+            from ..services.sqs_service import SQSService
+            self._services['sqs'] = SQSService(self.client_factory)
+        
+        return self._services['sqs']
+    
+    def get_iam_service(self):
+        """Obtém instância do IAMService"""
+        if 'iam' in self._mocks:
+            return self._mocks['iam']
+        
+        if 'iam' not in self._services:
+            from ..services.iam_service import IAMService
+            self._services['iam'] = IAMService(self.client_factory)
+        
+        return self._services['iam']
+    
+    def get_securityhub_service(self):
+        """Obtém instância do SecurityHubService"""
+        if 'securityhub' in self._mocks:
+            return self._mocks['securityhub']
+        
+        if 'securityhub' not in self._services:
+            from ..services.securityhub_service import SecurityHubService
+            self._services['securityhub'] = SecurityHubService(self.client_factory)
+        
+        return self._services['securityhub']
+    
+    def get_macie_service(self):
+        """Obtém instância do MacieService"""
+        if 'macie' in self._mocks:
+            return self._mocks['macie']
+        
+        if 'macie' not in self._services:
+            from ..services.macie_service import MacieService
+            self._services['macie'] = MacieService(self.client_factory)
+        
+        return self._services['macie']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1629,7 +1724,15 @@ class ServiceFactory:
             'robomaker': self.get_robomaker_service(),
             'qldb': self.get_qldb_service(),
             'managedblockchain': self.get_managedblockchain_service(),
-            'braket': self.get_braket_service()
+            'braket': self.get_braket_service(),
+            'xray': self.get_xray_service(),
+            'cloudformation': self.get_cloudformation_service(),
+            'ssm': self.get_ssm_service(),
+            'appconfig': self.get_appconfig_service(),
+            'sqs': self.get_sqs_service(),
+            'iam': self.get_iam_service(),
+            'securityhub': self.get_securityhub_service(),
+            'macie': self.get_macie_service()
         }
     
     def clear_cache(self):
