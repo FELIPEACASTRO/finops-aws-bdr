@@ -978,3 +978,496 @@ def test_ec2_service_analyze_usage():
 *Documento gerado em: Novembro 2025*
 *Versão: 1.0*
 *Autor: FinOps AWS Team*
+
+---
+
+## 12. Detalhes de Implementação por Componente
+
+### 12.1 ServiceFactory - Implementação Interna
+
+```python
+# Arquitetura interna do ServiceFactory
+
+class ServiceFactory:
+    """
+    Factory para criação de serviços AWS.
+    Implementa padrões Singleton e Factory Method.
+    """
+    
+    _instance = None
+    _services_cache = {}
+    
+    def __new__(cls, *args, **kwargs):
+        # Padrão Singleton
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
+    def __init__(self, client_factory: AWSClientFactory = None):
+        self.client_factory = client_factory or AWSClientFactory()
+        self._register_all_services()
+    
+    def _register_all_services(self):
+        """
+        Registra todos os 252+ serviços disponíveis.
+        Usa lazy loading para otimizar uso de memória.
+        """
+        # Mapeamento enum -> getter method
+        self._service_map = {
+            AWSServiceType.EC2: self.get_ec2_service,
+            AWSServiceType.LAMBDA: self.get_lambda_service,
+            AWSServiceType.S3: self.get_s3_service,
+            # ... 249 outros serviços
+        }
+    
+    def get_service(self, service_type: AWSServiceType):
+        """
+        Obtém serviço por tipo (com cache).
+        """
+        if service_type not in self._services_cache:
+            getter = self._service_map.get(service_type)
+            if getter:
+                self._services_cache[service_type] = getter()
+        return self._services_cache.get(service_type)
+    
+    def get_all_services(self) -> Dict[str, BaseAWSService]:
+        """
+        Retorna dicionário com todos os serviços instanciados.
+        """
+        return {
+            svc_type.value: self.get_service(svc_type)
+            for svc_type in AWSServiceType
+        }
+```
+
+### 12.2 RetryHandler - Estratégias de Retry
+
+```python
+# Implementação do RetryHandler
+
+class RetryHandler:
+    """
+    Handler para retry com exponential backoff.
+    """
+    
+    def __init__(
+        self,
+        max_retries: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        exponential_base: float = 2.0,
+        jitter: bool = True
+    ):
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.exponential_base = exponential_base
+        self.jitter = jitter
+    
+    def calculate_delay(self, attempt: int) -> float:
+        """
+        Calcula delay com exponential backoff.
+        
+        Fórmula: delay = min(base * (exp ^ attempt), max)
+        Com jitter opcional para evitar thundering herd.
+        """
+        delay = min(
+            self.base_delay * (self.exponential_base ** attempt),
+            self.max_delay
+        )
+        if self.jitter:
+            delay *= random.uniform(0.5, 1.5)
+        return delay
+    
+    def should_retry(self, exception: Exception) -> bool:
+        """
+        Determina se exceção é retryable.
+        """
+        retryable_exceptions = [
+            'Throttling',
+            'RequestLimitExceeded',
+            'ProvisionedThroughputExceededException',
+            'ServiceUnavailable',
+            'InternalError'
+        ]
+        error_code = getattr(exception, 'response', {}).get('Error', {}).get('Code', '')
+        return error_code in retryable_exceptions
+```
+
+### 12.3 ResilientExecutor - Circuit Breaker
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: Falhas >= threshold
+    Open --> HalfOpen: Timeout expirado
+    HalfOpen --> Closed: Sucesso
+    HalfOpen --> Open: Falha
+    Closed --> Closed: Sucesso
+```
+
+```python
+# Implementação do Circuit Breaker
+
+class CircuitBreaker:
+    """
+    Implementação do padrão Circuit Breaker.
+    Estados: CLOSED, OPEN, HALF_OPEN
+    """
+    
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        recovery_timeout: int = 30,
+        half_open_max_calls: int = 3
+    ):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.half_open_max_calls = half_open_max_calls
+        self.state = CircuitState.CLOSED
+        self.failure_count = 0
+        self.last_failure_time = None
+    
+    def can_execute(self) -> bool:
+        if self.state == CircuitState.CLOSED:
+            return True
+        elif self.state == CircuitState.OPEN:
+            if self._recovery_timeout_expired():
+                self.state = CircuitState.HALF_OPEN
+                return True
+            return False
+        else:  # HALF_OPEN
+            return self.half_open_calls < self.half_open_max_calls
+    
+    def record_success(self):
+        self.failure_count = 0
+        self.state = CircuitState.CLOSED
+    
+    def record_failure(self):
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+```
+
+---
+
+## 13. Estrutura de Dados e Modelos
+
+### 13.1 Dataclasses Principais
+
+```python
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional
+from datetime import datetime
+from enum import Enum
+
+@dataclass
+class InstanceMetrics:
+    """Métricas coletadas de uma instância."""
+    instance_id: str
+    instance_type: str
+    cpu_average: float
+    cpu_max: float
+    memory_average: Optional[float]
+    network_in_bytes: int
+    network_out_bytes: int
+    disk_read_ops: int
+    disk_write_ops: int
+    collection_period_days: int = 30
+
+@dataclass
+class CostBreakdown:
+    """Breakdown de custos por recurso."""
+    resource_id: str
+    resource_type: str
+    service: str
+    region: str
+    hourly_cost: float
+    daily_cost: float
+    monthly_cost: float
+    tags: Dict[str, str] = field(default_factory=dict)
+
+@dataclass  
+class Recommendation:
+    """Recomendação de otimização."""
+    id: str
+    type: RecommendationType
+    resource_id: str
+    title: str
+    description: str
+    current_cost: float
+    estimated_savings: float
+    implementation_effort: EffortLevel
+    risk_level: RiskLevel
+    priority: int
+    action_items: List[str] = field(default_factory=list)
+    
+@dataclass
+class AnalysisResult:
+    """Resultado completo de análise."""
+    execution_id: str
+    timestamp: datetime
+    account_id: str
+    region: str
+    services_analyzed: int
+    resources_analyzed: int
+    total_cost: float
+    recommendations: List[Recommendation]
+    metrics: Dict[str, Any]
+    errors: List[str] = field(default_factory=list)
+```
+
+### 13.2 Enums de Tipos
+
+```python
+class AWSServiceType(Enum):
+    """Enum com todos os 255 tipos de serviço AWS."""
+    
+    # Compute & Serverless
+    EC2 = "ec2"
+    LAMBDA = "lambda"
+    BATCH = "batch"
+    LIGHTSAIL = "lightsail"
+    APP_RUNNER = "apprunner"
+    ELASTIC_BEANSTALK = "elasticbeanstalk"
+    # ... 249 outros
+    
+class RecommendationType(Enum):
+    """Tipos de recomendação."""
+    RIGHTSIZING_DOWN = "rightsizing_down"
+    RIGHTSIZING_UP = "rightsizing_up"
+    RESERVED_INSTANCE = "reserved_instance"
+    SAVINGS_PLAN = "savings_plan"
+    SPOT_INSTANCE = "spot_instance"
+    IDLE_RESOURCE = "idle_resource"
+    STORAGE_TIERING = "storage_tiering"
+    DELETE_UNUSED = "delete_unused"
+
+class EffortLevel(Enum):
+    """Nível de esforço para implementação."""
+    LOW = "low"      # < 1 hora
+    MEDIUM = "medium"  # 1-8 horas
+    HIGH = "high"    # > 8 horas
+
+class RiskLevel(Enum):
+    """Nível de risco da recomendação."""
+    LOW = "low"      # Sem impacto em produção
+    MEDIUM = "medium"  # Impacto mínimo possível
+    HIGH = "high"    # Requer janela de manutenção
+```
+
+---
+
+## 14. APIs e Interfaces
+
+### 14.1 Lambda Handler API
+
+```python
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    """
+    Handler principal do AWS Lambda.
+    
+    Args:
+        event: Evento de entrada (API Gateway, EventBridge, etc)
+        context: Contexto de execução Lambda
+        
+    Returns:
+        Dict com statusCode, headers, body
+        
+    Event Types Suportados:
+        - scheduled: Execução agendada via EventBridge
+        - api: Requisição via API Gateway
+        - sns: Trigger via SNS
+    """
+    
+    # Response format
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json",
+            "X-Request-Id": context.aws_request_id
+        },
+        "body": json.dumps({
+            "execution_id": "exec-123",
+            "status": "completed",
+            "summary": {
+                "services_analyzed": 252,
+                "recommendations_count": 45,
+                "total_savings": 12500.00
+            },
+            "report_url": "s3://bucket/reports/..."
+        })
+    }
+```
+
+### 14.2 Interface BaseAWSService
+
+```python
+from abc import ABC, abstractmethod
+
+class BaseAWSService(ABC):
+    """
+    Classe base abstrata para todos os serviços AWS.
+    Define interface comum para análise e recomendações.
+    """
+    
+    def __init__(self, client_factory: AWSClientFactory):
+        self.client_factory = client_factory
+        self.logger = get_logger(self.__class__.__name__)
+    
+    @abstractmethod
+    def health_check(self) -> Dict[str, Any]:
+        """
+        Verifica saúde do serviço.
+        
+        Returns:
+            {"status": "healthy"|"degraded"|"unhealthy", "details": {...}}
+        """
+        pass
+    
+    @abstractmethod
+    def get_resources(self) -> List[Dict[str, Any]]:
+        """
+        Lista todos os recursos do serviço.
+        
+        Returns:
+            Lista de recursos com metadados
+        """
+        pass
+    
+    @abstractmethod
+    def get_metrics(self, resource_id: str, period_days: int = 30) -> Dict[str, Any]:
+        """
+        Coleta métricas de um recurso específico.
+        """
+        pass
+    
+    @abstractmethod
+    def analyze_usage(self) -> Dict[str, Any]:
+        """
+        Analisa uso e gera insights.
+        """
+        pass
+    
+    @abstractmethod
+    def get_recommendations(self) -> List[Recommendation]:
+        """
+        Gera recomendações de otimização.
+        """
+        pass
+```
+
+---
+
+## 15. Segurança e Best Practices
+
+### 15.1 Princípios de Segurança
+
+```mermaid
+graph TD
+    subgraph "Segurança em Camadas"
+        A[IAM Policies] --> B[Menor Privilégio]
+        B --> C[Apenas Leitura]
+        C --> D[Auditoria via CloudTrail]
+        D --> E[Criptografia em Trânsito]
+        E --> F[Sem Dados Sensíveis em Logs]
+    end
+```
+
+### 15.2 IAM Policy Recomendada
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "FinOpsReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "rds:Describe*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "lambda:List*",
+                "lambda:Get*",
+                "cloudwatch:GetMetric*",
+                "cloudwatch:List*",
+                "ce:Get*",
+                "pricing:Get*",
+                "compute-optimizer:Get*",
+                "organizations:Describe*",
+                "organizations:List*",
+                "tag:Get*",
+                "sts:GetCallerIdentity"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "FinOpsStateManagement",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Query"
+            ],
+            "Resource": "arn:aws:dynamodb:*:*:table/finops-*"
+        },
+        {
+            "Sid": "FinOpsReports",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::finops-reports-*/*"
+        }
+    ]
+}
+```
+
+---
+
+## 16. Performance e Otimizações
+
+### 16.1 Estratégias de Performance
+
+| Estratégia | Implementação | Ganho |
+|------------|---------------|-------|
+| **Lazy Loading** | Serviços carregados sob demanda | -50% memória inicial |
+| **Connection Pooling** | boto3 session reutilizada | -30% latência API |
+| **Pagination** | Paginas de 100 itens | Suporta milhões de recursos |
+| **Caching** | Cache de serviços por execução | -40% chamadas API |
+| **Batch Operations** | Requisições em lote quando possível | -60% tempo total |
+
+### 16.2 Diagrama de Fluxo Otimizado
+
+```mermaid
+sequenceDiagram
+    participant L as Lambda
+    participant F as ServiceFactory
+    participant C as AWSClientFactory
+    participant AWS as AWS APIs
+    participant D as DynamoDB
+    
+    L->>F: get_all_services()
+    F->>C: get_client(ec2) [cached]
+    C-->>F: boto3.client
+    
+    par Parallel API Calls
+        F->>AWS: describe_instances
+        F->>AWS: describe_volumes
+        F->>AWS: get_metric_data
+    end
+    
+    AWS-->>F: responses
+    F->>D: save_state(checkpoint)
+    D-->>F: ok
+    F-->>L: services dict
+```
+
+---
+
+*Guia Técnico FinOps AWS - Versão 2.0 Expandida*
+*Novembro 2025*

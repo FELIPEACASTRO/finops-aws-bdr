@@ -703,3 +703,328 @@ Para instruções de uso, consulte o [Manual do Usuário](USER_MANUAL.md).
 
 *Documento gerado em: Novembro 2025*
 *Versão: 1.0*
+
+---
+
+## 11. Fluxos de Trabalho Detalhados
+
+### 11.1 Fluxo de Análise Completa
+
+```mermaid
+flowchart TD
+    A[Início] --> B[Carregar Configuração]
+    B --> C[Inicializar Factories]
+    C --> D[Verificar Estado Anterior]
+    D --> E{Execução Anterior?}
+    E -->|Sim| F[Resumir do Checkpoint]
+    E -->|Não| G[Nova Execução]
+    F --> H[Continuar Análise]
+    G --> H
+    
+    H --> I[Loop por Serviços]
+    I --> J[Health Check]
+    J --> K{Saudável?}
+    K -->|Sim| L[Coletar Recursos]
+    K -->|Não| M[Registrar Erro]
+    L --> N[Coletar Métricas]
+    N --> O[Analisar Uso]
+    O --> P[Gerar Recomendações]
+    P --> Q[Salvar Checkpoint]
+    M --> Q
+    Q --> R{Mais Serviços?}
+    R -->|Sim| I
+    R -->|Não| S[Consolidar Resultados]
+    S --> T[Gerar Relatório]
+    T --> U[Enviar Notificações]
+    U --> V[Fim]
+```
+
+### 11.2 Fluxo de Recomendação
+
+```mermaid
+flowchart LR
+    subgraph "Coleta"
+        A[Recursos] --> B[Métricas 30d]
+        B --> C[Custos]
+    end
+    
+    subgraph "Análise"
+        C --> D[Calcular Utilização]
+        D --> E[Detectar Padrões]
+        E --> F[Comparar com Benchmarks]
+    end
+    
+    subgraph "Decisão"
+        F --> G{Utilização < 10%?}
+        G -->|Sim| H[Recurso Ocioso]
+        G -->|Não| I{Utilização < 40%?}
+        I -->|Sim| J[Rightsizing]
+        I -->|Não| K{Uso Constante?}
+        K -->|Sim| L[Reserved Instance]
+        K -->|Não| M[Spot/On-Demand]
+    end
+    
+    subgraph "Output"
+        H --> N[Recomendação]
+        J --> N
+        L --> N
+        M --> N
+    end
+```
+
+---
+
+## 12. Casos de Uso Avançados
+
+### 12.1 Multi-Account FinOps
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      CENÁRIO: MULTI-ACCOUNT FINOPS                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ESTRUTURA ORGANIZACIONAL                                                   │
+│  ─────────────────────────────────────────────────────────────────────      │
+│                                                                             │
+│                    ┌──────────────────┐                                     │
+│                    │  Management      │                                     │
+│                    │  Account         │                                     │
+│                    └────────┬─────────┘                                     │
+│                             │                                               │
+│           ┌─────────────────┼─────────────────┐                             │
+│           │                 │                 │                             │
+│    ┌──────▼──────┐   ┌──────▼──────┐   ┌──────▼──────┐                     │
+│    │   Prod      │   │    Dev      │   │   Staging   │                     │
+│    │  Account    │   │  Account    │   │  Account    │                     │
+│    │  $50k/mês   │   │  $15k/mês   │   │  $8k/mês    │                     │
+│    └─────────────┘   └─────────────┘   └─────────────┘                     │
+│                                                                             │
+│  IMPLEMENTAÇÃO                                                              │
+│  ─────────────────────────────────────────────────────────────────────      │
+│                                                                             │
+│  1. IAM Role com trust para conta de management                            │
+│  2. FinOps AWS assume role em cada conta                                   │
+│  3. Coleta dados de todas as contas                                        │
+│  4. Consolida em relatório único                                           │
+│  5. Gera recomendações cross-account                                       │
+│                                                                             │
+│  BENEFÍCIOS                                                                 │
+│  ─────────────────────────────────────────────────────────────────────      │
+│                                                                             │
+│  • Visão unificada de custos                                               │
+│  • Comparação entre ambientes                                               │
+│  • Identificação de recursos duplicados                                    │
+│  • Reserved Instance sharing                                                │
+│  • Savings Plans organizacionais                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 12.2 Análise de Containers (ECS/EKS)
+
+```mermaid
+graph TB
+    subgraph "ECS Cluster Analysis"
+        A[ECS Cluster] --> B[List Services]
+        B --> C[List Tasks]
+        C --> D[Get Task Definitions]
+        
+        D --> E[CPU Reserved vs Used]
+        D --> F[Memory Reserved vs Used]
+        
+        E --> G{Over-provisioned?}
+        F --> G
+        
+        G -->|Yes| H[Rightsizing Recommendation]
+        G -->|No| I[Capacity Planning]
+    end
+    
+    subgraph "EKS Cluster Analysis"
+        J[EKS Cluster] --> K[List Node Groups]
+        K --> L[Get Node Metrics]
+        L --> M[Pod Density Analysis]
+        
+        M --> N{Nodes Underutilized?}
+        N -->|Yes| O[Consolidate Nodes]
+        N -->|No| P[Spot Nodes Opportunity]
+    end
+```
+
+### 12.3 Análise de Data Analytics
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CENÁRIO: DATA ANALYTICS OPTIMIZATION                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  SERVIÇOS ANALISADOS                                                        │
+│  ─────────────────────────────────────────────────────────────────────      │
+│                                                                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   Redshift  │  │     EMR     │  │    Athena   │  │    Glue     │        │
+│  │  Warehouse  │  │   Clusters  │  │   Queries   │  │    Jobs     │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                                             │
+│  ANÁLISES ESPECÍFICAS                                                       │
+│  ─────────────────────────────────────────────────────────────────────      │
+│                                                                             │
+│  REDSHIFT:                                                                  │
+│  • Utilização de nós (CPU, Storage)                                        │
+│  • Concurrency Scaling usage                                               │
+│  • Reserved Nodes opportunity                                              │
+│  • Pause/Resume scheduling                                                 │
+│                                                                             │
+│  EMR:                                                                       │
+│  • Cluster runtime analysis                                                │
+│  • Instance Fleet optimization                                             │
+│  • Spot Instance usage                                                      │
+│  • Auto-scaling effectiveness                                               │
+│                                                                             │
+│  ATHENA:                                                                    │
+│  • Query cost per GB scanned                                               │
+│  • Partitioning opportunities                                              │
+│  • Result caching effectiveness                                            │
+│  • Workgroup cost allocation                                               │
+│                                                                             │
+│  GLUE:                                                                      │
+│  • DPU utilization                                                         │
+│  • Job duration optimization                                               │
+│  • Crawler efficiency                                                       │
+│  • Data Catalog usage                                                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 13. Relatórios e Dashboards
+
+### 13.1 Estrutura do Relatório
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ESTRUTURA DO RELATÓRIO FINOPS                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  SEÇÃO 1: SUMÁRIO EXECUTIVO                                                 │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • Total de custos do período                                               │
+│  • Top 5 serviços por custo                                                │
+│  • Total de economia potencial identificada                                │
+│  • Recomendações de alta prioridade                                        │
+│                                                                             │
+│  SEÇÃO 2: ANÁLISE DE CUSTOS                                                 │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • Breakdown por serviço                                                    │
+│  • Breakdown por conta/região                                              │
+│  • Tendência histórica                                                      │
+│  • Projeção para próximo mês                                               │
+│                                                                             │
+│  SEÇÃO 3: RECOMENDAÇÕES                                                     │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • Lista priorizada de recomendações                                       │
+│  • Economia estimada por recomendação                                      │
+│  • Esforço de implementação                                                │
+│  • Riscos e mitigações                                                     │
+│                                                                             │
+│  SEÇÃO 4: MÉTRICAS DE UTILIZAÇÃO                                           │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • CPU/Memory/Storage por serviço                                          │
+│  • Recursos ociosos identificados                                          │
+│  • Oportunidades de rightsizing                                            │
+│                                                                             │
+│  SEÇÃO 5: RESERVED INSTANCES                                                │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • Cobertura atual de RI/SP                                                │
+│  • Oportunidades de compra                                                 │
+│  • ROI de reservas existentes                                              │
+│                                                                             │
+│  SEÇÃO 6: COMPLIANCE E GOVERNANÇA                                          │
+│  ─────────────────────────────────────────────────────────────────────      │
+│  • Recursos sem tags obrigatórias                                          │
+│  • Recursos fora de política                                               │
+│  • Alertas e anomalias                                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 14. Integração com CI/CD
+
+### 14.1 Pipeline de FinOps
+
+```mermaid
+graph LR
+    subgraph "CI/CD Pipeline"
+        A[Commit] --> B[Build]
+        B --> C[Test]
+        C --> D[Deploy to Staging]
+    end
+    
+    subgraph "FinOps Gate"
+        D --> E[Estimate New Costs]
+        E --> F{Within Budget?}
+        F -->|No| G[Notify Team]
+        F -->|Yes| H[Continue]
+        G --> I[Require Approval]
+        I --> H
+    end
+    
+    subgraph "Production"
+        H --> J[Deploy to Prod]
+        J --> K[Monitor Costs]
+        K --> L[Weekly FinOps Report]
+    end
+```
+
+### 14.2 GitHub Actions Integration
+
+```yaml
+# .github/workflows/finops-check.yml
+name: FinOps Cost Analysis
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6 AM
+
+jobs:
+  finops-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Run FinOps Analysis
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: python run_with_aws.py --output json > finops_report.json
+      
+      - name: Check Cost Threshold
+        run: |
+          TOTAL_COST=$(jq '.total_cost' finops_report.json)
+          if (( $(echo "$TOTAL_COST > 50000" | bc -l) )); then
+            echo "::warning::Monthly cost exceeds $50,000 threshold"
+          fi
+      
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: finops-report
+          path: finops_report.json
+```
+
+---
+
+*Guia Funcional FinOps AWS - Versão 2.0 Expandida*
+*Novembro 2025*

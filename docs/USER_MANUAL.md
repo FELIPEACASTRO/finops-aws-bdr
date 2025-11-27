@@ -643,3 +643,300 @@ python run_with_aws.py
 *Manual do Usuário - FinOps AWS*
 *Versão: 1.0*
 *Última atualização: Novembro 2025*
+
+---
+
+## 11. Troubleshooting Avançado
+
+### 11.1 Guia de Diagnóstico
+
+```
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                      GUIA DE DIAGNÓSTICO AVANÇADO                          ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+```
+
+#### Problema: Lambda Timeout
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SINTOMA: Task timed out after X seconds                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  DIAGNÓSTICO:                                                               │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Verificar timeout configurado no Lambda                                │
+│     aws lambda get-function-configuration --function-name finops           │
+│                                                                             │
+│  2. Verificar número de recursos sendo analisados                          │
+│     Muitos recursos = mais tempo necessário                                │
+│                                                                             │
+│  3. Verificar se há throttling da AWS                                      │
+│     Logs com "Rate exceeded"                                               │
+│                                                                             │
+│  SOLUÇÕES:                                                                  │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Aumentar timeout do Lambda (máximo 15 minutos)                         │
+│     aws lambda update-function-configuration \                             │
+│       --function-name finops \                                             │
+│       --timeout 900                                                         │
+│                                                                             │
+│  2. Aumentar memória (mais memória = mais CPU)                             │
+│     aws lambda update-function-configuration \                             │
+│       --function-name finops \                                             │
+│       --memory-size 1024                                                   │
+│                                                                             │
+│  3. Habilitar checkpoint/resume para processar em partes                   │
+│     Variável de ambiente: ENABLE_CHECKPOINTING=true                        │
+│                                                                             │
+│  4. Filtrar serviços analisados                                            │
+│     Variável de ambiente: SERVICES_FILTER=ec2,rds,s3                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Problema: Memory Error
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SINTOMA: Runtime.ExitError ou MemoryError                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  DIAGNÓSTICO:                                                               │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Verificar memória alocada vs usada no CloudWatch                       │
+│     Metric: AWS/Lambda/MemoryUtilization                                   │
+│                                                                             │
+│  2. Conta com muitos recursos (ex: milhares de instâncias EC2)             │
+│                                                                             │
+│  SOLUÇÕES:                                                                  │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Aumentar memória do Lambda                                             │
+│     aws lambda update-function-configuration \                             │
+│       --function-name finops \                                             │
+│       --memory-size 3008                                                   │
+│                                                                             │
+│  2. Processar por região separadamente                                     │
+│     Variável: REGION_FILTER=us-east-1                                      │
+│                                                                             │
+│  3. Habilitar streaming de resultados                                      │
+│     Variável: STREAMING_RESULTS=true                                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Problema: Dados Incompletos
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SINTOMA: Alguns serviços não aparecem no relatório                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  DIAGNÓSTICO:                                                               │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Verificar permissões IAM para o serviço faltante                       │
+│                                                                             │
+│  2. Verificar se o serviço está disponível na região                       │
+│                                                                             │
+│  3. Verificar logs de erro                                                  │
+│     grep "ERROR" /tmp/finops.log                                           │
+│                                                                             │
+│  SOLUÇÕES:                                                                  │
+│  ───────────────────────────────────────────────────────────────────────    │
+│  1. Adicionar permissões necessárias                                       │
+│     Consultar docs/APPENDIX_SERVICES.md para lista de permissões          │
+│                                                                             │
+│  2. Verificar SCPs no AWS Organizations                                    │
+│     aws organizations list-policies --filter SERVICE_CONTROL_POLICY       │
+│                                                                             │
+│  3. Executar em região específica                                          │
+│     export AWS_REGION=us-west-2                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 12. Variáveis de Ambiente
+
+### 12.1 Lista Completa de Variáveis
+
+```
+┌────────────────────────────┬────────────────────┬────────────────────────────┐
+│ Variável                   │ Default            │ Descrição                  │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ AWS_REGION                 │ us-east-1          │ Região AWS principal       │
+│ AWS_ACCESS_KEY_ID          │ -                  │ Access Key (se não IAM)    │
+│ AWS_SECRET_ACCESS_KEY      │ -                  │ Secret Key (se não IAM)    │
+│ AWS_PROFILE                │ default            │ Perfil do ~/.aws/config    │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ LOG_LEVEL                  │ INFO               │ DEBUG, INFO, WARNING, ERROR│
+│ LOG_FORMAT                 │ json               │ json, text                 │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ ENABLE_CHECKPOINTING       │ true               │ Habilitar checkpoints      │
+│ CHECKPOINT_TABLE           │ finops-state       │ Nome da tabela DynamoDB    │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ SERVICES_FILTER            │ (todos)            │ Lista de serviços: ec2,rds │
+│ REGION_FILTER              │ (todas)            │ Lista de regiões           │
+│ ACCOUNT_FILTER             │ (todas)            │ Lista de contas AWS        │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ METRICS_PERIOD_DAYS        │ 30                 │ Período de métricas        │
+│ RECOMMENDATION_THRESHOLD   │ 10                 │ % mínimo para recomendar   │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ REPORT_S3_BUCKET           │ -                  │ Bucket para relatórios     │
+│ NOTIFICATION_SNS_TOPIC     │ -                  │ ARN do tópico SNS          │
+├────────────────────────────┼────────────────────┼────────────────────────────┤
+│ MAX_RETRIES                │ 3                  │ Tentativas em caso de erro │
+│ RETRY_BASE_DELAY           │ 1.0                │ Delay base em segundos     │
+│ RETRY_MAX_DELAY            │ 60.0               │ Delay máximo em segundos   │
+└────────────────────────────┴────────────────────┴────────────────────────────┘
+```
+
+---
+
+## 13. Comandos Úteis
+
+### 13.1 Comandos de Diagnóstico
+
+```bash
+# Verificar versão do Python
+python --version
+
+# Verificar boto3
+python -c "import boto3; print(boto3.__version__)"
+
+# Testar conexão AWS
+aws sts get-caller-identity
+
+# Verificar permissões EC2
+aws ec2 describe-instances --max-items 1
+
+# Verificar permissões RDS
+aws rds describe-db-instances --max-items 1
+
+# Verificar permissões Cost Explorer
+aws ce get-cost-and-usage \
+  --time-period Start=2025-01-01,End=2025-01-02 \
+  --granularity DAILY \
+  --metrics "BlendedCost"
+
+# Verificar limites de API
+aws service-quotas get-service-quota \
+  --service-code ec2 \
+  --quota-code L-1216C47A
+```
+
+### 13.2 Comandos de Execução
+
+```bash
+# Execução com mock (sem AWS real)
+python run_local_demo.py 1
+
+# Execução real
+python run_with_aws.py
+
+# Execução com filtros
+SERVICES_FILTER=ec2,rds,s3 python run_with_aws.py
+
+# Execução em região específica
+AWS_REGION=eu-west-1 python run_with_aws.py
+
+# Execução com debug
+LOG_LEVEL=DEBUG python run_with_aws.py 2>&1 | tee finops_debug.log
+
+# Execução salvando resultado
+python run_with_aws.py > report_$(date +%Y%m%d_%H%M%S).json
+```
+
+### 13.3 Comandos de Teste
+
+```bash
+# Rodar todos os testes
+python -m pytest tests/ -v
+
+# Rodar testes de um serviço específico
+python -m pytest tests/unit/test_ec2_service.py -v
+
+# Rodar testes com coverage
+python -m pytest tests/ --cov=src/finops_aws --cov-report=html
+
+# Rodar apenas testes rápidos
+python -m pytest tests/ -m "not slow" -v
+```
+
+---
+
+## 14. Melhores Práticas
+
+### 14.1 Checklist de Produção
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     CHECKLIST PARA PRODUÇÃO                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  SEGURANÇA                                                                  │
+│  ☐ Usar IAM Role ao invés de Access Keys                                   │
+│  ☐ Permissões mínimas necessárias (read-only)                              │
+│  ☐ Habilitar CloudTrail para auditoria                                     │
+│  ☐ Não expor credenciais em logs                                           │
+│                                                                             │
+│  CONFIGURAÇÃO                                                               │
+│  ☐ Lambda timeout adequado (recomendado: 900s)                             │
+│  ☐ Memória adequada (recomendado: 1024MB+)                                 │
+│  ☐ VPC configurada se necessário acessar recursos privados                │
+│  ☐ Variáveis de ambiente configuradas                                      │
+│                                                                             │
+│  MONITORAMENTO                                                              │
+│  ☐ CloudWatch Logs habilitado                                               │
+│  ☐ Alertas de erro configurados                                            │
+│  ☐ Dashboard de métricas                                                    │
+│                                                                             │
+│  AGENDAMENTO                                                                │
+│  ☐ EventBridge rule configurada                                            │
+│  ☐ Frequência adequada (recomendado: diária)                               │
+│  ☐ Janela de execução fora do horário de pico                              │
+│                                                                             │
+│  NOTIFICAÇÕES                                                               │
+│  ☐ SNS topic configurado                                                    │
+│  ☐ Destinatários corretos                                                   │
+│  ☐ Filtro de notificações por severidade                                   │
+│                                                                             │
+│  RELATÓRIOS                                                                 │
+│  ☐ Bucket S3 para armazenamento                                             │
+│  ☐ Lifecycle policy para arquivamento                                      │
+│  ☐ Acesso configurado para stakeholders                                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 15. Atualizações e Versionamento
+
+### 15.1 Como Atualizar
+
+```bash
+# 1. Verificar versão atual
+cat VERSION
+
+# 2. Fazer backup
+cp -r . ../finops-aws-backup
+
+# 3. Atualizar código
+git pull origin main
+
+# 4. Atualizar dependências
+pip install -r requirements.txt --upgrade
+
+# 5. Rodar testes
+python -m pytest tests/ -v
+
+# 6. Verificar changelog
+cat CHANGELOG.md
+```
+
+---
+
+*Manual do Usuário FinOps AWS - Versão 2.0 Expandida*
+*Novembro 2025*
