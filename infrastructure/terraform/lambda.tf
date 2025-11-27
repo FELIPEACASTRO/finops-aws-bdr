@@ -15,8 +15,32 @@ resource "null_resource" "pip_install" {
     command = <<-EOT
       rm -rf ${path.module}/layer/python
       mkdir -p ${path.module}/layer/python
-      pip install -r ${path.module}/../../requirements.txt -t ${path.module}/layer/python --quiet
+      python3 -m pip install -r ${path.module}/../../requirements.txt -t ${path.module}/layer/python --quiet --upgrade
     EOT
+    
+    interpreter = ["/bin/bash", "-c"]
+  }
+}
+
+resource "null_resource" "pip_install_docker" {
+  count = var.use_docker_for_layer ? 1 : 0
+  
+  triggers = {
+    requirements_hash = filesha256("${path.module}/../../requirements.txt")
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      rm -rf ${path.module}/layer/python
+      mkdir -p ${path.module}/layer/python
+      docker run --rm \
+        -v ${path.module}/../../:/var/task \
+        -v ${path.module}/layer:/opt/layer \
+        public.ecr.aws/lambda/python:3.11 \
+        pip install -r /var/task/requirements.txt -t /opt/layer/python --quiet
+    EOT
+    
+    interpreter = ["/bin/bash", "-c"]
   }
 }
 

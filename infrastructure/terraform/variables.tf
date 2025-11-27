@@ -114,13 +114,26 @@ variable "schedule_expression" {
 }
 
 variable "schedule_expressions" {
-  description = "Lista de expressoes cron para multiplas execucoes diarias"
+  description = "Lista de expressoes cron para multiplas execucoes diarias (maximo 5)"
   type        = list(string)
   default     = [
     "cron(0 6 * * ? *)",
+    "cron(0 9 * * ? *)",
     "cron(0 12 * * ? *)",
+    "cron(0 15 * * ? *)",
     "cron(0 18 * * ? *)"
   ]
+
+  validation {
+    condition     = length(var.schedule_expressions) <= 5
+    error_message = "Maximo de 5 execucoes diarias permitidas."
+  }
+}
+
+variable "use_docker_for_layer" {
+  description = "Usar Docker para construir o layer (recomendado para dependencias nativas)"
+  type        = bool
+  default     = false
 }
 
 ################################################################################
@@ -310,6 +323,12 @@ variable "kms_key_deletion_window" {
     condition     = var.kms_key_deletion_window >= 7 && var.kms_key_deletion_window <= 30
     error_message = "KMS deletion window deve estar entre 7 e 30 dias."
   }
+}
+
+variable "use_managed_readonly_policy" {
+  description = "Usar política gerenciada AWS ReadOnlyAccess (mais simples, menos restritivo)"
+  type        = bool
+  default     = false
 }
 
 variable "enable_vpc" {

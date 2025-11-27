@@ -166,10 +166,34 @@ The project includes comprehensive documentation in the `docs/` folder:
 - **[USER_MANUAL.md](docs/USER_MANUAL.md)**: Installation, configuration, troubleshooting
 - **[APPENDIX_SERVICES.md](docs/APPENDIX_SERVICES.md)**: Complete catalog of 252 AWS services
 
+## Terraform Deployment
+
+A infraestrutura completa para deploy está em `infrastructure/terraform/`:
+
+- **main.tf** - Provider AWS e configurações principais
+- **variables.tf** - 45+ variáveis configuráveis
+- **iam.tf** - IAM roles e policies (ReadOnly para 252 serviços)
+- **lambda.tf** - Função Lambda com layer de dependências
+- **eventbridge.tf** - Agendamento para 5 execuções diárias
+- **storage.tf** - S3 bucket e DynamoDB tables
+- **security.tf** - KMS encryption e SNS alerts
+- **outputs.tf** - Outputs úteis com exemplos de invocação
+- **README_TERRAFORM.md** - Documentação completa em Português
+
+### Quick Start
+```bash
+cd infrastructure/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Editar terraform.tfvars com suas configurações
+terraform init
+terraform plan
+terraform apply
+```
+
 ## External Dependencies
 
 - **AWS SDK for Python (boto3):** Core AWS interaction library
-- **pytest:** Testing framework with 1842+ tests
+- **pytest:** Testing framework with 1877+ tests
 - **moto:** AWS service mocking for tests
 - **pytest-asyncio, pytest-mock:** Testing plugins
 - **tabulate:** Table formatting for reports

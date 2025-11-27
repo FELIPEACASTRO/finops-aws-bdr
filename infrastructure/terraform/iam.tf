@@ -1,6 +1,10 @@
 ################################################################################
 # FinOps AWS - IAM Roles and Policies
 # Permissoes minimas necessarias para analise de custos
+#
+# OPCOES DE PERMISSAO:
+# 1. use_managed_readonly_policy = true  -> Usa AWS ReadOnlyAccess (simples)
+# 2. use_managed_readonly_policy = false -> Usa políticas customizadas (seguro)
 ################################################################################
 
 ################################################################################
@@ -24,6 +28,17 @@ resource "aws_iam_role" "lambda_execution" {
   })
 
   tags = local.common_tags
+}
+
+################################################################################
+# AWS Managed ReadOnlyAccess Policy (opcional - mais simples)
+################################################################################
+
+resource "aws_iam_role_policy_attachment" "managed_readonly" {
+  count = var.use_managed_readonly_policy ? 1 : 0
+  
+  role       = aws_iam_role.lambda_execution.name
+  policy_arn = "arn:${local.partition}:iam::aws:policy/ReadOnlyAccess"
 }
 
 ################################################################################
