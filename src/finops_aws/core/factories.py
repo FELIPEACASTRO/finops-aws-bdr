@@ -101,6 +101,13 @@ class AWSServiceType(Enum):
     QUICKSIGHT = "quicksight"
     DATASYNC = "datasync"
     LAKEFORMATION = "lakeformation"
+    GLOBALACCELERATOR = "globalaccelerator"
+    DIRECTCONNECT = "directconnect"
+    TRANSITGATEWAY = "transitgateway"
+    ECR = "ecr"
+    APPRUNNER = "apprunner"
+    ELASTICBEANSTALK = "elasticbeanstalk"
+    LIGHTSAIL = "lightsail"
 
 
 @dataclass
@@ -1212,6 +1219,83 @@ class ServiceFactory:
         
         return self._services['lakeformation']
     
+    def get_globalaccelerator_service(self):
+        """Obtém instância do GlobalAcceleratorService"""
+        if 'globalaccelerator' in self._mocks:
+            return self._mocks['globalaccelerator']
+        
+        if 'globalaccelerator' not in self._services:
+            from ..services.globalaccelerator_service import GlobalAcceleratorService
+            self._services['globalaccelerator'] = GlobalAcceleratorService(self.client_factory)
+        
+        return self._services['globalaccelerator']
+    
+    def get_directconnect_service(self):
+        """Obtém instância do DirectConnectService"""
+        if 'directconnect' in self._mocks:
+            return self._mocks['directconnect']
+        
+        if 'directconnect' not in self._services:
+            from ..services.directconnect_service import DirectConnectService
+            self._services['directconnect'] = DirectConnectService(self.client_factory)
+        
+        return self._services['directconnect']
+    
+    def get_transitgateway_service(self):
+        """Obtém instância do TransitGatewayService"""
+        if 'transitgateway' in self._mocks:
+            return self._mocks['transitgateway']
+        
+        if 'transitgateway' not in self._services:
+            from ..services.transitgateway_service import TransitGatewayService
+            self._services['transitgateway'] = TransitGatewayService(self.client_factory)
+        
+        return self._services['transitgateway']
+    
+    def get_ecr_service(self):
+        """Obtém instância do ECRService"""
+        if 'ecr' in self._mocks:
+            return self._mocks['ecr']
+        
+        if 'ecr' not in self._services:
+            from ..services.ecr_service import ECRService
+            self._services['ecr'] = ECRService(self.client_factory)
+        
+        return self._services['ecr']
+    
+    def get_apprunner_service(self):
+        """Obtém instância do AppRunnerServiceManager"""
+        if 'apprunner' in self._mocks:
+            return self._mocks['apprunner']
+        
+        if 'apprunner' not in self._services:
+            from ..services.apprunner_service import AppRunnerServiceManager
+            self._services['apprunner'] = AppRunnerServiceManager(self.client_factory)
+        
+        return self._services['apprunner']
+    
+    def get_elasticbeanstalk_service(self):
+        """Obtém instância do ElasticBeanstalkService"""
+        if 'elasticbeanstalk' in self._mocks:
+            return self._mocks['elasticbeanstalk']
+        
+        if 'elasticbeanstalk' not in self._services:
+            from ..services.elasticbeanstalk_service import ElasticBeanstalkService
+            self._services['elasticbeanstalk'] = ElasticBeanstalkService(self.client_factory)
+        
+        return self._services['elasticbeanstalk']
+    
+    def get_lightsail_service(self):
+        """Obtém instância do LightsailService"""
+        if 'lightsail' in self._mocks:
+            return self._mocks['lightsail']
+        
+        if 'lightsail' not in self._services:
+            from ..services.lightsail_service import LightsailService
+            self._services['lightsail'] = LightsailService(self.client_factory)
+        
+        return self._services['lightsail']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1278,7 +1362,14 @@ class ServiceFactory:
             'athena': self.get_athena_service(),
             'quicksight': self.get_quicksight_service(),
             'datasync': self.get_datasync_service(),
-            'lakeformation': self.get_lakeformation_service()
+            'lakeformation': self.get_lakeformation_service(),
+            'globalaccelerator': self.get_globalaccelerator_service(),
+            'directconnect': self.get_directconnect_service(),
+            'transitgateway': self.get_transitgateway_service(),
+            'ecr': self.get_ecr_service(),
+            'apprunner': self.get_apprunner_service(),
+            'elasticbeanstalk': self.get_elasticbeanstalk_service(),
+            'lightsail': self.get_lightsail_service()
         }
     
     def clear_cache(self):

@@ -265,7 +265,7 @@ class TransitGatewayPeeringAttachment:
         """Verifica se é cross-region."""
         req_region = self.requester_tgw_info.get('Region', '')
         acc_region = self.accepter_tgw_info.get('Region', '')
-        return req_region != acc_region and req_region and acc_region
+        return bool(req_region and acc_region and req_region != acc_region)
 
     def to_dict(self) -> Dict[str, Any]:
         """Converte para dicionário."""
