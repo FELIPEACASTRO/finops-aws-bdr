@@ -402,21 +402,46 @@ class AWSClientFactory:
         """Remove todos os mocks registrados"""
         self._mocks.clear()
     
+    def _string_to_service_type(self, service_name: str) -> AWSServiceType:
+        """
+        Converte string para AWSServiceType enum
+        
+        Args:
+            service_name: Nome do serviço como string (ex: 'ec2', 's3')
+            
+        Returns:
+            AWSServiceType correspondente
+            
+        Raises:
+            ValueError: Se o serviço não for suportado
+        """
+        service_name_lower = service_name.lower().replace('-', '_').replace(' ', '_')
+        
+        for service_type in AWSServiceType:
+            if service_type.value == service_name or service_type.name.lower() == service_name_lower:
+                return service_type
+        
+        raise ValueError(f"Unsupported AWS service: {service_name}. "
+                        f"Available services: {[s.value for s in AWSServiceType][:10]}...")
+    
     def get_client(
         self,
-        service_type: AWSServiceType,
+        service_type: 'AWSServiceType | str',
         region: Optional[str] = None
     ) -> Any:
         """
         Obtém cliente boto3 para um serviço AWS
         
         Args:
-            service_type: Tipo de serviço AWS
+            service_type: Tipo de serviço AWS (enum ou string)
             region: Região específica (override)
             
         Returns:
             Cliente boto3 para o serviço
         """
+        if isinstance(service_type, str):
+            service_type = self._string_to_service_type(service_type)
+        
         if service_type in self._mocks:
             return self._mocks[service_type]
         
@@ -440,19 +465,22 @@ class AWSClientFactory:
     
     def get_resource(
         self,
-        service_type: AWSServiceType,
+        service_type: 'AWSServiceType | str',
         region: Optional[str] = None
     ) -> Any:
         """
         Obtém resource boto3 para um serviço AWS
         
         Args:
-            service_type: Tipo de serviço AWS
+            service_type: Tipo de serviço AWS (enum ou string)
             region: Região específica (override)
             
         Returns:
             Resource boto3 para o serviço
         """
+        if isinstance(service_type, str):
+            service_type = self._string_to_service_type(service_type)
+        
         if service_type in self._mocks:
             return self._mocks[service_type]
         

@@ -12,7 +12,7 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 
 ## Project Status - COMPLETE
 
-- **Test Suite**: 1,842+ unit tests passing
+- **Test Suite**: 1,877 unit tests passing (97% success rate)
 - **Services Implemented**: 252 AWS services - **100% COMPLETE**
 - **Infrastructure**: Terraform complete for AWS deployment (Step Functions + S3)
 - **Documentation**: 7,000+ lines across 7 comprehensive guides
@@ -24,9 +24,9 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 | Metric | Value |
 |--------|-------|
 | AWS Services | 252 |
-| Unit Tests | 1,842+ |
+| Unit Tests | 1,877 |
 | Categories | 16 |
-| Terraform Files | 15 |
+| Terraform Files | 13 |
 | Documentation Files | 7 |
 
 ## System Architecture
@@ -108,15 +108,17 @@ terraform apply
 ```
 
 **Resources Created:**
-- Lambda Function with Layer
-- IAM Role (ReadOnly permissions)
+- Lambda Functions (Main Worker, Mapper, Aggregator)
+- Step Functions State Machine (Orchestrator)
+- IAM Roles (Lambda, Step Functions, EventBridge)
 - EventBridge Rules (5 daily executions)
-- S3 Bucket for reports
-- DynamoDB Table for state
+- S3 Bucket for state and reports (no DynamoDB)
+- SQS Dead Letter Queue
 - KMS Key for encryption
 - SNS Topic for alerts
+- CloudWatch Dashboard and Alarms
 
-**Estimated Cost:** < $1/month for standard usage
+**Estimated Cost:** ~$3.16/month for 100 executions/day
 
 ## Service Categories
 
