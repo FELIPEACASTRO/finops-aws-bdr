@@ -83,6 +83,10 @@ class AWSServiceType(Enum):
     EVENTS = "events"
     PIPES = "pipes"
     SCHEMAS = "schemas"
+    CODEBUILD = "codebuild"
+    CODEPIPELINE = "codepipeline"
+    CODEDEPLOY = "codedeploy"
+    CODECOMMIT = "codecommit"
 
 
 @dataclass
@@ -996,6 +1000,50 @@ class ServiceFactory:
         
         return self._services['eventbridge']
     
+    def get_codebuild_service(self):
+        """Obtém instância do CodeBuildService"""
+        if 'codebuild' in self._mocks:
+            return self._mocks['codebuild']
+        
+        if 'codebuild' not in self._services:
+            from ..services.codebuild_service import CodeBuildService
+            self._services['codebuild'] = CodeBuildService(self.client_factory)
+        
+        return self._services['codebuild']
+    
+    def get_codepipeline_service(self):
+        """Obtém instância do CodePipelineService"""
+        if 'codepipeline' in self._mocks:
+            return self._mocks['codepipeline']
+        
+        if 'codepipeline' not in self._services:
+            from ..services.codepipeline_service import CodePipelineService
+            self._services['codepipeline'] = CodePipelineService(self.client_factory)
+        
+        return self._services['codepipeline']
+    
+    def get_codedeploy_service(self):
+        """Obtém instância do CodeDeployService"""
+        if 'codedeploy' in self._mocks:
+            return self._mocks['codedeploy']
+        
+        if 'codedeploy' not in self._services:
+            from ..services.codedeploy_service import CodeDeployService
+            self._services['codedeploy'] = CodeDeployService(self.client_factory)
+        
+        return self._services['codedeploy']
+    
+    def get_codecommit_service(self):
+        """Obtém instância do CodeCommitService"""
+        if 'codecommit' in self._mocks:
+            return self._mocks['codecommit']
+        
+        if 'codecommit' not in self._services:
+            from ..services.codecommit_service import CodeCommitService
+            self._services['codecommit'] = CodeCommitService(self.client_factory)
+        
+        return self._services['codecommit']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1044,7 +1092,11 @@ class ServiceFactory:
             'cloudwatch_logs': self.get_cloudwatch_logs_service(),
             'waf': self.get_waf_service(),
             'cognito': self.get_cognito_service(),
-            'eventbridge': self.get_eventbridge_service()
+            'eventbridge': self.get_eventbridge_service(),
+            'codebuild': self.get_codebuild_service(),
+            'codepipeline': self.get_codepipeline_service(),
+            'codedeploy': self.get_codedeploy_service(),
+            'codecommit': self.get_codecommit_service()
         }
     
     def clear_cache(self):

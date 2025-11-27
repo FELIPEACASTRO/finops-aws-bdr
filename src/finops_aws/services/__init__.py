@@ -52,6 +52,12 @@ FASE 2.7: Serviços de Monitoramento e Segurança
 - WAFService: Análise de WAF (Web ACLs, regras, IP sets)
 - CognitoService: Análise de Cognito (user pools, identity pools)
 - EventBridgeService: Análise de EventBridge (event buses, rules, archives, pipes)
+
+FASE 2.8: Serviços de DevOps e CI/CD
+- CodeBuildService: Análise de CodeBuild (projetos, builds, report groups)
+- CodePipelineService: Análise de CodePipeline (pipelines, execuções, webhooks)
+- CodeDeployService: Análise de CodeDeploy (aplicações, deployment groups, deployments)
+- CodeCommitService: Análise de CodeCommit (repositórios, branches, PRs)
 """
 
 from .cost_service import CostService
@@ -101,6 +107,10 @@ from .cloudwatch_service import CloudWatchService, LogGroup, CloudWatchAlarm, Cl
 from .waf_service import WAFService, WebACL, RuleGroup, IPSet, RegexPatternSet
 from .cognito_service import CognitoService, UserPool, UserPoolClient, IdentityPool, ResourceServer
 from .eventbridge_service import EventBridgeService, EventBus, EventRule, EventArchive, EventPipe, SchemaRegistry
+from .codebuild_service import CodeBuildService, BuildProject, BuildHistory, ReportGroup
+from .codepipeline_service import CodePipelineService, Pipeline, PipelineExecution, Webhook
+from .codedeploy_service import CodeDeployService, DeploymentApplication, DeploymentGroup, Deployment, DeploymentConfig
+from .codecommit_service import CodeCommitService, Repository, Branch, PullRequest, ApprovalRule
 
 __all__ = [
     'CostService',
@@ -235,5 +245,23 @@ __all__ = [
     'EventRule',
     'EventArchive',
     'EventPipe',
-    'SchemaRegistry'
+    'SchemaRegistry',
+    'CodeBuildService',
+    'BuildProject',
+    'BuildHistory',
+    'ReportGroup',
+    'CodePipelineService',
+    'Pipeline',
+    'PipelineExecution',
+    'Webhook',
+    'CodeDeployService',
+    'DeploymentApplication',
+    'DeploymentGroup',
+    'Deployment',
+    'DeploymentConfig',
+    'CodeCommitService',
+    'Repository',
+    'Branch',
+    'PullRequest',
+    'ApprovalRule'
 ]
