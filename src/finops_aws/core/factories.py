@@ -123,6 +123,11 @@ class AWSServiceType(Enum):
     APPSTREAM = "appstream"
     WORKDOCS = "workdocs"
     CHIME = "chime"
+    GAMELIFT = "gamelift"
+    ROBOMAKER = "robomaker"
+    QLDB = "qldb"
+    MANAGEDBLOCKCHAIN = "managedblockchain"
+    BRAKET = "braket"
 
 
 @dataclass
@@ -1476,6 +1481,61 @@ class ServiceFactory:
         
         return self._services['chime']
     
+    def get_gamelift_service(self):
+        """Obtém instância do GameLiftService"""
+        if 'gamelift' in self._mocks:
+            return self._mocks['gamelift']
+        
+        if 'gamelift' not in self._services:
+            from ..services.gamelift_service import GameLiftService
+            self._services['gamelift'] = GameLiftService(self.client_factory)
+        
+        return self._services['gamelift']
+    
+    def get_robomaker_service(self):
+        """Obtém instância do RoboMakerService"""
+        if 'robomaker' in self._mocks:
+            return self._mocks['robomaker']
+        
+        if 'robomaker' not in self._services:
+            from ..services.robomaker_service import RoboMakerService
+            self._services['robomaker'] = RoboMakerService(self.client_factory)
+        
+        return self._services['robomaker']
+    
+    def get_qldb_service(self):
+        """Obtém instância do QLDBService"""
+        if 'qldb' in self._mocks:
+            return self._mocks['qldb']
+        
+        if 'qldb' not in self._services:
+            from ..services.qldb_service import QLDBService
+            self._services['qldb'] = QLDBService(self.client_factory)
+        
+        return self._services['qldb']
+    
+    def get_managedblockchain_service(self):
+        """Obtém instância do ManagedBlockchainService"""
+        if 'managedblockchain' in self._mocks:
+            return self._mocks['managedblockchain']
+        
+        if 'managedblockchain' not in self._services:
+            from ..services.managedblockchain_service import ManagedBlockchainService
+            self._services['managedblockchain'] = ManagedBlockchainService(self.client_factory)
+        
+        return self._services['managedblockchain']
+    
+    def get_braket_service(self):
+        """Obtém instância do BraketService"""
+        if 'braket' in self._mocks:
+            return self._mocks['braket']
+        
+        if 'braket' not in self._services:
+            from ..services.braket_service import BraketService
+            self._services['braket'] = BraketService(self.client_factory)
+        
+        return self._services['braket']
+    
     def get_all_services(self) -> Dict[str, Any]:
         """
         Obtém todas as instâncias de serviços
@@ -1564,7 +1624,12 @@ class ServiceFactory:
             'datapipeline': self.get_datapipeline_service(),
             'appstream': self.get_appstream_service(),
             'workdocs': self.get_workdocs_service(),
-            'chime': self.get_chime_service()
+            'chime': self.get_chime_service(),
+            'gamelift': self.get_gamelift_service(),
+            'robomaker': self.get_robomaker_service(),
+            'qldb': self.get_qldb_service(),
+            'managedblockchain': self.get_managedblockchain_service(),
+            'braket': self.get_braket_service()
         }
     
     def clear_cache(self):
