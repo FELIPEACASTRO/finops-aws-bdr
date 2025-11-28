@@ -421,9 +421,11 @@ class FinOpsResilientHandler:
         if report_task_id and results.get(report_task_id):
             # Sucesso - retorna relatório completo
             report_data = results[report_task_id]
+            report_data['partial'] = False
+            report_data['execution_status'] = 'complete'
             status_code = 200
         else:
-            # Falha parcial - retorna progresso e dados disponíveis
+            # Falha parcial - retorna progresso e dados disponíveis com status 200
             completed_tasks = self.state_manager.get_completed_tasks()
             partial_data = {}
             
@@ -433,11 +435,12 @@ class FinOpsResilientHandler:
             
             report_data = {
                 'partial_results': partial_data,
+                'partial': True,
                 'execution_status': 'incomplete',
                 'progress': self.executor.get_execution_progress(),
                 'message': 'Analysis completed with some failures. Partial results available.'
             }
-            status_code = 206  # Partial Content
+            status_code = 200  # Sempre retorna 200, usa campo 'partial' para indicar estado
 
         # Adiciona metadados de execução
         duration = (datetime.now() - start_time).total_seconds()

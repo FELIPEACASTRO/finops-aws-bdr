@@ -400,13 +400,14 @@ class RetryHandler:
             raise last_exception
         raise RuntimeError("All async retry attempts failed")
 
-    def with_retry(
+    def with_retry_decorator(
         self,
         max_retries: Optional[int] = None,
         base_delay: Optional[float] = None
     ):
         """
-        Decorator para adicionar retry a uma função
+        Decorator de instância para adicionar retry a uma função.
+        Use este método quando já tiver uma instância de RetryHandler.
         
         Args:
             max_retries: Override do número máximo de retries
@@ -477,6 +478,47 @@ class RetryHandler:
     def reset_metrics(self):
         """Reseta métricas"""
         self.metrics = RetryMetrics()
+
+    @staticmethod
+    def with_retry(
+        max_retries: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        jitter: float = 0.25
+    ):
+        """
+        Decorator estático para adicionar retry a uma função.
+        Pode ser usado sem criar uma instância de RetryHandler.
+        
+        Uso:
+            @RetryHandler.with_retry(max_retries=3, base_delay=0.1)
+            def my_function():
+                ...
+        
+        Args:
+            max_retries: Número máximo de tentativas
+            base_delay: Delay base em segundos
+            max_delay: Delay máximo em segundos
+            jitter: Fator de jitter (0.0 a 1.0)
+            
+        Returns:
+            Decorator
+        """
+        policy = RetryPolicy(
+            max_retries=max_retries,
+            base_delay=base_delay,
+            max_delay=max_delay,
+            jitter=jitter
+        )
+        handler = RetryHandler(policy)
+        
+        def decorator(func: Callable[..., T]) -> Callable[..., T]:
+            @wraps(func)
+            def wrapper(*args, **kwargs) -> T:
+                return handler.execute(func, *args, **kwargs)
+            
+            return wrapper
+        return decorator
 
 
 def create_aws_retry_policy() -> RetryPolicy:

@@ -83,13 +83,16 @@ class TestRetryMechanisms:
     
     def test_retry_with_specific_exceptions(self):
         """Teste: Retry apenas para exceções específicas"""
+        from finops_aws.core.retry_handler import RetryPolicy
+        
         call_count = [0]
         
-        handler = RetryHandler(
+        policy = RetryPolicy(
             max_retries=3,
             base_delay=0.01,
             retryable_exceptions=[ConnectionError, TimeoutError]
         )
+        handler = RetryHandler(policy=policy)
         
         def function_with_connection_error():
             call_count[0] += 1

@@ -483,13 +483,21 @@ class EKSService(BaseAWSService):
         
         return addons
     
-    def get_resources(self) -> List[Dict[str, Any]]:
-        """Retorna todos os recursos EKS"""
+    def get_resources(self) -> Dict[str, Any]:
+        """Retorna todos os recursos EKS com resumo"""
         clusters = self.get_clusters()
         
-        resources = []
+        cluster_resources = []
+        total_node_groups = 0
+        total_fargate_profiles = 0
+        total_nodes = 0
+        
         for cluster in clusters:
-            resources.append({
+            total_node_groups += len(cluster.node_groups)
+            total_fargate_profiles += len(cluster.fargate_profiles)
+            total_nodes += cluster.total_node_count
+            
+            cluster_resources.append({
                 'resource_id': cluster.arn,
                 'resource_type': 'EKS Cluster',
                 'name': cluster.name,
@@ -500,7 +508,16 @@ class EKSService(BaseAWSService):
                 'has_encryption': cluster.has_encryption,
                 'uses_spot': cluster.uses_spot_instances
             })
-        return resources
+        
+        return {
+            'clusters': cluster_resources,
+            'summary': {
+                'total_clusters': len(clusters),
+                'total_node_groups': total_node_groups,
+                'total_fargate_profiles': total_fargate_profiles,
+                'total_nodes': total_nodes
+            }
+        }
     
     def get_costs(self, period_days: int = 30) -> ServiceCost:
         """Retorna estimativas de custo para clusters EKS"""

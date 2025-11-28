@@ -10,7 +10,7 @@ Data: Novembro 2025
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Any, Optional, Protocol
+from typing import Dict, List, Any, Optional, Protocol, Union
 from botocore.exceptions import ClientError
 
 from ..utils.logger import setup_logger, log_api_call
@@ -148,8 +148,8 @@ class BaseAWSService(ABC):
         pass
     
     @abstractmethod
-    def get_resources(self) -> List[Dict[str, Any]]:
-        """Lista recursos do serviço"""
+    def get_resources(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        """Lista recursos do serviço. Pode retornar lista ou dicionário com resumo."""
         pass
     
     def get_costs(self, period_days: int = 30) -> ServiceCost:
@@ -377,7 +377,7 @@ class SimpleAWSService(BaseAWSService):
         except Exception:
             return False
     
-    def get_resources(self) -> List[Dict[str, Any]]:
+    def get_resources(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
         """Obtém recursos do serviço"""
         return []
     

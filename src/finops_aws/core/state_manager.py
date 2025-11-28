@@ -126,10 +126,11 @@ class StateManager:
         self.current_execution: Optional[ExecutionState] = None
 
     def _generate_execution_id(self, account_id: str) -> str:
-        """Gera ID único para execução"""
+        """Gera ID único para execução usando UUID para evitar colisões"""
+        import uuid
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        hash_suffix = hashlib.md5(f"{account_id}_{timestamp}".encode()).hexdigest()[:8]
-        return f"exec_{account_id}_{timestamp}_{hash_suffix}"
+        unique_suffix = uuid.uuid4().hex[:8]
+        return f"exec_{account_id}_{timestamp}_{unique_suffix}"
 
     def _get_state_key(self, execution_id: str) -> str:
         """Gera chave S3 para o estado"""
