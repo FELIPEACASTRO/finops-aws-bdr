@@ -56,17 +56,38 @@ class RDSService:
         cost_client=None
     ):
         """
-        Inicializa o RDSService
+        Inicializa o RDSService com lazy loading
         
         Args:
             rds_client: Cliente RDS injetado (opcional)
             cloudwatch_client: Cliente CloudWatch injetado (opcional)
             cost_client: Cliente Cost Explorer injetado (opcional)
         """
-        self.rds_client = rds_client or boto3.client('rds')
-        self.cloudwatch_client = cloudwatch_client or boto3.client('cloudwatch')
-        self.cost_client = cost_client or boto3.client('ce')
+        self._rds_client = rds_client
+        self._cloudwatch_client = cloudwatch_client
+        self._cost_client = cost_client
         self.region = get_aws_region()
+    
+    @property
+    def rds_client(self):
+        """Lazy loading do cliente RDS"""
+        if self._rds_client is None:
+            self._rds_client = boto3.client('rds', region_name=self.region)
+        return self._rds_client
+    
+    @property
+    def cloudwatch_client(self):
+        """Lazy loading do cliente CloudWatch"""
+        if self._cloudwatch_client is None:
+            self._cloudwatch_client = boto3.client('cloudwatch', region_name=self.region)
+        return self._cloudwatch_client
+    
+    @property
+    def cost_client(self):
+        """Lazy loading do cliente Cost Explorer"""
+        if self._cost_client is None:
+            self._cost_client = boto3.client('ce', region_name=self.region)
+        return self._cost_client
     
     def get_service_name(self) -> str:
         """Retorna nome do serviço"""

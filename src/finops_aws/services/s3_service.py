@@ -99,6 +99,83 @@ class S3Service(BaseAWSService):
             for b in buckets
         ]
     
+    def get_bucket_count(self) -> int:
+        """
+        Obtém apenas a contagem de buckets S3 (leve, sem detalhes)
+        
+        Returns:
+            Número total de buckets
+        """
+        try:
+            response = self.s3_client.list_buckets()
+            return len(response.get('Buckets', []))
+        except ClientError as e:
+            handle_aws_error(e, "get_bucket_count")
+            return 0
+    
+    def get_buckets_limited(self, max_buckets: int = 20) -> List[S3Bucket]:
+        """
+        Obtém lista limitada de buckets S3 com detalhes
+        
+        Args:
+            max_buckets: Número máximo de buckets para coletar detalhes
+            
+        Returns:
+            Lista limitada de S3Bucket com detalhes
+        """
+        try:
+            response = self.s3_client.list_buckets()
+            bucket_names = [b['Name'] for b in response.get('Buckets', [])[:max_buckets]]
+            buckets = []
+            
+            for bucket_name in bucket_names:
+                bucket = S3Bucket(name=bucket_name)
+                
+                try:
+                    location = self.s3_client.get_bucket_location(Bucket=bucket.name)
+                    bucket.region = location.get('LocationConstraint') or 'us-east-1'
+                except Exception:
+                    bucket.region = 'unknown'
+                
+                try:
+                    versioning = self.s3_client.get_bucket_versioning(Bucket=bucket.name)
+                    bucket.versioning_enabled = versioning.get('Status') == 'Enabled'
+                except Exception:
+                    pass
+                
+                try:
+                    encryption = self.s3_client.get_bucket_encryption(Bucket=bucket.name)
+                    bucket.encryption_enabled = bool(encryption.get('ServerSideEncryptionConfiguration'))
+                except Exception:
+                    pass
+                
+                try:
+                    lifecycle = self.s3_client.get_bucket_lifecycle_configuration(Bucket=bucket.name)
+                    bucket.lifecycle_rules = len(lifecycle.get('Rules', []))
+                except Exception:
+                    pass
+                
+                try:
+                    public_access = self.s3_client.get_public_access_block(Bucket=bucket.name)
+                    config = public_access.get('PublicAccessBlockConfiguration', {})
+                    bucket.public_access_blocked = all([
+                        config.get('BlockPublicAcls', False),
+                        config.get('IgnorePublicAcls', False),
+                        config.get('BlockPublicPolicy', False),
+                        config.get('RestrictPublicBuckets', False)
+                    ])
+                except Exception:
+                    bucket.public_access_blocked = False
+                
+                buckets.append(bucket)
+            
+            logger.info(f"Retrieved details for {len(buckets)} S3 buckets (limited from {len(response.get('Buckets', []))})")
+            return buckets
+            
+        except ClientError as e:
+            handle_aws_error(e, "get_buckets_limited")
+            return []
+    
     def get_buckets(self) -> List[S3Bucket]:
         """
         Obtém lista de todos os buckets S3 com detalhes

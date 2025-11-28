@@ -10,9 +10,7 @@ from typing import Dict, Any, Optional
 
 from .core.state_manager import StateManager, TaskType
 from .core.resilient_executor import ResilientExecutor
-from .services.cost_service import CostService
-from .services.metrics_service import MetricsService
-from .services.optimizer_service import OptimizerService
+from .core.factories import ServiceFactory
 from .models.finops_models import FinOpsReport
 from .utils.logger import setup_logger, log_error
 from .utils.aws_helpers import get_aws_account_id
@@ -27,12 +25,15 @@ class FinOpsResilientHandler:
     Implementa recuperação de estado e execução incremental
     """
     
-    def __init__(self):
+    def __init__(self, service_factory: Optional[ServiceFactory] = None):
         self.state_manager = StateManager()
         self.executor = ResilientExecutor(self.state_manager)
-        self.cost_service = CostService()
-        self.metrics_service = MetricsService()
-        self.optimizer_service = OptimizerService()
+        self._factory = service_factory or ServiceFactory()
+        self.cost_service = self._factory.get_cost_service()
+        self.metrics_service = self._factory.get_metrics_service()
+        self.optimizer_service = self._factory.get_optimizer_service()
+        self.rds_service = self._factory.get_rds_service()
+        self.s3_service = self._factory.get_s3_service()
 
     async def handle_request(self, event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         """
@@ -190,26 +191,83 @@ class FinOpsResilientHandler:
             return []
 
     async def _collect_rds_metrics(self) -> Any:
-        """Coleta métricas do RDS"""
+        """Coleta métricas do RDS usando RDSService"""
         logger.info("Collecting RDS metrics...")
         
         try:
-            logger.info("RDS metrics collection not implemented yet")
-            return []
+            instances = self.rds_service.get_rds_instances()
+            rds_metrics = []
+            
+            for instance in instances:
+                metrics = self.rds_service.get_rds_metrics(
+                    instance.db_instance_identifier, 
+                    period_days=7
+                )
+                rds_metrics.append({
+                    'db_instance_identifier': instance.db_instance_identifier,
+                    'db_instance_class': instance.db_instance_class,
+                    'engine': instance.engine,
+                    'status': instance.db_instance_status,
+                    'multi_az': instance.multi_az,
+                    'metrics': metrics
+                })
+            
+            logger.info(f"Collected metrics for {len(rds_metrics)} RDS instances")
+            return rds_metrics
         except Exception as e:
             logger.error(f"Failed to collect RDS metrics: {e}")
             return []
 
     async def _collect_s3_metrics(self) -> Any:
-        """Coleta métricas do S3"""
+        """Coleta métricas do S3 usando S3Service com limite para evitar throttling"""
         logger.info("Collecting S3 metrics...")
         
+        max_buckets_for_detailed_metrics = int(os.getenv('S3_MAX_BUCKETS_METRICS', '20'))
+        
         try:
-            logger.info("S3 metrics collection not implemented yet")
-            return []
+            bucket_count = self.s3_service.get_bucket_count()
+            buckets = self.s3_service.get_buckets_limited(max_buckets_for_detailed_metrics)
+            
+            total_size = 0
+            total_objects = 0
+            
+            for bucket in buckets[:10]:
+                bucket_metrics = self.s3_service.get_bucket_metrics(bucket.name)
+                total_size += bucket_metrics.get('size_bytes', {}).get('latest', 0)
+                total_objects += bucket_metrics.get('object_count', {}).get('latest', 0)
+            
+            s3_metrics = {
+                'service_name': 'Amazon S3',
+                'bucket_count': bucket_count,
+                'buckets_analyzed': len(buckets),
+                'total_size_bytes': total_size,
+                'total_objects': total_objects,
+                'buckets_with_versioning': sum(1 for b in buckets if b.versioning_enabled),
+                'buckets_with_encryption': sum(1 for b in buckets if b.encryption_enabled),
+                'buckets_with_lifecycle': sum(1 for b in buckets if b.lifecycle_rules > 0),
+                'public_buckets': sum(1 for b in buckets if not b.public_access_blocked),
+                'buckets': [
+                    {
+                        'name': b.name,
+                        'region': b.region,
+                        'size_bytes': b.size_bytes,
+                        'object_count': b.object_count,
+                        'storage_class': b.storage_class,
+                        'versioning_enabled': b.versioning_enabled,
+                        'encryption_enabled': b.encryption_enabled
+                    }
+                    for b in buckets
+                ]
+            }
+            
+            if bucket_count > max_buckets_for_detailed_metrics:
+                logger.info(f"S3 metrics limited to {max_buckets_for_detailed_metrics} of {bucket_count} buckets")
+            
+            logger.info(f"Collected metrics for {len(buckets)} S3 buckets (total: {bucket_count})")
+            return s3_metrics
         except Exception as e:
             logger.error(f"Failed to collect S3 metrics: {e}")
-            return []
+            return {}
 
     async def _get_ec2_recommendations(self) -> Any:
         """Obtém recomendações do EC2"""
@@ -236,12 +294,14 @@ class FinOpsResilientHandler:
             return []
 
     async def _get_rds_recommendations(self) -> Any:
-        """Obtém recomendações do RDS"""
+        """Obtém recomendações do RDS usando RDSService"""
         logger.info("Getting RDS recommendations...")
         
         try:
-            logger.info("RDS recommendations not implemented yet")
-            return []
+            instances = self.rds_service.get_rds_instances()
+            recommendations = self.rds_service.get_rds_recommendations(instances)
+            logger.info(f"Got {len(recommendations)} RDS recommendations")
+            return recommendations
         except Exception as e:
             logger.error(f"Failed to get RDS recommendations: {e}")
             return []
