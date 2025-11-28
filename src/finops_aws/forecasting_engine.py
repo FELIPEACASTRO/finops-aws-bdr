@@ -10,13 +10,24 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Try to import ML libraries with fallback
+SKLEARN_AVAILABLE = False
+NUMPY_AVAILABLE = False
+
 try:
     import numpy as np
+    NUMPY_AVAILABLE = True
+except Exception:
+    np = None
+    logger.warning("numpy not available")
+
+try:
     from sklearn.linear_model import LinearRegression
     from sklearn.preprocessing import StandardScaler
     SKLEARN_AVAILABLE = True
-except ImportError:
-    SKLEARN_AVAILABLE = False
+except Exception:
+    LinearRegression = None
+    StandardScaler = None
     logger.warning("scikit-learn not available - using simple forecasting")
 
 
@@ -52,6 +63,9 @@ class CostForecaster:
     
     def _forecast_with_sklearn(self, historical_costs: List[float], forecast_days: int) -> Dict[str, Any]:
         """Previsão com scikit-learn - Linear Regression"""
+        if not SKLEARN_AVAILABLE or np is None or LinearRegression is None:
+            return self._forecast_simple(historical_costs, forecast_days)
+        
         try:
             X = np.arange(len(historical_costs)).reshape(-1, 1)
             y = np.array(historical_costs)
@@ -74,8 +88,8 @@ class CostForecaster:
                 'forecast_mean': float(np.mean(forecast)),
                 'forecast_std': float(std_error),
                 'confidence_interval_95': {
-                    'upper': (np.mean(forecast) + 1.96 * std_error),
-                    'lower': max(0, np.mean(forecast) - 1.96 * std_error)
+                    'upper': float(np.mean(forecast) + 1.96 * std_error),
+                    'lower': max(0, float(np.mean(forecast) - 1.96 * std_error))
                 },
                 'trend': 'increasing' if model.coef_[0] > 0 else 'decreasing',
                 'trend_rate': float(model.coef_[0])
@@ -90,32 +104,37 @@ class CostForecaster:
     def _forecast_simple(self, historical_costs: List[float], forecast_days: int) -> Dict[str, Any]:
         """Previsão simples - média móvel exponencial"""
         try:
-            costs_array = np.array(historical_costs, dtype=float)
-            mean_cost = np.mean(costs_array)
-            std_cost = np.std(costs_array)
+            if np is not None:
+                costs_array = np.array(historical_costs, dtype=float)
+                mean_cost = float(np.mean(costs_array))
+                std_cost = float(np.std(costs_array))
+            else:
+                mean_cost = sum(historical_costs) / len(historical_costs) if historical_costs else 0
+                std_cost = 0
             
             # EMA com decay factor
             alpha = 0.3
             ema = mean_cost
-            for cost in costs_array:
+            for cost in historical_costs:
                 ema = alpha * cost + (1 - alpha) * ema
             
             forecast = [ema] * forecast_days
             
             # Adiciona variação com tendência
-            trend = (costs_array[-1] - costs_array[0]) / len(costs_array)
-            forecast = [max(0, ema + (i * trend * 0.1)) for i in range(forecast_days)]
+            if len(historical_costs) > 1:
+                trend = (historical_costs[-1] - historical_costs[0]) / len(historical_costs)
+                forecast = [max(0, ema + (i * trend * 0.1)) for i in range(forecast_days)]
             
             return {
                 'status': 'success',
                 'method': 'exponential_moving_average',
                 'forecast': forecast,
                 'forecast_days': forecast_days,
-                'forecast_mean': float(np.mean(forecast)),
-                'forecast_std': float(std_cost),
+                'forecast_mean': mean_cost,
+                'forecast_std': std_cost,
                 'confidence_interval_95': {
-                    'upper': float(mean_cost + 1.96 * std_cost),
-                    'lower': max(0, float(mean_cost - 1.96 * std_cost))
+                    'upper': mean_cost + (1.96 * std_cost if std_cost > 0 else mean_cost * 0.2),
+                    'lower': max(0, mean_cost - (1.96 * std_cost if std_cost > 0 else mean_cost * 0.2))
                 },
                 'trend': 'stable'
             }
@@ -135,14 +154,28 @@ class CostForecaster:
         Returns:
             Dicionário com anomalias detectadas
         """
+        if np is None:
+            # Fallback sem numpy
+            mean = sum(historical_costs) / len(historical_costs) if historical_costs else 0
+            std = 0
+            return {
+                'anomalies_detected': [],
+                'total_anomalies': 0,
+                'mean_cost': mean,
+                'std_cost': std,
+                'note': 'Numpy not available for anomaly detection'
+            }
+        
         costs_array = np.array(historical_costs, dtype=float)
-        mean = np.mean(costs_array)
-        std = np.std(costs_array)
+        mean = float(np.mean(costs_array))
+        std = float(np.std(costs_array))
         
         if std == 0:
             return {
                 'anomalies_detected': [],
-                'total_anomalies': 0
+                'total_anomalies': 0,
+                'mean_cost': mean,
+                'std_cost': std
             }
         
         z_scores = np.abs((costs_array - mean) / std)
@@ -161,8 +194,8 @@ class CostForecaster:
         return {
             'anomalies_detected': anomalies,
             'total_anomalies': len(anomalies),
-            'mean_cost': float(mean),
-            'std_cost': float(std)
+            'mean_cost': mean,
+            'std_cost': std
         }
     
     def forecast_aggregated_costs(self, service_costs: Dict[str, List[float]], forecast_days: int = 30) -> Dict[str, Any]:
@@ -178,9 +211,13 @@ class CostForecaster:
                     total_forecast = [total_forecast[i] + forecast['forecast'][i] 
                                      for i in range(forecast_days)]
         
+        total_mean = sum(total_forecast) / len(total_forecast) if total_forecast else 0
+        if np is not None:
+            total_mean = float(np.mean(total_forecast))
+        
         return {
             'total_forecast': total_forecast,
-            'total_forecast_mean': np.mean(total_forecast),
+            'total_forecast_mean': total_mean,
             'service_forecasts': forecasts,
             'timestamp': datetime.utcnow().isoformat()
         }

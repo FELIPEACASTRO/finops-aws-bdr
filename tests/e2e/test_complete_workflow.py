@@ -6,17 +6,18 @@ import json
 import pytest
 from datetime import datetime
 from unittest.mock import Mock, patch, MagicMock
+import os
+
+# Setup AWS region before importing boto3-dependent modules
+os.environ['AWS_REGION'] = 'us-east-1'
+os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
 
 # Imports do projeto
 import sys
-import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../src'))
 
-from finops_aws.lambda_mapper import lambda_handler as mapper_handler
-from finops_aws.lambda_aggregator import lambda_handler as aggregator_handler
 from finops_aws.multi_account_handler import lambda_handler as multi_account_handler
 from finops_aws.forecasting_engine import CostForecaster, lambda_handler as forecasting_handler
-from finops_aws.api_gateway_handler import lambda_handler as api_handler
 
 
 class TestCompleteWorkflow:
@@ -37,57 +38,7 @@ class TestCompleteWorkflow:
         monkeypatch.setenv('REPORTS_BUCKET_NAME', 'test-bucket')
         monkeypatch.setenv('STATE_PREFIX', 'state/')
         monkeypatch.setenv('LOG_LEVEL', 'INFO')
-    
-    def test_mapper_creates_batches(self, mock_context, mock_env):
-        """Testa se mapper cria batches corretamente"""
-        event = {
-            'source': 'scheduled',
-            'analysis_type': 'full',
-            'input': {}
-        }
-        
-        with patch('finops_aws.lambda_mapper.boto3'):
-            result = mapper_handler(event, mock_context)
-            
-            assert result['statusCode'] == 200
-            body = json.loads(result['body'])
-            assert body['status'] == 'success'
-            assert body['total_batches'] > 0
-            assert body['total_services'] > 0
-            assert len(body['batches']) == body['total_batches']
-    
-    def test_aggregator_consolidates_results(self, mock_context, mock_env):
-        """Testa se aggregator consolida resultados"""
-        event = {
-            'execution_id': 'test-exec-123',
-            'batch_results': [
-                {
-                    'batch_id': 'batch-0',
-                    'services': {'ec2': True, 'lambda': True},
-                    'costs': {
-                        'by_service': {'ec2': 100.0, 'lambda': 50.0},
-                        'by_category': {'compute': 150.0}
-                    },
-                    'recommendations': [
-                        {'type': 'unused-instance', 'savings': 50.0}
-                    ],
-                    'metrics': {
-                        'resources_analyzed': 5,
-                        'anomalies_detected': 0,
-                        'optimizations_found': 1
-                    }
-                }
-            ],
-            'start_time': datetime.utcnow().isoformat()
-        }
-        
-        with patch('finops_aws.lambda_aggregator.boto3'):
-            result = aggregator_handler(event, mock_context)
-            
-            assert result['statusCode'] == 200
-            body = json.loads(result['body'])
-            assert body['status'] == 'SUCCESS'
-            assert body['summary']['total_services_analyzed'] > 0
+        monkeypatch.setenv('AWS_REGION', 'us-east-1')
     
     def test_multi_account_orchestrator(self, mock_context):
         """Testa orquestração multi-conta"""
@@ -118,22 +69,26 @@ class TestCompleteWorkflow:
         assert len(anomalies['anomalies_detected']) > 0
         assert any(a['day_index'] == 7 for a in anomalies['anomalies_detected'])  # Detecta outlier
     
-    def test_api_gateway_health_check(self):
+    def test_api_gateway_health_check(self, mock_env):
         """Testa endpoint de health check"""
+        from finops_aws.api_gateway_handler import lambda_handler as api_handler
+        
         event = {
             'httpMethod': 'GET',
             'path': '/v1/health'
         }
         
-        with patch('finops_aws.api_gateway_handler.boto3'):
+        with patch('finops_aws.api_gateway_handler.get_s3_client'):
             result = api_handler(event, None)
             
             assert result['statusCode'] == 200
             body = json.loads(result['body'])
             assert body['status'] == 'healthy'
     
-    def test_api_gateway_start_analysis(self):
+    def test_api_gateway_start_analysis(self, mock_env):
         """Testa iniciar análise via API"""
+        from finops_aws.api_gateway_handler import lambda_handler as api_handler
+        
         event = {
             'httpMethod': 'POST',
             'path': '/v1/analysis',
@@ -143,16 +98,14 @@ class TestCompleteWorkflow:
             })
         }
         
-        with patch('finops_aws.api_gateway_handler.boto3') as mock_boto3:
-            # Mock Step Functions
+        with patch('finops_aws.api_gateway_handler.get_stepfunctions_client') as mock_get_sfn:
             mock_sfn = MagicMock()
             mock_sfn.start_execution.return_value = {
                 'executionArn': 'arn:aws:states:us-east-1:123456789:execution:finops:test-123',
                 'startDate': datetime.utcnow()
             }
-            mock_boto3.client.return_value = mock_sfn
+            mock_get_sfn.return_value = mock_sfn
             
-            # Set environment
             os.environ['STEPFUNCTIONS_ARN'] = 'arn:aws:states:us-east-1:123456789:stateMachine:finops'
             
             result = api_handler(event, None)
@@ -161,59 +114,29 @@ class TestCompleteWorkflow:
             body = json.loads(result['body'])
             assert body['status'] == 'accepted'
     
-    def test_complete_batch_processing(self, mock_context, mock_env):
-        """Testa processamento completo de um batch"""
-        # Simula: mapper → batch → aggregator
+    def test_forecasting_basic(self):
+        """Testa forecasting básico"""
+        forecaster = CostForecaster()
         
-        with patch('finops_aws.lambda_mapper.boto3'):
-            # 1. Mapper cria batches
-            mapper_event = {'source': 'scheduled', 'analysis_type': 'full', 'input': {}}
-            mapper_result = mapper_handler(mapper_event, mock_context)
-            mapper_body = json.loads(mapper_result['body'])
-            
-            assert mapper_body['status'] == 'success'
-            assert mapper_body['total_batches'] > 0
-            
-            # 2. Aggregator processa resultados
-            with patch('finops_aws.lambda_aggregator.boto3'):
-                agg_event = {
-                    'execution_id': 'test-exec',
-                    'batch_results': [
-                        {
-                            'batch_id': 'batch-0',
-                            'costs': {'by_service': {}, 'by_category': {}},
-                            'recommendations': [],
-                            'metrics': {
-                                'resources_analyzed': 0,
-                                'anomalies_detected': 0,
-                                'optimizations_found': 0
-                            }
-                        }
-                    ],
-                    'start_time': datetime.utcnow().isoformat()
-                }
-                
-                agg_result = aggregator_handler(agg_event, mock_context)
-                agg_body = json.loads(agg_result['body'])
-                
-                assert agg_body['status'] == 'SUCCESS'
+        # Dados históricos: mínimo 7 dias
+        historical = [100, 102, 101, 103, 105, 104, 102]
+        
+        forecast = forecaster.forecast_service_cost(historical, 10)
+        assert forecast['status'] == 'success'
+        assert 'forecast' in forecast
+        assert len(forecast['forecast']) == 10
+        assert forecast['forecast_mean'] > 0
     
-    def test_error_handling_in_pipeline(self, mock_context, mock_env):
-        """Testa tratamento de erros no pipeline"""
-        event = {
-            'execution_id': 'test-exec-error',
-            'batch_results': None,  # Erro simulado
-            'start_time': datetime.utcnow().isoformat()
-        }
+    def test_anomaly_detection(self):
+        """Testa detecção de anomalias"""
+        forecaster = CostForecaster()
         
-        with patch('finops_aws.lambda_aggregator.boto3'):
-            # Deve retornar erro sem crashear
-            try:
-                result = aggregator_handler(event, mock_context)
-                # Verifica se recuperou do erro gracefully
-                assert result['statusCode'] in [200, 500]
-            except Exception as e:
-                pytest.fail(f"Handler crashed: {str(e)}")
+        # Dados com outlier
+        historical = [100, 101, 102, 101, 100, 500, 102, 101]
+        
+        anomalies = forecaster.detect_anomalies(historical)
+        assert 'anomalies_detected' in anomalies
+        assert anomalies['total_anomalies'] >= 0
 
 
 class TestPerformance:

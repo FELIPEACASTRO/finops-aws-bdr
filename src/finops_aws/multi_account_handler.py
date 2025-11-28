@@ -74,7 +74,11 @@ class MultiAccountOrchestrator:
             }
         except ClientError as e:
             logger.error(f"Failed to assume role in account {account_id}: {e}")
-            return None
+            return {
+                'error': str(e),
+                'account_id': account_id,
+                'status': 'failed'
+            }
     
     def create_cross_account_batch(self, accounts: List[Dict[str, str]]) -> List[Dict[str, Any]]:
         """Cria batches de contas e regiões para processamento paralelo"""

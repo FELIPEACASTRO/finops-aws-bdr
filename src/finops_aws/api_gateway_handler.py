@@ -12,8 +12,22 @@ from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 
-s3_client = boto3.client('s3')
-stepfunctions_client = boto3.client('stepfunctions')
+# Lazy loading - clients criados sob demanda
+_s3_client = None
+_stepfunctions_client = None
+
+def get_s3_client():
+    global _s3_client
+    if _s3_client is None:
+        _s3_client = boto3.client('s3', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
+    return _s3_client
+
+def get_stepfunctions_client():
+    global _stepfunctions_client
+    if _stepfunctions_client is None:
+        _stepfunctions_client = boto3.client('stepfunctions', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
+    return _stepfunctions_client
+
 sfn_arn = os.environ.get('STEPFUNCTIONS_ARN', '')
 reports_bucket = os.environ.get('REPORTS_BUCKET_NAME', 'finops-aws-reports')
 
@@ -73,7 +87,7 @@ def handle_start_analysis(event: Dict[str, Any]) -> Dict[str, Any]:
             return response(400, {'error': 'Step Functions not configured'})
         
         # Inicia execução
-        exec_response = stepfunctions_client.start_execution(
+        exec_response = get_stepfunctions_client().start_execution(
             stateMachineArn=sfn_arn,
             input=json.dumps({
                 'source': 'api',
@@ -107,7 +121,7 @@ def handle_get_status(event: Dict[str, Any]) -> Dict[str, Any]:
             exec_arn = f"arn:aws:states:*:*:execution:*:{execution_id}"
             # Try to get from S3 state
             key = f"state/executions/{execution_id}/state.json"
-            s3_response = s3_client.get_object(Bucket=reports_bucket, Key=key)
+            s3_response = get_s3_client().get_object(Bucket=reports_bucket, Key=key)
             state = json.loads(s3_response['Body'].read())
             
             return response(200, {
@@ -115,7 +129,7 @@ def handle_get_status(event: Dict[str, Any]) -> Dict[str, Any]:
                 'status': state.get('status', 'UNKNOWN'),
                 'state': state
             })
-        except s3_client.exceptions.NoSuchKey:
+        except get_s3_client().exceptions.NoSuchKey:
             return response(404, {'error': 'Execution not found'})
     
     except Exception as e:
@@ -126,7 +140,7 @@ def handle_get_latest_report(event: Dict[str, Any]) -> Dict[str, Any]:
     """Obtém relatório mais recente"""
     try:
         key = 'reports/latest/report.json'
-        s3_response = s3_client.get_object(Bucket=reports_bucket, Key=key)
+        s3_response = get_s3_client().get_object(Bucket=reports_bucket, Key=key)
         report = json.loads(s3_response['Body'].read())
         
         return response(200, {
@@ -134,7 +148,7 @@ def handle_get_latest_report(event: Dict[str, Any]) -> Dict[str, Any]:
             'report': report
         })
     
-    except s3_client.exceptions.NoSuchKey:
+    except get_s3_client().exceptions.NoSuchKey:
         return response(404, {'error': 'No reports available yet'})
     except Exception as e:
         return response(500, {'error': str(e)})
@@ -146,7 +160,7 @@ def handle_list_reports(event: Dict[str, Any]) -> Dict[str, Any]:
         query_params = event.get('queryStringParameters', {})
         prefix = query_params.get('prefix', 'reports/') if query_params else 'reports/'
         
-        list_response = s3_client.list_objects_v2(
+        list_response = get_s3_client().list_objects_v2(
             Bucket=reports_bucket,
             Prefix=prefix,
             MaxKeys=100
