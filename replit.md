@@ -26,6 +26,13 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 3. **RetryHandler**: Static decorator `@RetryHandler.with_retry()` with full metrics support
 4. **EKS Service**: Returns structured dict with `clusters` and `summary` keys
 5. **Base Service**: Flexible return type `Union[List, Dict]` for service resources
+6. **RDS Metrics**: `_collect_rds_metrics()` usa RDSService via ServiceFactory com lazy loading
+7. **S3 Metrics Escalável**: `_collect_s3_metrics()` usa `get_bucket_count()` e `get_buckets_limited()` para evitar throttling
+8. **RDS Recommendations**: `_get_rds_recommendations()` usa RDSService para análise de CPU, Multi-AZ, backup e encryption
+9. **Injeção de Dependências**: Handler usa ServiceFactory para todas as dependências (mocks compatíveis)
+
+### Variáveis de Ambiente
+- `S3_MAX_BUCKETS_METRICS`: Limite de buckets para métricas detalhadas (padrão: 20)
 
 ### Componentes Premium Implementados:
 - `multi_account_handler.py` - Suporte multi-conta via AWS Organizations
