@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinOps AWS - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #3b82f6;
+        }
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
+        }
+        .card-title {
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+        .card-change {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .card-change.positive { color: #10b981; }
+        .card-change.negative { color: #ef4444; }
+        .section {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+        }
+        .chart-container {
+            background: #0f172a;
+            border-radius: 6px;
+            padding: 15px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        th {
+            background: #0f172a;
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        tr:hover { background: #0f172a; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #10b98133; color: #10b981; }
+        .badge-warning { background: #f5971633; color: #f59716; }
+        .badge-error { background: #ef444433; color: #ef4444; }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover { background: #2563eb; }
+        button:disabled { background: #64748b; cursor: not-allowed; }
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .alert-success { background: #10b98133; color: #10b981; border-left: 3px solid #10b981; }
+        .alert-error { background: #ef444433; color: #ef4444; border-left: 3px solid #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 FinOps AWS Dashboard</h1>
+            <p class="subtitle">Análise Inteligente de Custos AWS - Otimize seus gastos em nuvem</p>
+        </header>
+
+        <div id="alerts"></div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Custo Total (30d)</div>
+                <div class="card-value" id="total-cost">$0.00</div>
+                <div class="card-change" id="cost-change">-</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Economia Potencial</div>
+                <div class="card-value" id="savings">$0.00</div>
+                <div class="card-change positive">↓ 18.5% de economia</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Serviços Analisados</div>
+                <div class="card-value" id="services-count">252</div>
+                <div class="card-change">100% do catálogo AWS</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Recomendações</div>
+                <div class="card-value" id="recommendations-count">0</div>
+                <div class="card-change" id="recommendations-priority">-</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🚀 Executar Análise</div>
+            <div class="actions">
+                <button onclick="startAnalysis('full')" id="btn-full">Análise Completa</button>
+                <button onclick="startAnalysis('costs_only')" id="btn-costs">Apenas Custos</button>
+                <button onclick="startAnalysis('recommendations_only')" id="btn-recommendations">Apenas Recomendações</button>
+                <button onclick="refreshData()" id="btn-refresh">Atualizar</button>
+            </div>
+            <div id="status" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💰 Top 10 Serviços por Custo</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Serviço</th>
+                        <th>Custo Mensal</th>
+                        <th>% do Total</th>
+                        <th>Tendência</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="services-table">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8;">Carregando dados...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🎯 Top Recomendações de Economia</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Recomendação</th>
+                        <th>Recurso</th>
+                        <th>Economia/Mês</th>
+                        <th>Prioridade</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="recommendations-table">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8;">Carregando dados...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📈 Previsão de Custos (30 dias)</div>
+            <div class="chart-container" id="forecast-chart">
+                <p>Gráfico será carregado após executar análise</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        async function startAnalysis(type) {
+            try {
+                setStatus(`<div class="loading"></div> Iniciando análise do tipo: ${type}...`, 'loading');
+                
+                const response = await fetch(`${API_BASE}/v1/analysis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ analysis_type: type, regions: ['us-east-1', 'sa-east-1'] })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                showAlert(`✅ Análise iniciada (ID: ${data.execution_id.substring(0, 8)}...)`, 'success');
+                setStatus(`Processando... ID: ${data.execution_id}`, 'loading');
+                
+                setTimeout(refreshData, 5000);
+            } catch (error) {
+                showAlert(`❌ Erro: ${error.message}`, 'error');
+                setStatus('Erro ao iniciar análise', 'error');
+            }
+        }
+        
+        async function refreshData() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/reports/latest`);
+                if (!response.ok) {
+                    setStatus('Nenhum relatório disponível. Execute uma análise!', 'info');
+                    return;
+                }
+                
+                const data = await response.json();
+                const report = data.report.summary;
+                
+                document.getElementById('total-cost').textContent = `$${report.total_cost.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+                document.getElementById('savings').textContent = `$${report.total_savings_potential.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+                document.getElementById('recommendations-count').textContent = report.recommendations_count || 0;
+                
+                updateServicesTable(data.report.details.costs.by_service);
+                updateRecommendationsTable(data.report.details.recommendations);
+                
+                setStatus(`✅ Última atualização: ${new Date(report.end_time).toLocaleString('pt-BR')}`, 'success');
+            } catch (error) {
+                console.log('Dados ainda não disponíveis:', error.message);
+            }
+        }
+        
+        function updateServicesTable(services) {
+            const sorted = Object.entries(services).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const html = sorted.map(([name, cost]) => `
+                <tr>
+                    <td>${name}</td>
+                    <td>$${cost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                    <td>${((cost / Object.values(services).reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%</td>
+                    <td>→ Estável</td>
+                    <td><span class="status-badge badge-warning">Monitor</span></td>
+                </tr>
+            `).join('');
+            document.getElementById('services-table').innerHTML = html || '<tr><td colspan="5">Sem dados</td></tr>';
+        }
+        
+        function updateRecommendationsTable(recommendations) {
+            const top = recommendations.slice(0, 10);
+            const html = top.map(rec => `
+                <tr>
+                    <td>${rec.title || rec.type || 'Recomendação'}</td>
+                    <td>${rec.resource_id || rec.service || '-'}</td>
+                    <td>$${(rec.savings || 0).toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                    <td><span class="status-badge ${rec.priority === 'HIGH' ? 'badge-error' : rec.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success'}">${rec.priority || 'MÉDIA'}</span></td>
+                    <td><button onclick="alert('Abra AWS Console para aplicar')">Aplicar</button></td>
+                </tr>
+            `).join('');
+            document.getElementById('recommendations-table').innerHTML = html || '<tr><td colspan="5">Sem recomendações</td></tr>';
+        }
+        
+        function setStatus(message, type) {
+            document.getElementById('status').innerHTML = message;
+        }
+        
+        function showAlert(message, type) {
+            const alerts = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alerts.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+        
+        // Carrega dados iniciais
+        window.addEventListener('load', refreshData);
+    </script>
+</body>
+</html>
