@@ -34,7 +34,7 @@
 
 | # | Tipo de Teste | Status | Notas |
 |---|---------------|--------|-------|
-| 1 | Teste de Componente/Unit | ✅ COBERTO | 1877 testes unitários |
+| 1 | Teste de Componente/Unit | ✅ COBERTO | 1,877+ testes unitários |
 | 2 | Teste de Integração | ✅ COBERTO | 36 testes de integração |
 | 3 | Teste de Sistema | ✅ COBERTO | test_lambda_handler_e2e.py |
 | 4 | Teste de Aceitação | ⚠️ PARCIAL | Testes E2E simulam |

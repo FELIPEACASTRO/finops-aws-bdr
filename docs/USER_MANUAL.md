@@ -241,7 +241,7 @@ Verificando credenciais AWS...
   ✓ Região: us-east-1
 
 Iniciando análise...
-  [====================] 100% - 252 serviços analisados
+  [====================] 100% - 253 serviços analisados
 
 Resultados:
   Total de recursos: 1,234
@@ -265,7 +265,7 @@ pytest tests/unit/ -v
 **Saída esperada:**
 ```
 ============================= test session starts =============================
-collected 1842 items
+collected 2000 items
 
 tests/unit/test_cleanup_manager.py ............................ [  1%]
 tests/unit/test_cost_service.py ............................... [  2%]
@@ -415,7 +415,7 @@ terraform apply
     "total_cost_monthly": 45234.56,
     "potential_savings": 8500.00,
     "savings_percentage": 18.8,
-    "services_analyzed": 252,
+    "services_analyzed": 253,
     "recommendations_count": 47
   },
   "cost_breakdown": {...},

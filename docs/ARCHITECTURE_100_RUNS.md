@@ -82,7 +82,7 @@ START → InitializeExecution (Mapper)
 ### 2. Lambda Mapper
 
 Responsável por:
-- Dividir 252 serviços em batches de ~20
+- Dividir 253 serviços em batches de ~20
 - Agrupar serviços que usam Cost Explorer (rate limiting)
 - Salvar estado inicial no S3
 

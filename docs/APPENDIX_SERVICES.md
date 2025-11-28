@@ -27,7 +27,7 @@
 ### 1.1 Cobertura Total
 
 ```mermaid
-pie title Distribuição dos 252 Serviços por Categoria
+pie title Distribuição dos 253 Serviços por Categoria
     "Compute & Serverless" : 25
     "Storage" : 15
     "Database" : 25
@@ -49,11 +49,11 @@ pie title Distribuição dos 252 Serviços por Categoria
 
 | Métrica | Valor |
 |---------|-------|
-| **Total de Serviços** | 252 |
+| **Total de Serviços** | 253 |
 | **Categorias** | 16 |
 | **Métodos por Serviço** | 5 (mínimo) |
-| **Testes Unitários** | 1,842+ |
-| **Cobertura de Código** | ~90% |
+| **Testes Automatizados** | 2,000+ |
+| **Testes QA** | 78 (45 completos + 33 simulados) |
 
 ---
 
@@ -532,7 +532,7 @@ graph TB
 ---
 
 *Apêndice de Serviços - FinOps AWS*
-*Total: 252 serviços implementados*
+*Total: 253 serviços implementados*
 *Versão: 1.0*
 *Última atualização: Novembro 2025*
 
@@ -875,11 +875,11 @@ graph TB
 │                                                                             │
 │  TOTAIS                                                                     │
 │  ─────────────────────────────────────────────────────────────────────      │
-│  • Serviços AWS Implementados: 252                                         │
-│  • Arquivos de Serviço: 252                                                │
+│  • Serviços AWS Implementados: 253                                         │
+│  • Arquivos de Serviço: 253                                                │
 │  • Classes de Serviço: 247                                                 │
 │  • Métodos Getter na Factory: 254                                          │
-│  • Testes Unitários: 1,842                                                 │
+│  • Testes Unitários: 2,000+                                                 │
 │                                                                             │
 │  POR CATEGORIA                                                              │
 │  ─────────────────────────────────────────────────────────────────────      │
@@ -914,4 +914,4 @@ graph TB
 
 *Apêndice de Serviços FinOps AWS - Versão 2.0 Expandida*
 *Novembro 2025*
-*Total de 252 serviços AWS documentados*
+*Total de 253 serviços AWS documentados*

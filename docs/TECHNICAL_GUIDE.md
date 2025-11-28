@@ -41,7 +41,7 @@ graph TB
     subgraph "Camada de Serviços"
         I --> J[ServiceFactory]
         J --> K[BaseAWSService]
-        K --> L[252 Serviços AWS]
+        K --> L[253 Serviços AWS]
     end
     
     subgraph "Camada de Infraestrutura"
@@ -92,7 +92,7 @@ graph LR
         I[S3]
         J[Lambda]
         K[ECS/EKS]
-        L[252+ Serviços]
+        L[253+ Serviços]
     end
     
     D --> A
@@ -195,7 +195,7 @@ src/finops_aws/
 ├── models/                     # Modelos de domínio
 │   ├── __init__.py
 │   └── finops_models.py        # Dataclasses e entidades
-├── services/                   # 252 serviços AWS
+├── services/                   # 253 serviços AWS
 │   ├── __init__.py
 │   ├── base_service.py         # Classe base abstrata
 │   ├── ec2_service.py          # Serviço EC2
@@ -340,7 +340,7 @@ class AWSServiceType(Enum):
     EC2 = 'ec2'
     LAMBDA = 'lambda'
     BATCH = 'batch'
-    # ... 252 outros
+    # ... 253 outros
 ```
 
 ---
@@ -916,10 +916,10 @@ pyramid
 | Componente | Testes | Cobertura |
 |------------|--------|-----------|
 | Core (factories, executors) | 200+ | 95% |
-| Services (252 serviços) | 1500+ | 85% |
+| Services (253 serviços) | 1500+ | 85% |
 | Models | 50+ | 100% |
 | Utils | 50+ | 90% |
-| **Total** | **1842** | **~90%** |
+| **Total** | **2000** | **~90%** |
 
 ### 11.3 Executando Testes
 
@@ -1016,7 +1016,7 @@ class ServiceFactory:
     
     def _register_all_services(self):
         """
-        Registra todos os 252+ serviços disponíveis.
+        Registra todos os 253+ serviços disponíveis.
         Usa lazy loading para otimizar uso de memória.
         """
         # Mapeamento enum -> getter method
@@ -1299,7 +1299,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "execution_id": "exec-123",
             "status": "completed",
             "summary": {
-                "services_analyzed": 252,
+                "services_analyzed": 253,
                 "recommendations_count": 45,
                 "total_savings": 12500.00
             },

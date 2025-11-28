@@ -26,7 +26,7 @@
 1. [Capítulo 1: O Pesadelo da Fatura AWS](#capítulo-1-o-pesadelo-da-fatura-aws)
 2. [Capítulo 2: Conhecendo o FinOps AWS](#capítulo-2-conhecendo-o-finops-aws)
 3. [Capítulo 3: Arquitetura - Por Dentro da Máquina](#capítulo-3-arquitetura---por-dentro-da-máquina)
-4. [Capítulo 4: Os 252 Serviços AWS](#capítulo-4-os-252-serviços-aws)
+4. [Capítulo 4: Os 253 Serviços AWS](#capítulo-4-os-253-serviços-aws)
 5. [Capítulo 5: Colocando para Funcionar](#capítulo-5-colocando-para-funcionar)
 6. [Capítulo 6: Lendo os Resultados](#capítulo-6-lendo-os-resultados)
 7. [Capítulo 7: Casos Reais do Dia a Dia](#capítulo-7-casos-reais-do-dia-a-dia)
@@ -229,7 +229,7 @@ Maria nunca tinha ouvido falar de Reserved Instances:
 ║                                                                             ║
 ║  ┌─────────────────────────────────────────────────────────────────────┐   ║
 ║  │                                                                     │   ║
-║  │   ✅ Analisa 252 serviços AWS automaticamente                      │   ║
+║  │   ✅ Analisa 253 serviços AWS automaticamente                      │   ║
 ║  │   ✅ Identifica recursos ociosos e superdimensionados              │   ║
 ║  │   ✅ Gera recomendações de economia                                │   ║
 ║  │   ✅ Funciona em múltiplas contas                                  │   ║
@@ -372,7 +372,7 @@ Vamos entender como o FinOps AWS funciona com uma analogia:
 │  │                                │                                   │   │
 │  │    ┌───────────────────────────▼─────────────────────────────┐     │   │
 │  │    │              ServiceFactory                             │     │   │
-│  │    │   "A Linha de Montagem com 252 estações de trabalho"   │     │   │
+│  │    │   "A Linha de Montagem com 253 estações de trabalho"   │     │   │
 │  │    └───────────────────────────┬─────────────────────────────┘     │   │
 │  │                                │                                   │   │
 │  │          ┌─────────────────────┼─────────────────────┐             │   │
@@ -431,7 +431,7 @@ class ServiceFactory:
     """
     A Fábrica de Serviços.
     
-    Ela sabe criar 252 tipos diferentes de serviços,
+    Ela sabe criar 253 tipos diferentes de serviços,
     assim como uma fábrica de carros sabe fazer
     sedans, SUVs, picapes, etc.
     """
@@ -468,7 +468,7 @@ class ServiceFactory:
 │  │EC2│    │RDS│    │S3 │    │ECS│    │...│   <-- Todos têm o mesmo formato│
 │  └───┘    └───┘    └───┘    └───┘    └───┘                                │
 │                                                                             │
-│  Todos os 252 serviços têm os mesmos 5 métodos:                            │
+│  Todos os 253 serviços têm os mesmos 5 métodos:                            │
 │                                                                             │
 │  ┌────────────────────────────────────────────────────────────┐            │
 │  │  1. health_check()      → Está funcionando?               │            │
@@ -640,7 +640,7 @@ O FinOps AWS usa **Clean Architecture**, uma forma de organizar código que:
 │    │  ┌──────────────────────────────────────────────────────────────┐  │ │
 │    │  │  • ServiceFactory (cria serviços)                            │  │ │
 │    │  │  • BaseAWSService (interface comum)                          │  │ │
-│    │  │  • 252 Services (EC2, RDS, S3...)                           │  │ │
+│    │  │  • 253 Services (EC2, RDS, S3...)                           │  │ │
 │    │  │  • FinOps Models (dataclasses)                               │  │ │
 │    │  └──────────────────────────────────────────────────────────────┘  │ │
 │    │                              │                                      │ │
@@ -703,7 +703,7 @@ Vamos acompanhar uma execução do início ao fim:
 │  🏭 PASSO 3: Analisar Cada Serviço                                         │
 │                                                                             │
 │    ┌────────────────────────────────────────────────────────────────────┐  │
-│    │  for service_type in ALL_252_SERVICES:                            │  │
+│    │  for service_type in ALL_253_SERVICES:                            │  │
 │    │      print(f"Analisando {service_type}...")                       │  │
 │    │                                                                    │  │
 │    │      service = service_factory.get_service(service_type)          │  │
@@ -730,7 +730,7 @@ Vamos acompanhar uma execução do início ao fim:
 │    │      'total_cost': 45234.56,                                      │  │
 │    │      'potential_savings': 8500.00,                                │  │
 │    │      'recommendations': [...],                                    │  │
-│    │      'services_analyzed': 252                                     │  │
+│    │      'services_analyzed': 253                                     │  │
 │    │  }                                                                 │  │
 │    │                                                                    │  │
 │    │  return {'statusCode': 200, 'body': json.dumps(results)}         │  │
@@ -740,7 +740,7 @@ Vamos acompanhar uma execução do início ao fim:
 │  ✅ PASSO 5: Execução Completa!                                            │
 │                                                                             │
 │    ┌────────────────────────────────────────────────────────────────────┐  │
-│    │  "Pronto! Analisei 252 serviços em 5 minutos!"                   │  │
+│    │  "Pronto! Analisei 253 serviços em 5 minutos!"                   │  │
 │    │  "Encontrei $8,500 de economia potencial!"                        │  │
 │    └────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
@@ -817,7 +817,7 @@ Por que precisamos salvar o estado?
 │                                                                             │
 │  2. Handler cria → ____________ Factory                                     │
 │                                                                             │
-│  3. Factory cria → 252 ____________                                         │
+│  3. Factory cria → 253 ____________                                         │
 │                                                                             │
 │  4. Cada serviço executa → health_check, ____________, get_recommendations │
 │                                                                             │
@@ -830,14 +830,14 @@ Por que precisamos salvar o estado?
 
 ---
 
-# Capítulo 4: Os 252 Serviços AWS
+# Capítulo 4: Os 253 Serviços AWS
 
 ## 🌐 Mapa dos Serviços
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                                                                             │
-│                        🗺️ MAPA DOS 252 SERVIÇOS                            │
+│                        🗺️ MAPA DOS 253 SERVIÇOS                            │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │                                                                     │   │
@@ -882,7 +882,7 @@ Por que precisamos salvar o estado?
 │  │                                                                     │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
-│  TOTAL: 252 SERVIÇOS ANALISADOS! 🎉                                        │
+│  TOTAL: 253 SERVIÇOS ANALISADOS! 🎉                                        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1071,9 +1071,9 @@ cd finops-aws
 │  finops-aws/                                                                │
 │  ├── 📁 src/finops_aws/     ← Código principal                             │
 │  │   ├── 📁 core/           ← Factories, Executors                         │
-│  │   ├── 📁 services/       ← 252 serviços AWS                             │
+│  │   ├── 📁 services/       ← 253 serviços AWS                             │
 │  │   └── 📁 models/         ← Estruturas de dados                          │
-│  ├── 📁 tests/              ← 1,842 testes                                 │
+│  ├── 📁 tests/              ← 2,000+ testes                                 │
 │  ├── 📁 docs/               ← Documentação                                  │
 │  ├── 📄 requirements.txt    ← Dependências Python                           │
 │  ├── 📄 run_local_demo.py   ← Script para testar localmente                │
@@ -1182,7 +1182,7 @@ Você deve ver algo assim:
 │    - 3 databases analyzed                                                   │
 │    - 1 recommendation generated                                             │
 │                                                                             │
-│  ... (continua para 252 serviços)                                          │
+│  ... (continua para 253 serviços)                                          │
 │                                                                             │
 │  ================================================================================
 │  Demo completed successfully!                                                
@@ -1234,7 +1234,7 @@ python run_with_aws.py
 │                                                                             │
 │  5. Anote quantas recomendações foram geradas: ___________                 │
 │                                                                             │
-│  RESPOSTA ESPERADA: 252 serviços, várias recomendações                     │
+│  RESPOSTA ESPERADA: 253 serviços, várias recomendações                     │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -1262,7 +1262,7 @@ python run_with_aws.py
 │      "total_cost_monthly": 45234.56,           ← Custo total/mês           │
 │      "potential_savings": 8500.00,             ← Economia possível         │
 │      "savings_percentage": 18.8,               ← % de economia             │
-│      "services_analyzed": 252,                 ← Serviços analisados       │
+│      "services_analyzed": 253,                 ← Serviços analisados       │
 │      "recommendations_count": 47               ← Total de dicas            │
 │    },                                                                       │
 │                                                                             │
@@ -1595,7 +1595,7 @@ class ServiceFactory:
     """
     🏭 A Fábrica de Serviços
     
-    Pense nela como uma pizzaria que sabe fazer 252 tipos de pizza!
+    Pense nela como uma pizzaria que sabe fazer 253 tipos de pizza!
     Cada "pizza" é um serviço de análise AWS.
     """
     
@@ -1971,7 +1971,7 @@ python run_with_aws.py
 │  • TECHNICAL_GUIDE.md - Detalhes técnicos aprofundados                     │
 │  • FUNCTIONAL_GUIDE.md - Capacidades e módulos                             │
 │  • USER_MANUAL.md - Manual passo a passo                                   │
-│  • APPENDIX_SERVICES.md - Lista de 252 serviços                            │
+│  • APPENDIX_SERVICES.md - Lista de 253 serviços                            │
 │                                                                             │
 │  RECURSOS EXTERNOS                                                          │
 │  ──────────────────────────────────────────────────────────────────────    │
@@ -2003,7 +2003,7 @@ python run_with_aws.py
 ║  │                                                                     │   ║
 ║  │  ✅ O que é FinOps e por que é importante                         │   ║
 ║  │  ✅ Como o FinOps AWS funciona por dentro                         │   ║
-║  │  ✅ Os 252 serviços AWS que são analisados                        │   ║
+║  │  ✅ Os 253 serviços AWS que são analisados                        │   ║
 ║  │  ✅ Como instalar e configurar                                    │   ║
 ║  │  ✅ Como interpretar os resultados                                │   ║
 ║  │  ✅ Casos reais de economia                                       │   ║

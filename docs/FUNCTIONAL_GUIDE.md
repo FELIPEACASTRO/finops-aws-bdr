@@ -21,7 +21,7 @@
 
 FinOps AWS é uma solução enterprise-grade para **gestão financeira de infraestrutura AWS**. A plataforma oferece:
 
-- **Visibilidade Total**: Análise de 252 serviços AWS
+- **Visibilidade Total**: Análise de 253 serviços AWS
 - **Otimização Inteligente**: Recomendações baseadas em dados reais
 - **Automação**: Execução serverless via AWS Lambda
 - **Escalabilidade**: Suporte multi-conta e multi-região
@@ -37,7 +37,7 @@ mindmap
       Reserved Instances
       Spot Instances
     Visibilidade
-      252 serviços
+      253 serviços
       Multi-conta
       Multi-região
       Dashboards
@@ -206,7 +206,7 @@ graph LR
 ### 4.1 Cobertura por Categoria
 
 ```mermaid
-pie title Distribuição dos 252 Serviços por Categoria
+pie title Distribuição dos 253 Serviços por Categoria
     "Compute & Serverless" : 25
     "Storage" : 15
     "Database" : 25
@@ -691,7 +691,7 @@ graph LR
 
 O FinOps AWS oferece uma solução completa para gestão financeira de infraestrutura AWS, cobrindo:
 
-- **252 serviços AWS** com análise detalhada
+- **253 serviços AWS** com análise detalhada
 - **Recomendações inteligentes** baseadas em dados reais
 - **Monitoramento proativo** com alertas configuráveis
 - **Governança enterprise** para ambientes multi-conta
