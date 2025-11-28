@@ -117,12 +117,11 @@ class TestCircuitBreaker:
             failure_count[0] += 1
             raise Exception("Service unavailable")
         
-        with pytest.raises(Exception):
-            for _ in range(5):
-                try:
-                    failing_operation()
-                except Exception:
-                    pass
+        for _ in range(5):
+            try:
+                failing_operation()
+            except Exception:
+                pass
         
         assert failure_count[0] == 5
     

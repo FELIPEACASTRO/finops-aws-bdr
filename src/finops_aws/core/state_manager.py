@@ -190,16 +190,7 @@ class StateManager:
 
     def _initialize_default_tasks(self, execution: ExecutionState):
         """Inicializa tarefas padrão para uma execução"""
-        default_tasks = [
-            TaskType.COST_ANALYSIS,
-            TaskType.EC2_METRICS,
-            TaskType.LAMBDA_METRICS,
-            TaskType.EC2_RECOMMENDATIONS,
-            TaskType.LAMBDA_RECOMMENDATIONS,
-            TaskType.REPORT_GENERATION
-        ]
-
-        for task_type in default_tasks:
+        for task_type in TaskType:
             task_id = f"{task_type.value}_{execution.execution_id}"
             execution.tasks[task_id] = TaskState(
                 task_id=task_id,
@@ -304,12 +295,40 @@ class StateManager:
             logger.error(f"Failed to get latest execution: {e}")
             raise
 
-    def start_task(self, task_id: str) -> TaskState:
+    def _resolve_task_id(self, task_id_or_type) -> str:
+        """
+        Resolve task_id a partir de string ou TaskType
+        
+        Args:
+            task_id_or_type: ID da tarefa (string) ou TaskType (enum)
+            
+        Returns:
+            task_id resolvido
+        """
+        if not self.current_execution:
+            raise ValueError("No current execution")
+        
+        if isinstance(task_id_or_type, TaskType):
+            for tid, task in self.current_execution.tasks.items():
+                if task.task_type == task_id_or_type:
+                    return tid
+            raise ValueError(f"Task type {task_id_or_type.value} not found")
+        
+        if task_id_or_type in self.current_execution.tasks:
+            return task_id_or_type
+        
+        for tid, task in self.current_execution.tasks.items():
+            if task.task_type.value == task_id_or_type:
+                return tid
+        
+        raise ValueError(f"Task {task_id_or_type} not found")
+
+    def start_task(self, task_id_or_type) -> TaskState:
         """
         Marca tarefa como iniciada
         
         Args:
-            task_id: ID da tarefa
+            task_id_or_type: ID da tarefa (string) ou TaskType (enum)
             
         Returns:
             Estado da tarefa
@@ -317,9 +336,7 @@ class StateManager:
         if not self.current_execution:
             raise ValueError("No current execution")
 
-        if task_id not in self.current_execution.tasks:
-            raise ValueError(f"Task {task_id} not found")
-
+        task_id = self._resolve_task_id(task_id_or_type)
         task = self.current_execution.tasks[task_id]
         task.status = ExecutionStatus.RUNNING
         task.started_at = datetime.now()
@@ -330,12 +347,12 @@ class StateManager:
         
         return task
 
-    def complete_task(self, task_id: str, result_data: Optional[Dict[str, Any]] = None) -> TaskState:
+    def complete_task(self, task_id_or_type, result_data: Optional[Dict[str, Any]] = None) -> TaskState:
         """
         Marca tarefa como concluída
         
         Args:
-            task_id: ID da tarefa
+            task_id_or_type: ID da tarefa (string) ou TaskType (enum)
             result_data: Dados do resultado
             
         Returns:
@@ -344,15 +361,12 @@ class StateManager:
         if not self.current_execution:
             raise ValueError("No current execution")
 
-        if task_id not in self.current_execution.tasks:
-            raise ValueError(f"Task {task_id} not found")
-
+        task_id = self._resolve_task_id(task_id_or_type)
         task = self.current_execution.tasks[task_id]
         task.status = ExecutionStatus.COMPLETED
         task.completed_at = datetime.now()
         task.result_data = result_data
         
-        # Gera checksum dos dados para validação
         if result_data:
             data_str = json.dumps(result_data, sort_keys=True)
             task.checksum = hashlib.md5(data_str.encode()).hexdigest()
@@ -362,12 +376,12 @@ class StateManager:
         
         return task
 
-    def fail_task(self, task_id: str, error_message: str) -> TaskState:
+    def fail_task(self, task_id_or_type, error_message: str) -> TaskState:
         """
         Marca tarefa como falhada
         
         Args:
-            task_id: ID da tarefa
+            task_id_or_type: ID da tarefa (string) ou TaskType (enum)
             error_message: Mensagem de erro
             
         Returns:
@@ -376,9 +390,7 @@ class StateManager:
         if not self.current_execution:
             raise ValueError("No current execution")
 
-        if task_id not in self.current_execution.tasks:
-            raise ValueError(f"Task {task_id} not found")
-
+        task_id = self._resolve_task_id(task_id_or_type)
         task = self.current_execution.tasks[task_id]
         task.status = ExecutionStatus.FAILED
         task.error_message = error_message
@@ -388,12 +400,12 @@ class StateManager:
         
         return task
 
-    def skip_task(self, task_id: str, reason: Optional[str] = None) -> TaskState:
+    def skip_task(self, task_id_or_type, reason: Optional[str] = None) -> TaskState:
         """
         Marca tarefa como pulada
         
         Args:
-            task_id: ID da tarefa
+            task_id_or_type: ID da tarefa (string) ou TaskType (enum)
             reason: Motivo para pular
             
         Returns:
@@ -402,9 +414,7 @@ class StateManager:
         if not self.current_execution:
             raise ValueError("No current execution")
 
-        if task_id not in self.current_execution.tasks:
-            raise ValueError(f"Task {task_id} not found")
-
+        task_id = self._resolve_task_id(task_id_or_type)
         task = self.current_execution.tasks[task_id]
         task.status = ExecutionStatus.SKIPPED
         task.error_message = reason
