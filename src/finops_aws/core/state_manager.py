@@ -139,7 +139,7 @@ class StateManager:
         """Gera chave S3 para a última execução"""
         return f"accounts/{account_id}/latest_execution.json"
 
-    def create_execution(self, account_id: str, metadata: Dict[str, Any] = None) -> ExecutionState:
+    def create_execution(self, account_id: str, metadata: Optional[Dict[str, Any]] = None) -> ExecutionState:
         """
         Cria nova execução ou recupera execução em andamento
         
@@ -329,7 +329,7 @@ class StateManager:
         
         return task
 
-    def complete_task(self, task_id: str, result_data: Dict[str, Any] = None) -> TaskState:
+    def complete_task(self, task_id: str, result_data: Optional[Dict[str, Any]] = None) -> TaskState:
         """
         Marca tarefa como concluída
         
@@ -387,7 +387,7 @@ class StateManager:
         
         return task
 
-    def skip_task(self, task_id: str, reason: str = None) -> TaskState:
+    def skip_task(self, task_id: str, reason: Optional[str] = None) -> TaskState:
         """
         Marca tarefa como pulada
         

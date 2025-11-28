@@ -5,14 +5,14 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 class JSONFormatter(logging.Formatter):
     """Formatador JSON para logs estruturados"""
 
     def format(self, record: logging.LogRecord) -> str:
-        log_entry = {
+        log_entry: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "level": record.levelname,
             "logger": record.name,
@@ -22,9 +22,10 @@ class JSONFormatter(logging.Formatter):
             "line": record.lineno
         }
 
-        # Adiciona informações extras se disponíveis
         if hasattr(record, 'extra_data'):
-            log_entry.update(record.extra_data)
+            extra = getattr(record, 'extra_data', None)
+            if extra is not None:
+                log_entry.update(extra)
 
         if record.exc_info:
             log_entry["exception"] = self.formatException(record.exc_info)
@@ -32,7 +33,7 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(log_entry)
 
 
-def setup_logger(name: str, level: str = None) -> logging.Logger:
+def setup_logger(name: str, level: Optional[str] = None) -> logging.Logger:
     """
     Configura logger com formatação JSON
 
@@ -62,7 +63,7 @@ def setup_logger(name: str, level: str = None) -> logging.Logger:
 
 
 def log_api_call(logger: logging.Logger, service: str, operation: str,
-                 params: Dict[str, Any] = None, duration: float = None):
+                 params: Optional[Dict[str, Any]] = None, duration: Optional[float] = None) -> None:
     """
     Log estruturado para chamadas de API AWS
 
@@ -87,7 +88,7 @@ def log_api_call(logger: logging.Logger, service: str, operation: str,
     logger.info(f"AWS API call: {service}.{operation}", extra={'extra_data': extra_data})
 
 
-def log_error(logger: logging.Logger, error: Exception, context: Dict[str, Any] = None):
+def log_error(logger: logging.Logger, error: Exception, context: Optional[Dict[str, Any]] = None) -> None:
     """
     Log estruturado para erros
 
@@ -96,12 +97,12 @@ def log_error(logger: logging.Logger, error: Exception, context: Dict[str, Any] 
         error: Exceção capturada
         context: Contexto adicional do erro
     """
-    extra_data = {
+    extra_data: Dict[str, Any] = {
         "error_type": type(error).__name__,
         "error_message": str(error)
     }
 
-    if context:
+    if context is not None:
         extra_data["context"] = context
 
     logger.error(f"Error occurred: {error}", extra={'extra_data': extra_data}, exc_info=True)
