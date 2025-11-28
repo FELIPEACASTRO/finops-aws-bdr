@@ -282,8 +282,11 @@ def _update_execution_state(execution_id: str, status: str, data: Dict[str, Any]
         try:
             response = s3.get_object(Bucket=S3_BUCKET, Key=key)
             state = json.loads(response['Body'].read())
-        except s3.exceptions.NoSuchKey:
-            state = {}
+        except ClientError as e:
+            if e.response.get('Error', {}).get('Code') == 'NoSuchKey':
+                state = {}
+            else:
+                state = {}
         except Exception:
             state = {}
         

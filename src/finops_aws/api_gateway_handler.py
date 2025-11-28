@@ -129,8 +129,10 @@ def handle_get_status(event: Dict[str, Any]) -> Dict[str, Any]:
                 'status': state.get('status', 'UNKNOWN'),
                 'state': state
             })
-        except get_s3_client().exceptions.NoSuchKey:
-            return response(404, {'error': 'Execution not found'})
+        except ClientError as e:
+            if e.response.get('Error', {}).get('Code') == 'NoSuchKey':
+                return response(404, {'error': 'Execution not found'})
+            return response(500, {'error': str(e)})
     
     except Exception as e:
         return response(500, {'error': str(e)})
@@ -148,8 +150,10 @@ def handle_get_latest_report(event: Dict[str, Any]) -> Dict[str, Any]:
             'report': report
         })
     
-    except get_s3_client().exceptions.NoSuchKey:
-        return response(404, {'error': 'No reports available yet'})
+    except ClientError as e:
+        if e.response.get('Error', {}).get('Code') == 'NoSuchKey':
+            return response(404, {'error': 'No reports available yet'})
+        return response(500, {'error': str(e)})
     except Exception as e:
         return response(500, {'error': str(e)})
 
