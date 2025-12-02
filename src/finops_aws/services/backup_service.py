@@ -220,10 +220,10 @@ class BackupService(BaseAWSService):
                 'total_recovery_points': total_recovery_points,
                 'jobs_7d': len(jobs),
                 'failed_jobs_7d': failed_jobs,
-                'total_backup_size_gb': round(total_backup_size / (1024**3), 2)
-            },
-            period_days=7,
-            collected_at=datetime.now(timezone.utc)
+                'total_backup_size_gb': round(total_backup_size / (1024**3), 2),
+                'period_days': 7,
+                'collected_at': datetime.now(timezone.utc).isoformat()
+            }
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

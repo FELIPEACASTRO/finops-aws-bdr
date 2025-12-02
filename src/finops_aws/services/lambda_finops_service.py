@@ -276,10 +276,10 @@ class LambdaFinOpsService(BaseAWSService):
                 'total_throttles_7d': total_throttles,
                 'error_rate': round((total_errors / total_invocations * 100) if total_invocations > 0 else 0, 2),
                 'runtimes': runtimes,
-                'memory_distribution': memory_distribution
-            },
-            period_days=7,
-            collected_at=datetime.now(timezone.utc)
+                'memory_distribution': memory_distribution,
+                'period_days': 7,
+                'collected_at': datetime.now(timezone.utc).isoformat()
+            }
         )
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

@@ -65,7 +65,7 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 | Skipped (Moto limits) | 7 |
 | Categories | 16 |
 | Terraform LOC | 3,006 |
-| Documentation LOC | 8,224 |
+| Documentation LOC | 8,500+ |
 
 ### QA Test Categories (78 tests)
 
