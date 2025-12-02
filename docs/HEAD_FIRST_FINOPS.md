@@ -1431,7 +1431,421 @@ Para uma empresa com fatura AWS de **$50.000/mês**:
 
 ---
 
-# ANEXO A: GLOSSÁRIO
+# ANEXO A: CATÁLOGO COMPLETO DOS 253 SERVIÇOS AWS
+
+## Visão Geral da Cobertura
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    COBERTURA TOTAL: 253 SERVIÇOS AWS                         ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  Categoria                          │ Quantidade │ Representação             ║
+║  ───────────────────────────────────┼────────────┼────────────────────────   ║
+║  Compute & Serverless               │     25     │ ████████████████          ║
+║  Storage                            │     15     │ ██████████                ║
+║  Database                           │     25     │ ████████████████          ║
+║  Networking                         │     20     │ █████████████             ║
+║  Security & Identity                │     22     │ ██████████████            ║
+║  AI/ML                              │     26     │ █████████████████         ║
+║  Analytics                          │     20     │ █████████████             ║
+║  Developer Tools                    │     15     │ ██████████                ║
+║  Management & Governance            │     17     │ ███████████               ║
+║  Cost Management                    │     10     │ ███████                   ║
+║  Observability                      │     15     │ ██████████                ║
+║  IoT & Edge                         │     10     │ ███████                   ║
+║  Media                              │      7     │ █████                     ║
+║  End User & Productivity            │     15     │ ██████████                ║
+║  Specialty Services                 │     11     │ ███████                   ║
+║  ───────────────────────────────────┼────────────┼────────────────────────   ║
+║  TOTAL                              │    253     │ 100%                      ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 1. Compute & Serverless (25 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon EC2 | `EC2Service` | Elastic Compute Cloud - Servidores virtuais |
+| 2 | EC2 FinOps | `EC2FinOpsService` | Análise avançada de custos EC2 |
+| 3 | AWS Lambda | `LambdaService` | Computação serverless |
+| 4 | Lambda FinOps | `LambdaFinOpsService` | Análise avançada de custos Lambda |
+| 5 | Lambda@Edge | `LambdaEdgeService` | Edge computing via Lambda |
+| 6 | AWS Batch | `BatchService` | Processamento em lote |
+| 7 | Amazon Lightsail | `LightsailService` | VPS simplificado |
+| 8 | AWS App Runner | `AppRunnerService` | Deploy automático de containers |
+| 9 | Elastic Beanstalk | `ElasticBeanstalkService` | Platform as a Service (PaaS) |
+| 10 | AWS SAM | `SAMService` | Serverless Application Model |
+| 11 | AWS Outposts | `OutpostsService` | Infraestrutura on-premises |
+| 12 | Local Zones | `LocalZonesService` | Extensão de regiões AWS |
+| 13 | AWS Wavelength | `WavelengthService` | 5G edge computing |
+| 14 | Private 5G | `Private5GService` | Rede 5G privada |
+| 15 | Auto Scaling | `AutoScalingService` | Escalabilidade automática |
+| 16 | Amazon ECS | `ECSContainerService` | Elastic Container Service |
+| 17 | Amazon EKS | `EKSService` | Elastic Kubernetes Service |
+| 18 | Amazon ECR | `ECRService` | Elastic Container Registry |
+| 19 | AWS Fargate | `FargateService` | Containers serverless |
+| 20 | AWS Step Functions | `StepFunctionsService` | Orquestração de workflows |
+| 21 | Amazon EventBridge | `EventBridgeService` | Event bus serverless |
+| 22 | AWS Amplify | `AmplifyService` | Full-stack development |
+| 23 | AWS Proton | `ProtonService` | Platform engineering |
+| 24 | EC2 Spot | `EC2SpotService` | Instâncias Spot |
+| 25 | EC2 Reserved | `EC2ReservedService` | Instâncias Reservadas |
+
+---
+
+## 2. Storage (15 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon S3 | `S3Service` | Simple Storage Service |
+| 2 | Amazon EBS | `EBSService` | Elastic Block Store |
+| 3 | Amazon EFS | `EFSService` | Elastic File System |
+| 4 | Amazon FSx | `FSxService` | File systems gerenciados (Lustre, Windows, ONTAP, OpenZFS) |
+| 5 | Storage Gateway | `StorageGatewayService` | Hybrid cloud storage |
+| 6 | S3 Outposts | `S3OutpostsService` | S3 on-premises |
+| 7 | AWS Backup | `BackupService` | Backup centralizado |
+| 8 | AWS DataSync | `DataSyncService` | Transferência de dados |
+| 9 | DataSync Enhanced | `DataSyncEnhancedService` | Análise avançada de transferência |
+| 10 | Snow Family | `SnowService` | Snowball, Snowcone, Snowmobile |
+| 11 | AWS Transfer Family | `TransferFamilyService` | SFTP/FTPS/FTP gerenciado |
+| 12 | S3 Glacier | `S3GlacierService` | Arquivamento de longo prazo |
+| 13 | S3 Intelligent-Tiering | `S3IntelligentTieringService` | Tiering automático |
+| 14 | EBS Snapshots | `EBSSnapshotsService` | Gerenciamento de snapshots |
+| 15 | File Cache | `FileCacheService` | Cache de arquivos |
+
+---
+
+## 3. Database (25 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon RDS | `RDSService` | Relational Database Service |
+| 2 | Amazon Aurora | `AuroraService` | MySQL/PostgreSQL gerenciado |
+| 3 | Aurora Serverless | `AuroraServerlessService` | Aurora on-demand |
+| 4 | Amazon DynamoDB | `DynamoDBFinOpsService` | NoSQL gerenciado |
+| 5 | DynamoDB Global Tables | `DynamoDBGlobalService` | Multi-region replication |
+| 6 | DynamoDB Streams | `DynamoDBStreamsService` | Change data capture |
+| 7 | Amazon ElastiCache | `ElastiCacheService` | Redis/Memcached gerenciado |
+| 8 | ElastiCache Global | `ElastiCacheGlobalService` | Multi-region cache |
+| 9 | ElastiCache Serverless | `ElastiCacheServerlessService` | Cache on-demand |
+| 10 | Amazon MemoryDB | `MemoryDBService` | Redis durável |
+| 11 | Amazon Redshift | `RedshiftService` | Data warehouse |
+| 12 | Redshift Serverless | `RedshiftServerlessService` | Warehouse on-demand |
+| 13 | Amazon DocumentDB | `DocumentDBService` | MongoDB compatível |
+| 14 | Amazon Neptune | `NeptuneService` | Graph database |
+| 15 | Amazon Keyspaces | `KeyspacesService` | Apache Cassandra gerenciado |
+| 16 | Amazon Timestream | `TimestreamService` | Time series database |
+| 17 | Amazon QLDB | `QLDBService` | Quantum Ledger Database |
+| 18 | Amazon OpenSearch | `OpenSearchService` | Elasticsearch gerenciado |
+| 19 | OpenSearch Serverless | `OpenSearchServerlessService` | Search on-demand |
+| 20 | RDS Proxy | `RDSProxyService` | Connection pooling |
+| 21 | AWS DMS | `DMSService` | Database Migration Service |
+| 22 | DMS Migration Tasks | `DMSMigrationService` | Análise de tarefas de migração |
+| 23 | Schema Conversion Tool | `SchemaConversionService` | Conversão de esquemas |
+| 24 | RDS FinOps | `RDSFinOpsService` | Análise avançada RDS |
+| 25 | Database Insights | `DatabaseInsightsService` | Performance insights |
+
+---
+
+## 4. Networking (20 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon VPC | `VPCService` | Virtual Private Cloud |
+| 2 | VPC Network (NAT/EIP) | `VPCNetworkService` | NAT Gateways e Elastic IPs |
+| 3 | Elastic Load Balancing | `ELBService` | ALB, NLB, CLB |
+| 4 | Amazon CloudFront | `CloudFrontService` | CDN global |
+| 5 | Amazon Route 53 | `Route53Service` | DNS gerenciado |
+| 6 | AWS Global Accelerator | `GlobalAcceleratorService` | Anycast routing |
+| 7 | AWS Direct Connect | `DirectConnectService` | Conexão dedicada |
+| 8 | AWS Transit Gateway | `TransitGatewayService` | Network hub |
+| 9 | AWS App Mesh | `AppMeshService` | Service mesh |
+| 10 | AWS Cloud Map | `CloudMapService` | Service discovery |
+| 11 | AWS PrivateLink | `PrivateLinkService` | Private endpoints |
+| 12 | Amazon VPC Lattice | `VPCLatticeService` | Application networking |
+| 13 | AWS Verified Access | `VerifiedAccessService` | Zero trust access |
+| 14 | AWS Client VPN | `ClientVPNService` | VPN gerenciado |
+| 15 | Site-to-Site VPN | `SiteToSiteVPNService` | IPSec VPN |
+| 16 | AWS Network Manager | `NetworkManagerService` | Global network management |
+| 17 | Reachability Analyzer | `ReachabilityAnalyzerService` | Connectivity debugging |
+| 18 | VPC Traffic Mirroring | `TrafficMirroringService` | Packet capture |
+| 19 | Network Access Analyzer | `NetworkAccessAnalyzerService` | Access analysis |
+| 20 | VPC Flow Logs | `VPCFlowLogsService` | Network logging |
+
+---
+
+## 5. Security & Identity (22 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS IAM | `IAMService` | Identity & Access Management |
+| 2 | AWS Security Hub | `SecurityHubService` | Central de segurança |
+| 3 | Amazon GuardDuty | `GuardDutyService` | Threat detection |
+| 4 | Amazon Macie | `MacieService` | Data protection |
+| 5 | Amazon Inspector | `InspectorService` | Vulnerability scanning |
+| 6 | AWS KMS | `KMSService` | Key Management Service |
+| 7 | AWS ACM | `ACMService` | Certificate Manager |
+| 8 | AWS Secrets Manager | `SecretsManagerService` | Secrets management |
+| 9 | Secrets Manager Adv | `SecretsManagerAdvService` | Análise avançada de secrets |
+| 10 | AWS Private CA | `PrivateCAService` | Private Certificate Authority |
+| 11 | AWS CloudHSM | `CloudHSMService` | Hardware Security Module |
+| 12 | AWS Directory Service | `DirectoryServiceService` | Active Directory gerenciado |
+| 13 | AWS IAM Identity Center | `IdentityCenterService` | SSO centralizado |
+| 14 | IAM Access Analyzer | `AccessAnalyzerService` | Policy analysis |
+| 15 | AWS WAF | `WAFService` | Web Application Firewall |
+| 16 | AWS Shield | `ShieldService` | DDoS protection |
+| 17 | AWS Firewall Manager | `FirewallManagerService` | Central firewall management |
+| 18 | AWS Network Firewall | `NetworkFirewallService` | VPC firewall |
+| 19 | Amazon Cognito | `CognitoService` | User authentication |
+| 20 | AWS Audit Manager | `AuditManagerService` | Compliance auditing |
+| 21 | Amazon Detective | `DetectiveService` | Security investigation |
+| 22 | Amazon Security Lake | `SecurityLakeService` | Security data lake |
+
+---
+
+## 6. AI/ML (26 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon Bedrock | `BedrockService` | Foundation Models (GenAI) |
+| 2 | Amazon SageMaker | `SageMakerService` | ML Platform |
+| 3 | SageMaker Studio | `SageMakerStudioService` | ML IDE |
+| 4 | SageMaker Pipelines | `SageMakerPipelinesService` | ML workflows |
+| 5 | SageMaker Feature Store | `SageMakerFeatureStoreService` | Feature repository |
+| 6 | SageMaker Model Registry | `SageMakerModelRegistryService` | Model versioning |
+| 7 | SageMaker Experiments | `SageMakerExperimentsService` | Experiment tracking |
+| 8 | SageMaker Debugger | `SageMakerDebuggerService` | Training debug |
+| 9 | SageMaker Clarify | `SageMakerClarifyService` | Model explainability |
+| 10 | SageMaker Ground Truth | `SageMakerGroundTruthService` | Data labeling |
+| 11 | Amazon Comprehend | `ComprehendService` | NLP |
+| 12 | Amazon Rekognition | `RekognitionService` | Computer vision |
+| 13 | Amazon Textract | `TextractService` | Document analysis |
+| 14 | Amazon Lex | `LexService` | Chatbots |
+| 15 | Amazon Polly | `PollyService` | Text-to-speech |
+| 16 | Amazon Transcribe | `TranscribeService` | Speech-to-text |
+| 17 | Amazon Translate | `TranslateService` | Translation |
+| 18 | Amazon Personalize | `PersonalizeService` | Recommendations |
+| 19 | Amazon Forecast | `ForecastService` | Time series forecasting |
+| 20 | AWS Panorama | `PanoramaService` | Edge ML vision |
+| 21 | AWS DeepRacer | `DeepRacerService` | Reinforcement learning |
+| 22 | AWS DeepComposer | `DeepComposerService` | Music ML |
+| 23 | Amazon HealthLake | `HealthLakeService` | Healthcare ML |
+| 24 | Lookout for Equipment | `LookoutEquipmentService` | Equipment anomaly detection |
+| 25 | Lookout for Metrics | `LookoutMetricsService` | Metric anomaly detection |
+| 26 | Lookout for Vision | `LookoutVisionService` | Visual anomaly detection |
+
+---
+
+## 7. Analytics (20 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon Athena | `AthenaService` | Serverless SQL |
+| 2 | Amazon QuickSight | `QuickSightService` | BI dashboards |
+| 3 | AWS Glue | `GlueService` | ETL serverless |
+| 4 | AWS Glue DataBrew | `GlueDataBrewService` | Data preparation |
+| 5 | AWS Glue Streaming | `GlueStreamingService` | Real-time ETL |
+| 6 | Amazon EMR | `EMRService` | Managed Hadoop/Spark |
+| 7 | Amazon EMR Serverless | `EMRServerlessService` | EMR on-demand |
+| 8 | Amazon Kinesis | `KinesisService` | Data streaming |
+| 9 | Kinesis Data Firehose | `KinesisFirehoseService` | Data delivery |
+| 10 | Kinesis Video Streams | `KinesisVideoService` | Video streaming |
+| 11 | AWS Lake Formation | `LakeFormationService` | Data lake management |
+| 12 | AWS Data Exchange | `DataExchangeService` | Data marketplace |
+| 13 | Amazon MSK | `MSKService` | Managed Kafka |
+| 14 | MSK Connect | `MSKConnectService` | Kafka connectors |
+| 15 | MSK Serverless | `MSKServerlessService` | Kafka on-demand |
+| 16 | Amazon FinSpace | `FinSpaceService` | Financial analytics |
+| 17 | Amazon DataZone | `DataZoneService` | Data governance |
+| 18 | AWS Clean Rooms | `CleanRoomsService` | Secure analytics |
+| 19 | Data Pipeline | `DataPipelineService` | Data workflows |
+| 20 | Managed Apache Flink | `ManagedFlinkService` | Stream processing |
+
+---
+
+## 8. Developer Tools (15 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS X-Ray | `XRayService` | Distributed tracing |
+| 2 | AWS CloudFormation | `CloudFormationService` | Infrastructure as Code |
+| 3 | AWS Systems Manager | `SSMService` | Operations hub |
+| 4 | SSM Automation | `SSMAutomationService` | Runbook automation |
+| 5 | AWS AppConfig | `AppConfigService` | Feature flags |
+| 6 | AWS CodeBuild | `CodeBuildService` | Build service |
+| 7 | AWS CodePipeline | `CodePipelineService` | CI/CD pipelines |
+| 8 | AWS CodeDeploy | `CodeDeployService` | Deployment automation |
+| 9 | AWS CodeCommit | `CodeCommitService` | Git repositories |
+| 10 | CodeCommit Enhanced | `CodeCommitEnhancedService` | Análise avançada de repos |
+| 11 | AWS CodeStar | `CodeStarService` | Development environment |
+| 12 | AWS Cloud9 | `Cloud9Service` | Cloud IDE |
+| 13 | AWS Proton | `ProtonService` | Platform engineering |
+| 14 | AWS CodeArtifact | `CodeArtifactService` | Package repository |
+| 15 | Amazon CodeGuru | `CodeGuruService` | Code analysis & profiling |
+
+---
+
+## 9. Management & Governance (17 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS CloudTrail | `CloudTrailService` | API logging & auditing |
+| 2 | AWS Config | `ConfigService` | Resource compliance |
+| 3 | AWS Trusted Advisor | `TrustedAdvisorService` | Best practices |
+| 4 | AWS Organizations | `OrganizationsService` | Multi-account management |
+| 5 | AWS Control Tower | `ControlTowerService` | Landing zone |
+| 6 | Service Quotas | `ServiceQuotasService` | Limit management |
+| 7 | License Manager | `LicenseManagerService` | License tracking |
+| 8 | Resource Groups | `ResourceGroupsService` | Resource organization |
+| 9 | Tag Editor | `TagEditorService` | Tag management |
+| 10 | AWS RAM | `RAMService` | Resource sharing |
+| 11 | CloudFormation StackSets | `StackSetsService` | Multi-account IaC |
+| 12 | SSM Patch Manager | `PatchManagerService` | Patch automation |
+| 13 | SSM State Manager | `StateManagerService` | Desired state configuration |
+| 14 | AWS OpsCenter | `OpsCenterService` | Operational issues |
+| 15 | Incident Manager | `IncidentManagerService` | Incident response |
+| 16 | Launch Wizard | `LaunchWizardService` | Guided deployment |
+| 17 | AWS FIS | `FISService` | Fault injection simulator |
+
+---
+
+## 10. Cost Management (10 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS Cost Explorer | `CostExplorerService` | Cost analysis & visualization |
+| 2 | AWS Budgets | `BudgetsService` | Budget management & alerts |
+| 3 | Savings Plans | `SavingsPlansService` | Compute savings |
+| 4 | Reserved Instances | `ReservedInstancesService` | RI management |
+| 5 | Cost Anomaly Detection | `CostAnomalyDetectionService` | Anomaly alerts |
+| 6 | Cost Categories | `CostCategoriesService` | Cost organization |
+| 7 | Cost Allocation Tags | `CostAllocationTagsService` | Tag-based allocation |
+| 8 | Billing Conductor | `BillingConductorService` | Custom billing |
+| 9 | Marketplace Metering | `MarketplaceMeteringService` | Usage metering |
+| 10 | Data Exports | `DataExportsService` | Cost data export |
+
+---
+
+## 11. Observability (15 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon CloudWatch | `CloudWatchService` | Monitoring & alerting |
+| 2 | CloudWatch Logs | `CloudWatchLogsService` | Log management |
+| 3 | CloudWatch Insights | `CloudWatchInsightsService` | Log analytics |
+| 4 | CloudWatch Synthetics | `SyntheticsService` | Canary testing |
+| 5 | CloudWatch RUM | `RUMService` | Real user monitoring |
+| 6 | CloudWatch Evidently | `EvidentlyService` | Feature experiments |
+| 7 | AWS ServiceLens | `ServiceLensService` | Application health |
+| 8 | Container Insights | `ContainerInsightsService` | Container monitoring |
+| 9 | Lambda Insights | `LambdaInsightsService` | Lambda monitoring |
+| 10 | Contributor Insights | `ContributorInsightsService` | Top-N analysis |
+| 11 | Application Insights | `ApplicationInsightsService` | App monitoring |
+| 12 | Internet Monitor | `InternetMonitorService` | Internet health |
+| 13 | Network Monitor | `NetworkMonitorService` | Network health |
+| 14 | Amazon Managed Grafana | `ManagedGrafanaService` | Grafana managed |
+| 15 | Amazon Managed Prometheus | `ManagedPrometheusService` | Prometheus managed |
+
+---
+
+## 12. IoT & Edge (10 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS IoT Core | `IoTCoreService` | IoT connectivity |
+| 2 | AWS IoT Analytics | `IoTAnalyticsService` | IoT data analysis |
+| 3 | AWS IoT Greengrass | `GreengrassService` | Edge computing |
+| 4 | AWS IoT Events | `IoTEventsService` | Event detection |
+| 5 | AWS IoT TwinMaker | `IoTTwinMakerService` | Digital twins |
+| 6 | AWS IoT FleetWise | `IoTFleetWiseService` | Vehicle data collection |
+| 7 | AWS IoT SiteWise | `IoTSiteWiseService` | Industrial IoT |
+| 8 | AWS IoT Device Management | `IoTDeviceManagementService` | Device management |
+| 9 | AWS IoT Device Defender | `IoTDeviceDefenderService` | IoT security |
+| 10 | FreeRTOS | `FreeRTOSService` | IoT OS |
+
+---
+
+## 13. Media (7 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS Elemental MediaConvert | `MediaConvertService` | Video transcoding |
+| 2 | AWS Elemental MediaLive | `MediaLiveService` | Live video streaming |
+| 3 | AWS Elemental MediaPackage | `MediaPackageService` | Video packaging |
+| 4 | Amazon IVS | `IVSService` | Interactive Video Service |
+| 5 | AWS Elemental MediaStore | `MediaStoreService` | Media storage |
+| 6 | Elastic Transcoder | `ElasticTranscoderService` | Simple transcoding |
+| 7 | MediaTailor | `MediaTailorService` | Ad insertion |
+
+---
+
+## 14. End User & Productivity (15 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | Amazon WorkSpaces | `WorkSpacesService` | Virtual desktops |
+| 2 | WorkSpaces Web | `WorkSpacesWebService` | Browser-based desktops |
+| 3 | Amazon AppStream 2.0 | `AppStreamService` | Application streaming |
+| 4 | AppStream Advanced | `AppStreamAdvService` | Análise avançada |
+| 5 | Amazon WorkMail | `WorkMailService` | Email gerenciado |
+| 6 | Amazon WorkDocs | `WorkDocsService` | Document storage |
+| 7 | AWS Wickr | `WickrService` | Secure messaging |
+| 8 | Amazon Chime SDK | `ChimeSDKService` | Communications API |
+| 9 | Amazon Honeycode | `HoneycodeService` | No-code apps |
+| 10 | Amazon Connect | `ConnectService` | Contact center |
+| 11 | Amazon Pinpoint | `PinpointService` | Marketing campaigns |
+| 12 | Amazon SES | `SESService` | Email sending |
+| 13 | Amazon SNS | `SNSService` | Push notifications |
+| 14 | Amazon SQS | `SQSService` | Message queuing |
+| 15 | MWAA | `MWAAService` | Managed Apache Airflow |
+
+---
+
+## 15. Specialty Services (11 serviços)
+
+| # | Serviço AWS | Classe de Implementação | Descrição |
+|---|-------------|------------------------|-----------|
+| 1 | AWS Ground Station | `GroundStationService` | Satellite communication |
+| 2 | Amazon Nimble Studio | `NimbleStudioService` | Creative production |
+| 3 | AWS SimSpace Weaver | `SimSpaceWeaverService` | Spatial simulation |
+| 4 | Amazon Location Service | `LocationServiceService` | Maps & location |
+| 5 | GeoSpatial | `GeoSpatialService` | Geospatial analysis |
+| 6 | Amazon HealthOmics | `HealthOmicsService` | Genomics & healthcare |
+| 7 | AWS Supply Chain | `SupplyChainService` | Supply chain management |
+| 8 | AWS RoboMaker | `RoboMakerService` | Robotics development |
+| 9 | Amazon Braket | `BraketService` | Quantum computing |
+| 10 | Amazon Managed Blockchain | `ManagedBlockchainService` | Blockchain networks |
+| 11 | Game Tech | `GameTechService` | Game development |
+
+---
+
+## Matriz de Capacidades por Categoria
+
+| Categoria | Health Check | Análise de Uso | Recomendações | Recursos | Métricas |
+|-----------|:------------:|:--------------:|:-------------:|:--------:|:--------:|
+| Compute & Serverless | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Storage | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Database | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Networking | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Security & Identity | ✅ | ✅ | ✅ | ✅ | ✅ |
+| AI/ML | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Analytics | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Developer Tools | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Management & Governance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Cost Management | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Observability | ✅ | ✅ | ✅ | ✅ | ✅ |
+| IoT & Edge | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Media | ✅ | ✅ | ✅ | ✅ | ✅ |
+| End User & Productivity | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Specialty Services | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+---
+
+# ANEXO B: GLOSSÁRIO
 
 | Termo | Definição |
 |-------|-----------|
