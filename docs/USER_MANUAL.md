@@ -1,113 +1,227 @@
 # FinOps AWS - Manual do Usuário
 
-## Índice
+## Bem-vindo ao FinOps AWS!
+
+Este manual vai te guiar passo a passo desde a instalação até a obtenção de relatórios de economia na sua conta AWS.
+
+---
+
+## Índice Detalhado
 
 1. [Introdução](#1-introdução)
 2. [Requisitos](#2-requisitos)
 3. [Instalação e Configuração](#3-instalação-e-configuração)
 4. [Primeiro Uso](#4-primeiro-uso)
 5. [Execução Local](#5-execução-local)
-6. [Execução no AWS Lambda](#6-execução-no-aws-lambda)
+6. [Deploy para AWS Lambda](#6-deploy-para-aws-lambda)
 7. [Interpretando Resultados](#7-interpretando-resultados)
 8. [Configurações Avançadas](#8-configurações-avançadas)
 9. [Troubleshooting](#9-troubleshooting)
-10. [FAQ](#10-faq)
+10. [FAQ - Perguntas Frequentes](#10-faq---perguntas-frequentes)
+11. [Glossário](#11-glossário)
+12. [Suporte](#12-suporte)
 
 ---
 
-## 1. Introdução
+# 1. Introdução
 
-### 1.1 Bem-vindo ao FinOps AWS
+## 1.1 O que é o FinOps AWS?
 
-O FinOps AWS é sua ferramenta para **economizar dinheiro na AWS**. Ele analisa automaticamente seus recursos e encontra oportunidades de redução de custos.
+O **FinOps AWS** é uma ferramenta inteligente que analisa sua conta AWS e encontra oportunidades de **economizar dinheiro**. Funciona como um consultor financeiro para sua infraestrutura de nuvem.
 
-### 1.2 O que você pode fazer
-
-```mermaid
-graph LR
-    A[Você] --> B[FinOps AWS]
-    B --> C[Ver quanto está gastando]
-    B --> D[Encontrar desperdícios]
-    B --> E[Receber recomendações]
-    B --> F[Economizar dinheiro]
-    
-    style F fill:#4caf50
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│                    O QUE O FINOPS AWS FAZ POR VOCÊ                          │
+│                                                                             │
+│  ┌─────────────────┐         ┌─────────────────┐        ┌────────────────┐ │
+│  │                 │         │                 │        │                │ │
+│  │   ANALISA       │ ──────► │   IDENTIFICA    │ ─────► │   RECOMENDA    │ │
+│  │   253 serviços  │         │   desperdícios  │        │   economia     │ │
+│  │   AWS           │         │   e ociosidade  │        │   20-40%       │ │
+│  │                 │         │                 │        │                │ │
+│  └─────────────────┘         └─────────────────┘        └────────────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.3 Para quem é este manual
+## 1.2 Benefícios Principais
 
-- **Administradores de Cloud**: Configuração e execução
-- **Engenheiros DevOps**: Análise e otimização
-- **Gestores de TI**: Relatórios e dashboards
-- **Equipe Financeira**: Controle de custos
+| Benefício | Descrição | Você Economiza |
+|-----------|-----------|----------------|
+| **Encontra Recursos Ociosos** | Identifica máquinas desligadas ou sem uso | 100% do custo desses recursos |
+| **Sugere Rightsizing** | Reduz tamanho de máquinas superdimensionadas | 30-50% por recurso |
+| **Recomenda Reserved Instances** | Indica quando vale comprar com desconto | 30-60% em reservas |
+| **Otimiza Storage** | Move dados antigos para armazenamento mais barato | 40-70% em S3 |
+| **Detecta Anomalias** | Alerta sobre gastos inesperados | Evita surpresas na fatura |
+
+## 1.3 Para Quem é Este Manual?
+
+Este manual foi escrito para:
+
+- **Administradores de Cloud** - Configuração e operação
+- **Engenheiros DevOps/SRE** - Análise e otimização
+- **Gestores de TI** - Relatórios gerenciais
+- **Equipe Financeira** - Controle de custos e budgets
+- **Desenvolvedores** - Entendimento de custos das aplicações
+
+## 1.4 Segurança - Importante!
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           🔒 GARANTIA DE SEGURANÇA                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  O FinOps AWS é uma ferramenta APENAS DE LEITURA. Ele NUNCA irá:           │
+│                                                                             │
+│  ❌ Criar recursos na sua conta                                             │
+│  ❌ Modificar configurações existentes                                      │
+│  ❌ Deletar qualquer coisa                                                  │
+│  ❌ Acessar dados sensíveis dos seus sistemas                              │
+│                                                                             │
+│  ✅ Ele apenas LÊ informações para gerar relatórios                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 2. Requisitos
+# 2. Requisitos
 
-### 2.1 Requisitos Mínimos
+## 2.1 Requisitos de Sistema
 
-| Requisito | Especificação |
-|-----------|---------------|
-| **Python** | 3.11 ou superior |
-| **AWS Account** | Com permissões de leitura |
-| **IAM User/Role** | Ver seção de permissões |
-| **Memória** | 512MB mínimo |
-| **Rede** | Acesso às APIs AWS |
+| Requisito | Especificação | Verificação |
+|-----------|---------------|-------------|
+| **Python** | 3.11 ou superior | `python --version` |
+| **pip** | Qualquer versão recente | `pip --version` |
+| **Git** | Qualquer versão | `git --version` |
+| **Memória** | Mínimo 512MB | - |
+| **Disco** | 100MB livre | - |
+| **Internet** | Acesso às APIs AWS | - |
 
-### 2.2 Permissões AWS Necessárias
+## 2.2 Requisitos AWS
 
-Para funcionar corretamente, o FinOps AWS precisa de permissões de **leitura** nos serviços que você deseja analisar.
+| Requisito | Descrição | Obrigatório? |
+|-----------|-----------|--------------|
+| **Conta AWS** | Conta ativa com recursos para analisar | ✅ Sim |
+| **IAM User ou Role** | Com permissões de leitura | ✅ Sim |
+| **Access Key** | Para execução local (opcional para Lambda) | ⚠️ Depende |
+| **Cost Explorer** | Habilitado na conta | ✅ Sim |
 
-**Permissão Mínima Recomendada:**
+## 2.3 Permissões IAM Necessárias
 
+O FinOps AWS precisa de permissões de **leitura** (Describe, List, Get). Aqui está a política IAM recomendada:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "FinOpsReadOnly",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "rds:Describe*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "lambda:List*",
+                "lambda:Get*",
+                "ecs:Describe*",
+                "ecs:List*",
+                "eks:Describe*",
+                "eks:List*",
+                "elasticache:Describe*",
+                "dynamodb:Describe*",
+                "dynamodb:List*",
+                "cloudwatch:GetMetric*",
+                "cloudwatch:List*",
+                "ce:GetCost*",
+                "ce:GetReservation*",
+                "ce:GetSavings*",
+                "budgets:Describe*",
+                "iam:Get*",
+                "iam:List*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
 ```
-- ec2:Describe*
-- rds:Describe*
-- s3:GetBucket*, s3:List*
-- lambda:List*, lambda:Get*
-- cloudwatch:GetMetric*
-- ce:GetCostAndUsage
-- ce:GetReservation*
-```
 
-> **Nota de Segurança**: O FinOps AWS **nunca modifica** seus recursos. Todas as operações são apenas de leitura.
+### 2.3.1 Como Criar a Política IAM
+
+**Passo 1**: Acesse o Console AWS > IAM > Policies
+
+**Passo 2**: Clique em "Create policy"
+
+**Passo 3**: Selecione "JSON" e cole a política acima
+
+**Passo 4**: Nomeie como "FinOpsReadOnlyPolicy"
+
+**Passo 5**: Anexe ao seu usuário/role
 
 ---
 
-## 3. Instalação e Configuração
+# 3. Instalação e Configuração
 
-### 3.1 Passo 1: Obter o Código
+## 3.1 Passo 1: Obter o Código
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-org/finops-aws.git
+git clone https://github.com/sua-org/finops-aws.git
+
+# Entre na pasta
 cd finops-aws
+
+# Verifique os arquivos
+ls -la
 ```
 
-### 3.2 Passo 2: Instalar Dependências
+**Estrutura de pastas que você verá:**
+
+```
+finops-aws/
+├── src/                    # Código-fonte
+├── tests/                  # Testes automatizados
+├── docs/                   # Documentação (você está aqui!)
+├── infrastructure/         # Terraform para deploy
+├── run_local_demo.py       # Script para testar localmente
+├── run_with_aws.py         # Script para usar com AWS real
+└── requirements.txt        # Dependências Python
+```
+
+## 3.2 Passo 2: Instalar Dependências
 
 ```bash
-# Instalar pacotes Python
+# Instalar dependências Python
 pip install -r requirements.txt
 ```
 
-**Dependências instaladas:**
-- `boto3` - SDK AWS para Python
+**Dependências instaladas automaticamente:**
+- `boto3` - SDK oficial da AWS para Python
 - `pytest` - Framework de testes
-- `moto` - Mock de serviços AWS
+- `moto` - Simulador de AWS para testes
+- `tabulate` - Formatação de tabelas
 
-### 3.3 Passo 3: Configurar Credenciais AWS
+## 3.3 Passo 3: Configurar Credenciais AWS
 
-**Opção A: Variáveis de Ambiente (Recomendado)**
+Você tem **3 opções** para configurar as credenciais:
+
+### Opção A: Variáveis de Ambiente (Recomendado para desenvolvimento)
 
 ```bash
+# Linux/Mac
 export AWS_ACCESS_KEY_ID="sua-access-key"
 export AWS_SECRET_ACCESS_KEY="sua-secret-key"
 export AWS_REGION="us-east-1"
+
+# Windows (PowerShell)
+$env:AWS_ACCESS_KEY_ID="sua-access-key"
+$env:AWS_SECRET_ACCESS_KEY="sua-secret-key"
+$env:AWS_REGION="us-east-1"
 ```
 
-**Opção B: Arquivo de Credenciais**
+### Opção B: Arquivo de Credenciais
 
 Crie ou edite o arquivo `~/.aws/credentials`:
 
@@ -115,20 +229,36 @@ Crie ou edite o arquivo `~/.aws/credentials`:
 [default]
 aws_access_key_id = sua-access-key
 aws_secret_access_key = sua-secret-key
+
+[finops]
+aws_access_key_id = outra-access-key
+aws_secret_access_key = outra-secret-key
 ```
 
-**Opção C: IAM Role (Para Lambda/EC2)**
+E o arquivo `~/.aws/config`:
 
-Se estiver executando em uma instância EC2 ou Lambda, use uma IAM Role anexada ao recurso.
+```ini
+[default]
+region = us-east-1
+output = json
 
-### 3.4 Verificar Configuração
+[profile finops]
+region = us-east-1
+output = json
+```
+
+### Opção C: IAM Role (Para Lambda/EC2)
+
+Se estiver executando em uma instância EC2 ou Lambda, use uma IAM Role anexada ao recurso. Nenhuma configuração adicional é necessária.
+
+## 3.4 Passo 4: Verificar Configuração
 
 ```bash
 # Testar conexão com AWS
 python -c "import boto3; print(boto3.client('sts').get_caller_identity())"
 ```
 
-Saída esperada:
+**Saída esperada:**
 ```json
 {
     "UserId": "AIDAXXXXXXXXXX",
@@ -137,68 +267,48 @@ Saída esperada:
 }
 ```
 
+Se aparecer erro, verifique:
+- Access Key está correta?
+- Secret Key está correta?
+- Região é válida?
+- Usuário tem as permissões necessárias?
+
 ---
 
-## 4. Primeiro Uso
+# 4. Primeiro Uso
 
-### 4.1 Fluxo de Primeiro Uso
+## 4.1 Fluxo Recomendado para Novos Usuários
 
 ```mermaid
 flowchart TD
-    A[Início] --> B[Configurar Credenciais]
-    B --> C[Executar Demo Local]
-    C --> D{Funcionou?}
-    D -->|Sim| E[Analisar Resultados]
-    D -->|Não| F[Verificar Troubleshooting]
-    F --> B
-    E --> G[Configurar Lambda]
-    G --> H[Agendar Execução]
-    H --> I[Monitorar Relatórios]
+    A[Instalou o FinOps AWS] --> B[Teste com Demo Mockado]
+    B --> C{Funcionou?}
+    C -->|Sim| D[Configure Credenciais AWS]
+    C -->|Não| E[Verifique Instalação]
+    E --> B
+    D --> F[Teste com AWS Real]
+    F --> G{Funcionou?}
+    G -->|Sim| H[Analise os Resultados]
+    G -->|Não| I[Verifique Permissões]
+    I --> F
+    H --> J[Deploy para Lambda]
+    J --> K[Configure Agendamento]
+    K --> L[Receba Relatórios Diários!]
+    
+    style L fill:#4caf50,color:#fff
 ```
 
-### 4.2 Execução Rápida de Teste
+## 4.2 Teste Rápido (Sem AWS Real)
+
+Execute o demo mockado para verificar se a instalação está funcionando:
 
 ```bash
-# Executar demo com serviços mockados (não requer AWS real)
 python run_local_demo.py 1
 ```
 
-**Opções do menu:**
-1. **Demo com Mock** - Testa sem usar AWS real
-2. **Executar Testes** - Roda suite de testes
-3. **Ambos** - Demo + Testes
+**O que você verá:**
 
-### 4.3 Primeira Análise Real
-
-```bash
-# Executar análise com sua conta AWS
-python run_with_aws.py
 ```
-
----
-
-## 5. Execução Local
-
-### 5.1 Modos de Execução
-
-```mermaid
-graph TD
-    A[run_local_demo.py] --> B{Modo}
-    B -->|1| C[Demo Mockado]
-    B -->|2| D[Testes Unitários]
-    B -->|3| E[Demo + Testes]
-    
-    F[run_with_aws.py] --> G[Análise Real]
-    G --> H[Conecta à sua conta AWS]
-    H --> I[Analisa recursos reais]
-    I --> J[Gera recomendações]
-```
-
-### 5.2 Executando Demo Mockado
-
-```bash
-$ python run_local_demo.py 1
-
 ================================================================================
 FinOps AWS - Local Demo Runner
 ================================================================================
@@ -209,27 +319,49 @@ FinOps AWS - Local Demo Runner
 Running Lambda Handler Demo...
 ================================================================================
 
-✓ EC2 Service: Healthy
-  - 5 instances analyzed
-  - 2 recommendations generated
+Initializing FinOps Analysis...
+  ✓ ServiceFactory initialized
+  ✓ StateManager initialized
+  ✓ ResilientExecutor initialized
 
-✓ RDS Service: Healthy
-  - 3 databases analyzed
-  - 1 recommendation generated
+Analyzing AWS Services...
+  [====================] 100%
 
-✓ S3 Service: Healthy
-  - 10 buckets analyzed
-  - 4 recommendations generated
+Results:
+  ✓ EC2 Service: Healthy
+    - 5 instances analyzed
+    - 2 recommendations generated
+  
+  ✓ RDS Service: Healthy
+    - 3 databases analyzed
+    - 1 recommendation generated
+  
+  ✓ S3 Service: Healthy
+    - 10 buckets analyzed
+    - 4 recommendations generated
 
 ================================================================================
+Summary:
+  Services Analyzed: 253
+  Resources Found: 18
+  Recommendations: 7
+  Potential Savings: $1,234.00/month
+================================================================================
+
 Demo completed successfully!
 ```
 
-### 5.3 Executando com AWS Real
+## 4.3 Primeira Análise Real
+
+Agora com as credenciais AWS configuradas:
 
 ```bash
-$ python run_with_aws.py
+python run_with_aws.py
+```
 
+**O que você verá:**
+
+```
 ================================================================================
   FinOps AWS - Análise de Custos e Otimização
   Execução Local com Conta AWS Real
@@ -239,729 +371,591 @@ Verificando credenciais AWS...
   ✓ Credenciais válidas
   ✓ Conta: 123456789012
   ✓ Região: us-east-1
+  ✓ Usuário: seu-usuario
 
-Iniciando análise...
-  [====================] 100% - 253 serviços analisados
+Verificando permissões...
+  ✓ EC2: OK
+  ✓ RDS: OK
+  ✓ S3: OK
+  ✓ Lambda: OK
+  ✓ Cost Explorer: OK
 
-Resultados:
-  Total de recursos: 1,234
-  Custo estimado: $45,234.56/mês
-  Economia potencial: $8,500.00/mês (19%)
+Iniciando análise de 253 serviços AWS...
+  [====================] 100% - Tempo: 3m 45s
 
-Relatório salvo em: output/report_20251127.json
 ================================================================================
-```
+                           RELATÓRIO DE RESULTADOS
+================================================================================
 
-### 5.4 Executando Testes
+Recursos Analisados:
+  ├── EC2: 45 instâncias
+  ├── RDS: 12 databases
+  ├── S3: 28 buckets
+  ├── Lambda: 156 funções
+  └── Outros: 234 recursos
 
-```bash
-# Todos os testes
-python run_local_demo.py 2
+Custo Atual Estimado: $45,234.56/mês
 
-# Ou diretamente com pytest
-pytest tests/unit/ -v
-```
+Recomendações de Economia:
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ #  │ Tipo                  │ Recurso           │ Economia    │ Esforço │
+  ├────┼───────────────────────┼───────────────────┼─────────────┼─────────┤
+  │ 1  │ Terminate Idle        │ i-abc123 (EC2)    │ $150/mês    │ Baixo   │
+  │ 2  │ Rightsizing           │ db-prod-01 (RDS)  │ $89/mês     │ Médio   │
+  │ 3  │ S3 Lifecycle          │ logs-bucket       │ $45/mês     │ Baixo   │
+  │ 4  │ Reserved Instance     │ 5x t3.large       │ $234/mês    │ Baixo   │
+  └────┴───────────────────────┴───────────────────┴─────────────┴─────────┘
 
-**Saída esperada:**
-```
-============================= test session starts =============================
-collected 2000 items
+  Economia Total Potencial: $8,500.00/mês (18.8%)
 
-tests/unit/test_cleanup_manager.py ............................ [  1%]
-tests/unit/test_cost_service.py ............................... [  2%]
-...
-============================= 1841 passed, 1 skipped ==========================
+Relatório salvo em: output/report_20251202.json
+================================================================================
 ```
 
 ---
 
-## 6. Execução no AWS Lambda
+# 5. Execução Local
 
-### 6.1 Arquitetura de Deploy
+## 5.1 Modos de Execução
 
-```mermaid
-graph TB
-    subgraph "Sua Conta AWS"
-        A[Terraform] --> B[Lambda Function]
-        A --> C[IAM Role]
-        A --> D[S3 Bucket]
-        A --> E[EventBridge Rules]
-        A --> H[KMS Key]
-        
-        E -->|5x por dia| B
-        B --> F[Seus Recursos AWS]
-        B --> D
-        B --> G
-    end
+O script `run_local_demo.py` oferece 3 modos:
+
+| Modo | Comando | Descrição |
+|------|---------|-----------|
+| **1 - Demo** | `python run_local_demo.py 1` | Simula análise com dados fictícios |
+| **2 - Testes** | `python run_local_demo.py 2` | Executa 2.013 testes automatizados |
+| **3 - Ambos** | `python run_local_demo.py 3` | Demo + Testes |
+
+## 5.2 Executando os Testes
+
+Para verificar se tudo está funcionando corretamente:
+
+```bash
+python run_local_demo.py 2
 ```
 
-### 6.2 Passo a Passo: Deploy para Lambda
+**Saída esperada:**
 
-**Passo 1: Configurar variáveis**
+```
+================================================================================
+Running Test Suite...
+================================================================================
+
+============================= test session starts ==============================
+platform linux -- Python 3.11.0, pytest-7.4.0
+collected 2013 items
+
+tests/unit/test_factories.py ............................ [ 1%]
+tests/unit/test_state_manager.py ........................ [ 2%]
+tests/unit/test_resilient_executor.py ................... [ 4%]
+...
+tests/unit/test_qa_comprehensive.py .................... [99%]
+
+======================== 2013 passed, 7 skipped in 242.19s ====================
+
+✓ All tests passed!
+================================================================================
+```
+
+## 5.3 Executando com Diferentes Configurações
+
+### Analisar apenas serviços específicos:
+
+```bash
+# Apenas EC2 e RDS
+python run_with_aws.py --services ec2,rds
+
+# Apenas Storage
+python run_with_aws.py --category storage
+```
+
+### Analisar região específica:
+
+```bash
+python run_with_aws.py --region us-west-2
+```
+
+### Gerar relatório em formato específico:
+
+```bash
+# JSON (padrão)
+python run_with_aws.py --output json
+
+# Tabela no terminal
+python run_with_aws.py --output table
+
+# CSV para Excel
+python run_with_aws.py --output csv
+```
+
+---
+
+# 6. Deploy para AWS Lambda
+
+## 6.1 Arquitetura do Deploy
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          ARQUITETURA DE PRODUÇÃO                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐             │
+│  │ EventBridge │───►│ Step Functions  │───►│ Lambda Workers  │             │
+│  │  Scheduler  │    │  Orchestrator   │    │ (5 em paralelo) │             │
+│  └─────────────┘    └─────────────────┘    └───────┬─────────┘             │
+│        │                                           │                        │
+│        │            ┌─────────────────┐            │                        │
+│        │            │       S3        │◄───────────┘                        │
+│        │            │  (Relatórios)   │                                     │
+│        │            └────────┬────────┘                                     │
+│        │                     │                                              │
+│        │            ┌────────▼────────┐                                     │
+│        └───────────►│       SNS       │                                     │
+│                     │  (Notificações) │                                     │
+│                     └─────────────────┘                                     │
+│                                                                             │
+│  Custo estimado: ~$3/mês para 100 execuções/dia                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 6.2 Pré-requisitos para Deploy
+
+- [ ] Terraform instalado (`terraform --version`)
+- [ ] AWS CLI configurado
+- [ ] Conta AWS com permissões de administrador
+
+## 6.3 Passo a Passo do Deploy
+
+### Passo 1: Configurar variáveis do Terraform
 
 ```bash
 cd infrastructure/terraform
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Edite `terraform.tfvars`:
+Edite o arquivo `terraform.tfvars`:
 
 ```hcl
-# Configurações básicas
+# Configuração básica
 aws_region  = "us-east-1"
 environment = "production"
 project     = "finops-aws"
 
-# Configurações do Lambda
+# Configuração do Lambda
 lambda_memory_size = 1024
 lambda_timeout     = 900  # 15 minutos
 
+# Email para notificações
+alert_email = "seu-email@empresa.com"
+
 # Agendamento (5 execuções diárias)
 schedule_expressions = [
-  "cron(0 6 * * ? *)",   # 6:00 UTC
-  "cron(0 9 * * ? *)",   # 9:00 UTC
+  "cron(0 6 * * ? *)",   # 06:00 UTC
+  "cron(0 9 * * ? *)",   # 09:00 UTC
   "cron(0 12 * * ? *)",  # 12:00 UTC
   "cron(0 15 * * ? *)",  # 15:00 UTC
   "cron(0 18 * * ? *)"   # 18:00 UTC
 ]
-
-# Alertas
-alert_email = "finops-alerts@sua-empresa.com"
 ```
 
-**Passo 2: Inicializar Terraform**
+### Passo 2: Inicializar Terraform
 
 ```bash
 terraform init
 ```
 
-**Passo 3: Revisar e aplicar**
+**Saída esperada:**
+
+```
+Initializing the backend...
+Initializing provider plugins...
+- Finding latest version of hashicorp/aws...
+- Installing hashicorp/aws v5.0.0...
+
+Terraform has been successfully initialized!
+```
+
+### Passo 3: Verificar o plano
 
 ```bash
-# Revisar mudanças
-terraform plan
-
-# Aplicar infraestrutura
-terraform apply
+terraform plan -out=deploy.plan
 ```
 
-### 6.3 Verificar Deploy
+**Isso vai mostrar tudo que será criado:**
+- Lambda Functions (Mapper, Workers, Aggregator)
+- Step Functions State Machine
+- IAM Roles e Policies
+- S3 Bucket para relatórios
+- EventBridge Rules para agendamento
+- SNS Topic para notificações
+- CloudWatch Dashboard e Alarms
+- KMS Key para criptografia
+
+### Passo 4: Aplicar o deploy
 
 ```bash
-# Verificar outputs do Terraform
-terraform output
-
-# Testar Lambda manualmente
-aws lambda invoke \
-  --function-name finops-aws-production \
-  --payload '{}' \
-  response.json
-
-cat response.json
+terraform apply deploy.plan
 ```
 
-### 6.4 Configurar Agendamento
+Digite `yes` quando perguntado.
 
-O agendamento é configurado via variável `schedule_expressions` no Terraform:
+**Saída esperada:**
 
-```hcl
-# Em terraform.tfvars
-schedule_expressions = [
-  "cron(0 6 * * ? *)",   # 6:00 UTC
-  "cron(0 12 * * ? *)",  # 12:00 UTC
-  "cron(0 18 * * ? *)"   # 18:00 UTC
-]
+```
+Apply complete! Resources: 23 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+lambda_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:finops-aws-worker"
+s3_bucket = "finops-aws-reports-123456789012"
+state_machine_arn = "arn:aws:states:us-east-1:123456789012:stateMachine:finops-aws-orchestrator"
 ```
 
-Após alterar, execute:
+### Passo 5: Verificar o deploy
+
 ```bash
-terraform apply
+# Verificar funções Lambda
+aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'finops')]"
+
+# Testar execução manual
+aws stepfunctions start-execution \
+  --state-machine-arn "arn:aws:states:us-east-1:123456789012:stateMachine:finops-aws-orchestrator"
 ```
 
-**Exemplos de Cron:**
-| Expressão | Frequência |
-|-----------|------------|
-| `cron(0 6 * * ? *)` | Diário às 6h UTC |
-| `cron(0 8 ? * SUN *)` | Domingos às 8h UTC |
-| `cron(0 0 1 * ? *)` | Dia 1 de cada mês |
-| `rate(4 hours)` | A cada 4 horas |
+## 6.4 Monitoramento Pós-Deploy
 
-### 6.5 Recursos Criados pelo Terraform
+Após o deploy, você pode monitorar pelo Console AWS:
 
-| Recurso | Descrição |
-|---------|-----------|
-| Lambda Function | Função principal do FinOps |
-| Lambda Layer | Dependências Python |
-| IAM Role | Permissões ReadOnly |
-| S3 Bucket | Estado e relatórios |
-| EventBridge Rules | 5 agendamentos diários |
-| KMS Key | Criptografia |
-| SNS Topic | Alertas |
-| CloudWatch Log Group | Logs da Lambda |
+1. **CloudWatch Logs** - Ver logs de execução
+2. **Step Functions** - Ver histórico de execuções
+3. **S3 Bucket** - Ver relatórios gerados
+4. **CloudWatch Dashboard** - Métricas e alarmes
 
 ---
 
-## 7. Interpretando Resultados
+# 7. Interpretando Resultados
 
-### 7.1 Estrutura do Relatório
+## 7.1 Estrutura do Relatório
+
+O relatório gerado contém as seguintes seções:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ESTRUTURA DO RELATÓRIO                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. SUMÁRIO EXECUTIVO                                                       │
+│     ├── Custo total do período                                             │
+│     ├── Economia potencial identificada                                    │
+│     └── Top 5 oportunidades de economia                                    │
+│                                                                             │
+│  2. ANÁLISE POR SERVIÇO                                                     │
+│     ├── EC2: X instâncias, $Y custo, Z recomendações                       │
+│     ├── RDS: X databases, $Y custo, Z recomendações                        │
+│     ├── S3: X buckets, $Y custo, Z recomendações                           │
+│     └── ... (253 serviços)                                                 │
+│                                                                             │
+│  3. RECOMENDAÇÕES DETALHADAS                                                │
+│     ├── Lista priorizada por economia                                      │
+│     ├── Passos para implementação                                          │
+│     ├── Esforço e risco de cada ação                                       │
+│     └── ROI estimado                                                       │
+│                                                                             │
+│  4. ANOMALIAS DETECTADAS                                                    │
+│     ├── Gastos fora do padrão                                              │
+│     └── Recursos com comportamento anormal                                 │
+│                                                                             │
+│  5. TENDÊNCIAS E PREVISÕES                                                  │
+│     ├── Histórico de custos                                                │
+│     └── Previsão para próximos 30 dias                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 7.2 Tipos de Recomendações
+
+| Tipo | Ícone | Descrição | Economia Típica |
+|------|-------|-----------|-----------------|
+| **Terminate Idle** | 🗑️ | Desligar recursos sem uso | 100% |
+| **Rightsizing Down** | 📉 | Reduzir tamanho do recurso | 30-50% |
+| **Rightsizing Up** | 📈 | Aumentar tamanho (performance) | 0% (custo maior) |
+| **Reserved Instance** | 💰 | Compromisso de 1-3 anos | 30-60% |
+| **Savings Plan** | 📊 | Compromisso flexível | 20-30% |
+| **Spot Instance** | ⚡ | Usar capacidade ociosa | 60-90% |
+| **Storage Tiering** | 🗂️ | Mover para storage mais barato | 40-70% |
+
+## 7.3 Níveis de Esforço
+
+| Nível | Descrição | Tempo Estimado |
+|-------|-----------|----------------|
+| **Baixo** | Apenas alguns cliques no console | < 30 minutos |
+| **Médio** | Requer planejamento e janela de manutenção | 1-4 horas |
+| **Alto** | Requer refatoração de aplicação | > 8 horas |
+
+## 7.4 Níveis de Risco
+
+| Nível | Descrição | Exemplo |
+|-------|-----------|---------|
+| **Baixo** | Sem impacto em produção | Criar lifecycle policy no S3 |
+| **Médio** | Possível breve interrupção | Mudar tipo de instância EC2 |
+| **Alto** | Requer janela de manutenção | Migrar para Spot Instances |
+
+## 7.5 Exemplo de Recomendação Detalhada
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ RECOMENDAÇÃO #1: Rightsizing EC2                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ RECURSO                                                                     │
+│ ─────────────────────────────────────                                       │
+│ ID:              i-0abc123def456789                                         │
+│ Nome:            prod-web-server-01                                         │
+│ Tipo Atual:      m5.xlarge (4 vCPU, 16 GB RAM)                             │
+│ Região:          us-east-1                                                  │
+│ Custo Atual:     $140.16/mês                                               │
+│                                                                             │
+│ ANÁLISE                                                                     │
+│ ─────────────────────────────────────                                       │
+│ CPU Média (30 dias):     12.5%                                             │
+│ CPU Máxima (30 dias):    35.2%                                             │
+│ Memória Média:           22.3%                                             │
+│ Memória Máxima:          45.6%                                             │
+│                                                                             │
+│ CONCLUSÃO: Esta instância está superdimensionada.                          │
+│ A CPU nunca passou de 40% nos últimos 30 dias.                             │
+│                                                                             │
+│ RECOMENDAÇÃO                                                                │
+│ ─────────────────────────────────────                                       │
+│ Tipo Recomendado: m5.large (2 vCPU, 8 GB RAM)                              │
+│ Novo Custo:       $70.08/mês                                               │
+│ ECONOMIA:         $70.08/mês (50%)                                         │
+│                                                                             │
+│ IMPLEMENTAÇÃO                                                               │
+│ ─────────────────────────────────────                                       │
+│ Esforço: MÉDIO                                                              │
+│ Risco:   BAIXO                                                              │
+│                                                                             │
+│ Passos:                                                                     │
+│ 1. Agende uma janela de manutenção de 15 minutos                           │
+│ 2. Crie um snapshot AMI da instância (backup)                              │
+│ 3. Pare a instância (Stop, não Terminate)                                  │
+│ 4. Altere o Instance Type para m5.large                                    │
+│ 5. Inicie a instância                                                       │
+│ 6. Monitore a performance por 7 dias                                       │
+│                                                                             │
+│ ROI: Economia de $841/ano com ~30 min de trabalho                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# 8. Configurações Avançadas
+
+## 8.1 Variáveis de Ambiente
+
+| Variável | Descrição | Valor Padrão |
+|----------|-----------|--------------|
+| `AWS_REGION` | Região AWS para análise | us-east-1 |
+| `S3_MAX_BUCKETS_METRICS` | Limite de buckets para métricas detalhadas | 20 |
+| `LOG_LEVEL` | Nível de log (DEBUG, INFO, WARNING, ERROR) | INFO |
+| `FINOPS_BUCKET` | Nome do bucket S3 para relatórios | finops-aws-{account} |
+
+## 8.2 Configurando Multi-Account
+
+Para analisar múltiplas contas AWS:
+
+1. **Conta de Management**: Onde o FinOps AWS será instalado
+2. **Contas Filho**: Contas a serem analisadas
+
+**Em cada conta filho, crie uma role:**
 
 ```json
 {
-  "execution_id": "exec-20251127-143022",
-  "timestamp": "2025-11-27T14:30:22Z",
-  "status": "completed",
-  "summary": {
-    "total_resources": 1234,
-    "total_cost_monthly": 45234.56,
-    "potential_savings": 8500.00,
-    "savings_percentage": 18.8,
-    "services_analyzed": 253,
-    "recommendations_count": 47
-  },
-  "cost_breakdown": {...},
-  "recommendations": [...],
-  "services": {...}
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::MANAGEMENT_ACCOUNT_ID:role/FinOpsRole"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
 }
 ```
 
-### 7.2 Entendendo o Resumo
+## 8.3 Configurando Alertas
 
-```
-╔═══════════════════════════════════════════════════════════════╗
-║                    RESUMO DA ANÁLISE                          ║
-╠═══════════════════════════════════════════════════════════════╣
-║                                                               ║
-║  📊 RECURSOS                    💰 CUSTOS                     ║
-║  ┌─────────────────────┐       ┌─────────────────────┐       ║
-║  │ Total: 1,234        │       │ Mensal: $45,234     │       ║
-║  │ EC2: 156            │       │ Tendência: ↑12%     │       ║
-║  │ RDS: 23             │       │ Previsão: $48,500   │       ║
-║  │ S3: 89 buckets      │       │                     │       ║
-║  └─────────────────────┘       └─────────────────────┘       ║
-║                                                               ║
-║  💡 ECONOMIA POTENCIAL          ⚠️ RECOMENDAÇÕES             ║
-║  ┌─────────────────────┐       ┌─────────────────────┐       ║
-║  │ Total: $8,500/mês   │       │ Alta Prioridade: 12 │       ║
-║  │ Percentual: 18.8%   │       │ Média: 25           │       ║
-║  │ ROI: 2 semanas      │       │ Baixa: 10           │       ║
-║  └─────────────────────┘       └─────────────────────┘       ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
+### Via SNS:
+
+```bash
+# Inscrever email para receber alertas
+aws sns subscribe \
+  --topic-arn arn:aws:sns:us-east-1:123456789012:finops-alerts \
+  --protocol email \
+  --notification-endpoint seu-email@empresa.com
 ```
 
-### 7.3 Tipos de Recomendações
+### Tipos de alertas disponíveis:
 
-#### 🔴 Alta Prioridade
-Ação imediata recomendada. Alto impacto financeiro.
-
-**Exemplo:**
-```
-RECOMENDAÇÃO: Desligar instâncias ociosas
-- Recurso: i-0abc123def456 (m5.xlarge)
-- Problema: CPU média < 1% nos últimos 30 dias
-- Economia: $142.00/mês
-- Ação: Terminar instância ou investigar uso
-```
-
-#### 🟡 Média Prioridade
-Ação em 30 dias. Impacto moderado.
-
-**Exemplo:**
-```
-RECOMENDAÇÃO: Adquirir Reserved Instance
-- Recurso: i-0def456abc789 (r5.2xlarge)
-- Problema: Uso constante (24/7) há 6+ meses
-- Economia: $450.00/mês com RI 1-year
-- Ação: Avaliar compromisso e adquirir RI
-```
-
-#### 🟢 Baixa Prioridade
-Ação quando conveniente. Impacto menor.
-
-**Exemplo:**
-```
-RECOMENDAÇÃO: Mover objetos S3 para Glacier
-- Recurso: bucket-logs-antigos
-- Problema: 500GB não acessados há 180 dias
-- Economia: $10.00/mês
-- Ação: Configurar lifecycle policy
-```
-
-### 7.4 Breakdown de Custos
-
-```mermaid
-pie title Distribuição de Custos por Serviço
-    "EC2" : 40
-    "RDS" : 28
-    "S3" : 12
-    "Lambda" : 8
-    "CloudFront" : 5
-    "Outros" : 7
-```
+- Budget excedido
+- Anomalia de custo detectada
+- Falha na execução
+- Novas recomendações de alta economia
 
 ---
 
-## 8. Configurações Avançadas
+# 9. Troubleshooting
 
-### 8.1 Variáveis de Ambiente
+## 9.1 Problemas Comuns
 
-| Variável | Descrição | Padrão |
-|----------|-----------|--------|
-| `AWS_REGION` | Região AWS principal | `us-east-1` |
-| `LOG_LEVEL` | Nível de log (DEBUG, INFO, WARN) | `INFO` |
-| `S3_BUCKET` | Nome do bucket S3 para estado | `finops-aws-{account}` |
-| `EXECUTION_TIMEOUT` | Timeout em segundos | `840` |
-| `MAX_RETRIES` | Tentativas de retry | `3` |
-| `SERVICES_TO_ANALYZE` | Lista de serviços (CSV) | Todos |
-
-### 8.2 Configurar Serviços Específicos
-
-Para analisar apenas alguns serviços:
-
-```bash
-export SERVICES_TO_ANALYZE="ec2,rds,s3,lambda"
-python run_with_aws.py
-```
-
-### 8.3 Configurar Multi-Região
-
-```bash
-# Analisar múltiplas regiões
-export AWS_REGIONS="us-east-1,us-west-2,eu-west-1"
-python run_with_aws.py
-```
-
-### 8.4 Configurar Multi-Conta
-
-Para análise cross-account, configure roles assumíveis:
-
-```bash
-export CROSS_ACCOUNT_ROLES="arn:aws:iam::111111111111:role/FinOpsRole,arn:aws:iam::222222222222:role/FinOpsRole"
-python run_with_aws.py
-```
-
----
-
-## 9. Troubleshooting
-
-### 9.1 Problemas Comuns
-
-#### Erro: "No credentials found"
+### Erro: "Unable to locate credentials"
 
 ```
-❌ NENHUMA CREDENCIAL AWS ENCONTRADA!
+botocore.exceptions.NoCredentialsError: Unable to locate credentials
 ```
 
 **Solução:**
-1. Verifique se as variáveis de ambiente estão configuradas
-2. Ou verifique o arquivo `~/.aws/credentials`
-3. Execute: `aws sts get-caller-identity` para testar
+1. Verifique se as credenciais estão configuradas
+2. Execute: `aws sts get-caller-identity`
+3. Se falhar, reconfigure com `aws configure`
 
-#### Erro: "Access Denied"
-
-```
-botocore.exceptions.ClientError: An error occurred (AccessDenied)
-```
-
-**Solução:**
-1. Verifique as permissões IAM do usuário/role
-2. Adicione as políticas necessárias (ver seção 2.2)
-3. Verifique se não há SCPs bloqueando
-
-#### Erro: "Timeout"
+### Erro: "Access Denied"
 
 ```
-Task timed out after 900 seconds
+An error occurred (AccessDenied) when calling the DescribeInstances operation
 ```
 
 **Solução:**
-1. Aumente o timeout do Lambda (máx 15 min)
-2. Reduza o número de serviços analisados
-3. Considere execução em batch
+1. Verifique se o usuário tem as permissões necessárias
+2. Use a política IAM fornecida na seção 2.3
+3. Confirme que a política está anexada ao usuário/role
 
-#### Erro: "Rate exceeded"
+### Erro: "Cost Explorer not enabled"
 
 ```
-botocore.exceptions.ClientError: Rate exceeded
+An error occurred (DataUnavailableException): Cost Explorer has not been enabled
 ```
 
 **Solução:**
-1. O retry automático já trata isso
-2. Se persistir, aumente o delay entre chamadas
-3. Solicite aumento de limites à AWS
+1. Acesse AWS Console > Billing > Cost Explorer
+2. Clique em "Enable Cost Explorer"
+3. Aguarde até 24h para os dados ficarem disponíveis
 
-### 9.2 Verificar Logs
+### Erro: "Timeout"
 
-**Logs Locais:**
-```bash
-# Ver últimas linhas do log
-tail -f /var/log/finops-aws.log
+```
+Task timed out after X seconds
 ```
 
-**Logs no CloudWatch:**
-```bash
-# Ver logs do Lambda
-aws logs tail /aws/lambda/finops-aws-handler --follow
-```
+**Solução (Lambda):**
+1. Aumente o timeout do Lambda (máximo 15 minutos)
+2. Aumente a memória (mais memória = mais CPU)
+3. Considere processar menos serviços por execução
 
-### 9.3 Modo Debug
+## 9.2 Logs e Debugging
+
+### Ver logs localmente:
 
 ```bash
-# Ativar logs detalhados
+# Aumentar verbosidade
 export LOG_LEVEL=DEBUG
 python run_with_aws.py
 ```
 
----
-
-## 10. FAQ
-
-### Perguntas Frequentes
-
-**P: O FinOps AWS modifica meus recursos?**
-> R: Não. Todas as operações são apenas de leitura. A ferramenta nunca cria, modifica ou deleta recursos.
-
-**P: Quanto custa executar o FinOps AWS?**
-> R: O custo é mínimo:
-> - Lambda: ~$0.50/mês (execução diária)
-> - S3: ~$0.05/mês (estado e relatórios)
-> - Step Functions: ~$1.50/mês (100 execuções/dia)
-> - API calls: ~$1.00/mês
-> - **Total estimado: ~$3.16/mês**
-
-**P: Posso analisar apenas alguns serviços?**
-> R: Sim. Use a variável `SERVICES_TO_ANALYZE` para especificar quais serviços analisar.
-
-**P: Como integrar com Slack/Teams?**
-> R: Configure um SNS topic e adicione uma assinatura Lambda que envia para Slack/Teams.
-
-**P: Suporta AWS GovCloud/China?**
-> R: Sim, configure a região apropriada e endpoints.
-
-**P: Como exportar para Excel?**
-> R: O relatório JSON pode ser convertido com ferramentas como `jq` ou importado diretamente em ferramentas de BI.
-
-**P: Qual a frequência recomendada de execução?**
-> R: Diária para monitoramento ativo. Semanal para ambientes estáveis.
-
-**P: Posso customizar as recomendações?**
-> R: Sim. Cada serviço tem thresholds configuráveis (CPU, uso, etc).
-
----
-
-## Suporte
-
-### Recursos Adicionais
-
-- 📖 [Guia Técnico](TECHNICAL_GUIDE.md) - Detalhes de arquitetura
-- 📊 [Guia Funcional](FUNCTIONAL_GUIDE.md) - Capacidades da solução
-- 📋 [Catálogo de Serviços](APPENDIX_SERVICES.md) - Lista completa de serviços
-
-### Contato
-
-- **Issues**: Abra uma issue no repositório GitHub
-- **Email**: suporte@finops-aws.example.com
-- **Slack**: #finops-aws-support
-
----
-
-*Manual do Usuário - FinOps AWS*
-*Versão: 1.0*
-*Última atualização: Novembro 2025*
-
----
-
-## 11. Troubleshooting Avançado
-
-### 11.1 Guia de Diagnóstico
-
-```
-╔═════════════════════════════════════════════════════════════════════════════╗
-║                      GUIA DE DIAGNÓSTICO AVANÇADO                          ║
-╚═════════════════════════════════════════════════════════════════════════════╝
-```
-
-#### Problema: Lambda Timeout
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  SINTOMA: Task timed out after X seconds                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  DIAGNÓSTICO:                                                               │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Verificar timeout configurado no Lambda                                │
-│     aws lambda get-function-configuration --function-name finops           │
-│                                                                             │
-│  2. Verificar número de recursos sendo analisados                          │
-│     Muitos recursos = mais tempo necessário                                │
-│                                                                             │
-│  3. Verificar se há throttling da AWS                                      │
-│     Logs com "Rate exceeded"                                               │
-│                                                                             │
-│  SOLUÇÕES:                                                                  │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Aumentar timeout do Lambda (máximo 15 minutos)                         │
-│     aws lambda update-function-configuration \                             │
-│       --function-name finops \                                             │
-│       --timeout 900                                                         │
-│                                                                             │
-│  2. Aumentar memória (mais memória = mais CPU)                             │
-│     aws lambda update-function-configuration \                             │
-│       --function-name finops \                                             │
-│       --memory-size 1024                                                   │
-│                                                                             │
-│  3. Habilitar checkpoint/resume para processar em partes                   │
-│     Variável de ambiente: ENABLE_CHECKPOINTING=true                        │
-│                                                                             │
-│  4. Filtrar serviços analisados                                            │
-│     Variável de ambiente: SERVICES_FILTER=ec2,rds,s3                       │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Problema: Memory Error
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  SINTOMA: Runtime.ExitError ou MemoryError                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  DIAGNÓSTICO:                                                               │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Verificar memória alocada vs usada no CloudWatch                       │
-│     Metric: AWS/Lambda/MemoryUtilization                                   │
-│                                                                             │
-│  2. Conta com muitos recursos (ex: milhares de instâncias EC2)             │
-│                                                                             │
-│  SOLUÇÕES:                                                                  │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Aumentar memória do Lambda                                             │
-│     aws lambda update-function-configuration \                             │
-│       --function-name finops \                                             │
-│       --memory-size 3008                                                   │
-│                                                                             │
-│  2. Processar por região separadamente                                     │
-│     Variável: REGION_FILTER=us-east-1                                      │
-│                                                                             │
-│  3. Habilitar streaming de resultados                                      │
-│     Variável: STREAMING_RESULTS=true                                       │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Problema: Dados Incompletos
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  SINTOMA: Alguns serviços não aparecem no relatório                        │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  DIAGNÓSTICO:                                                               │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Verificar permissões IAM para o serviço faltante                       │
-│                                                                             │
-│  2. Verificar se o serviço está disponível na região                       │
-│                                                                             │
-│  3. Verificar logs de erro                                                  │
-│     grep "ERROR" /tmp/finops.log                                           │
-│                                                                             │
-│  SOLUÇÕES:                                                                  │
-│  ───────────────────────────────────────────────────────────────────────    │
-│  1. Adicionar permissões necessárias                                       │
-│     Consultar docs/APPENDIX_SERVICES.md para lista de permissões          │
-│                                                                             │
-│  2. Verificar SCPs no AWS Organizations                                    │
-│     aws organizations list-policies --filter SERVICE_CONTROL_POLICY       │
-│                                                                             │
-│  3. Executar em região específica                                          │
-│     export AWS_REGION=us-west-2                                            │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 12. Variáveis de Ambiente
-
-### 12.1 Lista Completa de Variáveis
-
-```
-┌────────────────────────────┬────────────────────┬────────────────────────────┐
-│ Variável                   │ Default            │ Descrição                  │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ AWS_REGION                 │ us-east-1          │ Região AWS principal       │
-│ AWS_ACCESS_KEY_ID          │ -                  │ Access Key (se não IAM)    │
-│ AWS_SECRET_ACCESS_KEY      │ -                  │ Secret Key (se não IAM)    │
-│ AWS_PROFILE                │ default            │ Perfil do ~/.aws/config    │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ LOG_LEVEL                  │ INFO               │ DEBUG, INFO, WARNING, ERROR│
-│ LOG_FORMAT                 │ json               │ json, text                 │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ ENABLE_CHECKPOINTING       │ true               │ Habilitar checkpoints      │
-│ S3_STATE_BUCKET            │ finops-aws-{acct}  │ Bucket S3 para estado      │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ SERVICES_FILTER            │ (todos)            │ Lista de serviços: ec2,rds │
-│ REGION_FILTER              │ (todas)            │ Lista de regiões           │
-│ ACCOUNT_FILTER             │ (todas)            │ Lista de contas AWS        │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ METRICS_PERIOD_DAYS        │ 30                 │ Período de métricas        │
-│ RECOMMENDATION_THRESHOLD   │ 10                 │ % mínimo para recomendar   │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ REPORT_S3_BUCKET           │ -                  │ Bucket para relatórios     │
-│ NOTIFICATION_SNS_TOPIC     │ -                  │ ARN do tópico SNS          │
-├────────────────────────────┼────────────────────┼────────────────────────────┤
-│ MAX_RETRIES                │ 3                  │ Tentativas em caso de erro │
-│ RETRY_BASE_DELAY           │ 1.0                │ Delay base em segundos     │
-│ RETRY_MAX_DELAY            │ 60.0               │ Delay máximo em segundos   │
-└────────────────────────────┴────────────────────┴────────────────────────────┘
-```
-
----
-
-## 13. Comandos Úteis
-
-### 13.1 Comandos de Diagnóstico
+### Ver logs no CloudWatch:
 
 ```bash
-# Verificar versão do Python
-python --version
+# Últimos 10 minutos de logs
+aws logs tail /aws/lambda/finops-aws-worker --since 10m
 
-# Verificar boto3
-python -c "import boto3; print(boto3.__version__)"
-
-# Testar conexão AWS
-aws sts get-caller-identity
-
-# Verificar permissões EC2
-aws ec2 describe-instances --max-items 1
-
-# Verificar permissões RDS
-aws rds describe-db-instances --max-items 1
-
-# Verificar permissões Cost Explorer
-aws ce get-cost-and-usage \
-  --time-period Start=2025-01-01,End=2025-01-02 \
-  --granularity DAILY \
-  --metrics "BlendedCost"
-
-# Verificar limites de API
-aws service-quotas get-service-quota \
-  --service-code ec2 \
-  --quota-code L-1216C47A
+# Seguir logs em tempo real
+aws logs tail /aws/lambda/finops-aws-worker --follow
 ```
 
-### 13.2 Comandos de Execução
+### Verificar saúde dos serviços:
 
 ```bash
-# Execução com mock (sem AWS real)
-python run_local_demo.py 1
-
-# Execução real
-python run_with_aws.py
-
-# Execução com filtros
-SERVICES_FILTER=ec2,rds,s3 python run_with_aws.py
-
-# Execução em região específica
-AWS_REGION=eu-west-1 python run_with_aws.py
-
-# Execução com debug
-LOG_LEVEL=DEBUG python run_with_aws.py 2>&1 | tee finops_debug.log
-
-# Execução salvando resultado
-python run_with_aws.py > report_$(date +%Y%m%d_%H%M%S).json
-```
-
-### 13.3 Comandos de Teste
-
-```bash
-# Rodar todos os testes
-python -m pytest tests/ -v
-
-# Rodar testes de um serviço específico
-python -m pytest tests/unit/test_ec2_service.py -v
-
-# Rodar testes com coverage
-python -m pytest tests/ --cov=src/finops_aws --cov-report=html
-
-# Rodar apenas testes rápidos
-python -m pytest tests/ -m "not slow" -v
+python -c "from src.finops_aws.core.factories import ServiceFactory; sf = ServiceFactory(); print(sf.get_ec2_service().health_check())"
 ```
 
 ---
 
-## 14. Melhores Práticas
+# 10. FAQ - Perguntas Frequentes
 
-### 14.1 Checklist de Produção
+## Geral
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                     CHECKLIST PARA PRODUÇÃO                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  SEGURANÇA                                                                  │
-│  ☐ Usar IAM Role ao invés de Access Keys                                   │
-│  ☐ Permissões mínimas necessárias (read-only)                              │
-│  ☐ Habilitar CloudTrail para auditoria                                     │
-│  ☐ Não expor credenciais em logs                                           │
-│                                                                             │
-│  CONFIGURAÇÃO                                                               │
-│  ☐ Lambda timeout adequado (recomendado: 900s)                             │
-│  ☐ Memória adequada (recomendado: 1024MB+)                                 │
-│  ☐ VPC configurada se necessário acessar recursos privados                │
-│  ☐ Variáveis de ambiente configuradas                                      │
-│                                                                             │
-│  MONITORAMENTO                                                              │
-│  ☐ CloudWatch Logs habilitado                                               │
-│  ☐ Alertas de erro configurados                                            │
-│  ☐ Dashboard de métricas                                                    │
-│                                                                             │
-│  AGENDAMENTO                                                                │
-│  ☐ EventBridge rule configurada                                            │
-│  ☐ Frequência adequada (recomendado: diária)                               │
-│  ☐ Janela de execução fora do horário de pico                              │
-│                                                                             │
-│  NOTIFICAÇÕES                                                               │
-│  ☐ SNS topic configurado                                                    │
-│  ☐ Destinatários corretos                                                   │
-│  ☐ Filtro de notificações por severidade                                   │
-│                                                                             │
-│  RELATÓRIOS                                                                 │
-│  ☐ Bucket S3 para armazenamento                                             │
-│  ☐ Lifecycle policy para arquivamento                                      │
-│  ☐ Acesso configurado para stakeholders                                    │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+**P: O FinOps AWS modifica minha infraestrutura?**
+R: Não! O FinOps AWS é 100% somente leitura. Ele apenas coleta informações e gera recomendações. Você decide se e quando implementar.
+
+**P: Quantos serviços AWS são analisados?**
+R: 253 serviços AWS, cobrindo compute, storage, database, networking, security, AI/ML, analytics e muito mais.
+
+**P: Qual é o custo de operação?**
+R: Aproximadamente $3/mês para 100 execuções diárias (5 por dia).
+
+## Segurança
+
+**P: Meus dados estão seguros?**
+R: Sim. O FinOps AWS:
+- Usa apenas permissões de leitura
+- Criptografa dados em trânsito (TLS) e em repouso (KMS)
+- Armazena relatórios no seu próprio bucket S3
+- Não envia dados para terceiros
+
+**P: Posso usar em ambiente de produção?**
+R: Sim! O FinOps AWS foi projetado para produção, com 2.013 testes automatizados (99,6% passando).
+
+## Economia
+
+**P: Quanto posso economizar?**
+R: Tipicamente 20-40% da fatura mensal AWS, dependendo da otimização atual da sua infraestrutura.
+
+**P: Como as recomendações são priorizadas?**
+R: Por economia potencial, considerando também esforço de implementação e risco.
 
 ---
 
-## 15. Atualizações e Versionamento
+# 11. Glossário
 
-### 15.1 Como Atualizar
-
-```bash
-# 1. Verificar versão atual
-cat VERSION
-
-# 2. Fazer backup
-cp -r . ../finops-aws-backup
-
-# 3. Atualizar código
-git pull origin main
-
-# 4. Atualizar dependências
-pip install -r requirements.txt --upgrade
-
-# 5. Rodar testes
-python -m pytest tests/ -v
-
-# 6. Verificar changelog
-cat CHANGELOG.md
-```
+| Termo | Definição |
+|-------|-----------|
+| **FinOps** | Financial Operations - práticas de gestão financeira em cloud |
+| **Rightsizing** | Ajustar o tamanho de recursos ao uso real |
+| **Reserved Instance (RI)** | Instância com desconto por compromisso de 1-3 anos |
+| **Savings Plan** | Compromisso flexível de uso com desconto |
+| **Spot Instance** | Instância com desconto usando capacidade ociosa da AWS |
+| **Underutilized** | Recurso usando menos de 40% de sua capacidade |
+| **Idle** | Recurso sem uso (0% ou quase) |
+| **Anomaly** | Comportamento fora do padrão normal |
+| **Circuit Breaker** | Padrão que previne falhas em cascata |
+| **Exponential Backoff** | Estratégia de retry com delays crescentes |
 
 ---
 
-*Manual do Usuário FinOps AWS - Versão 2.0 Expandida*
-*Novembro 2025*
+# 12. Suporte
+
+## Onde Buscar Ajuda
+
+1. **Documentação**: Leia os outros documentos na pasta `/docs`
+2. **Issues**: Abra uma issue no GitHub
+3. **Logs**: Verifique os logs de execução
+4. **Troubleshooting**: Consulte a seção 9 deste manual
+
+## Documentos Relacionados
+
+| Documento | Descrição |
+|-----------|-----------|
+| [HEAD_FIRST_FINOPS.md](HEAD_FIRST_FINOPS.md) | Guia executivo completo |
+| [TECHNICAL_GUIDE.md](TECHNICAL_GUIDE.md) | Detalhes técnicos da arquitetura |
+| [FUNCTIONAL_GUIDE.md](FUNCTIONAL_GUIDE.md) | Capacidades funcionais |
+| [APPENDIX_SERVICES.md](APPENDIX_SERVICES.md) | Catálogo de 253 serviços |
+
+---
+
+*Manual do Usuário - FinOps AWS Enterprise*
+*Versão 2.0 | Dezembro 2025*
+*Documentação didática e detalhada para todos os perfis de usuário*
