@@ -41,14 +41,19 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      FINOPS AWS                                 │
+│                      FINOPS AWS v2.1                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ✅ 253 Serviços AWS     ✅ Análise Automática                 │
 │  ✅ Clean Architecture   ✅ Recomendações ML                   │
-│  ✅ 2000+ Testes         ✅ Multi-Conta                        │
+│  ✅ 2100+ Testes         ✅ Multi-Conta                        │
 │  ✅ Serverless           ✅ Enterprise-Ready                   │
 │  ✅ Deploy Terraform     ✅ 5 Execuções/Dia                    │
+│                                                                 │
+│  🤖 NOVO: AI CONSULTANT (Amazon Q Business)                    │
+│  ✨ Relatórios Executivos em Linguagem Natural                 │
+│  👔 4 Personas: CEO, CTO, DevOps, FinOps Analyst               │
+│  📧 Entrega Multi-canal: Email, Slack, Dashboard               │
 │                                                                 │
 │  ECONOMIA TÍPICA: 20-40% em custos AWS                         │
 │                                                                 │

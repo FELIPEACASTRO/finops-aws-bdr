@@ -1365,7 +1365,7 @@ jobs:
 
 # 14. Roadmap de Funcionalidades
 
-## 14.1 Versão Atual (2.0)
+## 14.1 Versão Atual (2.1) - AI Consultant
 
 | Funcionalidade | Status |
 |----------------|--------|
@@ -1376,27 +1376,70 @@ jobs:
 | Previsões ML | ✅ Implementado |
 | Dashboard HTML | ✅ Implementado |
 | API REST | ✅ Implementado |
-| 2.013 Testes | ✅ 99,6% passing |
+| **AI Consultant (Amazon Q)** | ✅ **NOVO** |
+| **Relatórios Personalizados** | ✅ **NOVO** |
+| **4 Personas (CEO, CTO, DevOps, Analyst)** | ✅ **NOVO** |
+| **Delivery Multi-canal (Email, Slack)** | ✅ **NOVO** |
+| 2.100+ Testes | ✅ 99,6% passing |
+
+### AI Consultant - Consultor Financeiro Automatizado
+
+O módulo AI Consultant transforma o FinOps AWS de um coletor de dados em um **consultor financeiro automatizado**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    AI CONSULTANT - VISÃO FUNCIONAL                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  📊 DADOS BRUTOS          🤖 AMAZON Q            📋 RELATÓRIO INTELIGENTE  │
+│  ┌─────────────┐          ┌─────────────┐         ┌─────────────┐          │
+│  │ Custos      │   ──>    │ Análise IA  │   ──>   │ Executivo   │          │
+│  │ Métricas    │          │ Contexto    │         │ Técnico     │          │
+│  │ Tendências  │          │ Personaliza │         │ Operacional │          │
+│  └─────────────┘          └─────────────┘         └─────────────┘          │
+│                                                                             │
+│  PERSONAS DISPONÍVEIS:                                                      │
+│  👔 CEO/CFO   - Resumo executivo, ROI, decisões estratégicas               │
+│  💻 CTO       - Trade-offs técnicos, roadmap de modernização               │
+│  🔧 DevOps    - Comandos AWS CLI, scripts de automação                     │
+│  📈 Analyst   - Métricas detalhadas, KPIs, benchmarks                      │
+│                                                                             │
+│  CANAIS DE ENTREGA:                                                        │
+│  📧 Email (SES)  📱 Slack  📄 PDF  🌐 Dashboard  🔌 API REST               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Benefícios do AI Consultant:**
+
+| Benefício | Descrição |
+|-----------|-----------|
+| **Relatórios Personalizados** | Cada stakeholder recebe análise adequada ao seu perfil |
+| **Linguagem Natural** | Explicações claras sem jargão técnico desnecessário |
+| **Recomendações Contextualizadas** | Sugestões baseadas nos dados reais da empresa |
+| **Estimativas de ROI** | Cada recomendação inclui economia estimada |
+| **Conhecimento AWS Nativo** | Q Business conhece todos os 253 serviços AWS |
+| **Dados na AWS** | Nenhum dado sai da conta AWS do cliente |
 
 ## 14.2 Próximas Versões
 
-### v2.1 (Q1 2026)
+### v2.2 (Q1 2026)
 - [ ] Integração AWS CUR (Cost and Usage Reports)
 - [ ] Tagging/Showback avançado
 - [ ] Alertas em tempo real via CloudWatch Events
 - [ ] Mobile dashboard
 
-### v2.2 (Q2 2026)
+### v2.3 (Q2 2026)
 - [ ] Anomaly detection com ML avançado
-- [ ] Integração com Slack/Teams
 - [ ] Remediação automática (com aprovação)
 - [ ] Custom dashboards
+- [ ] Conversas multi-turno com AI
 
 ### v3.0 (Q3 2026)
 - [ ] Multi-cloud (Azure, GCP)
 - [ ] Kubernetes cost allocation
 - [ ] FinOps Maturity Assessment
-- [ ] AI-powered recommendations
+- [ ] AI-powered auto-remediation
 
 ---
 

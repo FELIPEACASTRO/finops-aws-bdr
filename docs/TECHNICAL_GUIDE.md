@@ -3304,7 +3304,132 @@ paths:
 
 ---
 
-# 17. Performance e Otimizações
+# 17. AI Consultant - Integração Amazon Q Business
+
+## 17.1 Visão Geral
+
+O módulo **AI Consultant** integra o FinOps AWS com o Amazon Q Business para gerar relatórios inteligentes em linguagem natural. O sistema transforma dados brutos de custo em análises executivas personalizadas para diferentes públicos.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      AI CONSULTANT ARCHITECTURE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                   │
+│  │  Aggregator │ ──> │ DataFormatter│ ──> │  PromptBuilder │               │
+│  │   Lambda    │     │             │     │   (4 Personas) │               │
+│  └─────────────┘     └─────────────┘     └──────┬──────┘                   │
+│                                                  │                          │
+│                                                  ▼                          │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                     AMAZON Q BUSINESS                                │   │
+│  │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │   │
+│  │  │Application│  │   Index   │  │  Retriever│  │DataSource │        │   │
+│  │  │(FinOps AI)│  │(Knowledge)│  │  (Native) │  │   (S3)    │        │   │
+│  │  └───────────┘  └───────────┘  └───────────┘  └───────────┘        │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                  │                          │
+│                                                  ▼                          │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                   │
+│  │ResponseParser│ ──> │ReportStructurer│──>│  Delivery   │                 │
+│  │             │     │ (MD/HTML/JSON)│    │ (Email/Slack)│                 │
+│  └─────────────┘     └─────────────┘     └─────────────┘                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## 17.2 Componentes do Módulo
+
+### QBusinessClient
+
+Cliente principal para interação com Amazon Q Business API:
+
+```python
+from finops_aws.ai_consultant import QBusinessClient, QBusinessConfig
+
+config = QBusinessConfig.from_env()
+client = QBusinessClient(config)
+
+# Chat síncrono
+response = client.chat("Analise os custos de EC2 do último mês")
+print(response.message)
+```
+
+### PromptBuilder
+
+Construtor de prompts otimizados para diferentes personas:
+
+```python
+from finops_aws.ai_consultant import PromptBuilder, PromptPersona
+
+builder = PromptBuilder()
+prompt = builder.build_analysis_prompt(
+    cost_data={"total_cost": 47523.89, ...},
+    period="Nov 2024",
+    persona=PromptPersona.EXECUTIVE
+)
+```
+
+### Personas Disponíveis
+
+| Persona | Foco | Detalhes Técnicos | Comandos |
+|---------|------|-------------------|----------|
+| **EXECUTIVE** | ROI, tendências, decisões | Não | Não |
+| **CTO** | Arquitetura, trade-offs | Sim | Não |
+| **DEVOPS** | Implementação, scripts | Sim | Sim |
+| **ANALYST** | Métricas, KPIs, benchmarks | Sim | Sim |
+
+## 17.3 Fluxo de Geração de Relatório
+
+```mermaid
+sequenceDiagram
+    participant A as Aggregator Lambda
+    participant F as DataFormatter
+    participant Q as Amazon Q Business
+    participant P as ResponseParser
+    participant D as Delivery
+
+    A->>F: cost_report
+    F->>F: format_cost_report()
+    F->>Q: PromptBuilder.build_analysis_prompt()
+    Q->>Q: chat_sync()
+    Q->>P: response.message
+    P->>P: parse()
+    P->>D: structured_report
+    D->>D: send_email() / send_slack()
+```
+
+## 17.4 Knowledge Base
+
+Documentos indexados para enriquecer respostas:
+
+- `aws_best_practices.md` - Melhores práticas de otimização AWS
+- `finops_framework.md` - Framework FinOps e metodologia
+
+## 17.5 Configuração Terraform
+
+```hcl
+# Habilitar Q Business
+variable "enable_q_business" {
+  default = true
+}
+
+# ARN do IAM Identity Center (obrigatório)
+variable "identity_center_instance_arn" {
+  description = "ARN do IAM Identity Center"
+}
+```
+
+Recursos criados:
+- Q Business Application
+- Q Business Index (Enterprise)
+- Q Business Retriever (Native)
+- Q Business Data Source (S3)
+- Lambda para geração de relatórios
+
+---
+
+# 18. Performance e Otimizações
 
 ## 17.1 Otimizações Implementadas
 

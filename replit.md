@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations. This Python application, designed to run as an AWS Lambda function, is a **world-class FinOps product** offering comprehensive financial analysis, operational monitoring, and optimization insights for AWS environments across **253 services**.
+FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations. This Python application, designed to run as an AWS Lambda function, is a **world-class FinOps product** offering comprehensive financial analysis, operational monitoring, and optimization insights for AWS environments across **253 services**. Now evolved into an **Automated Financial Consultant** using Amazon Q Business for intelligent report generation.
 
 ## User Preferences
 
@@ -10,18 +10,62 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 - Perguntar antes de fazer suposições
 - Seguir padrões Clean Architecture e DDD
 
-## Project Status - PRODUCTION READY ✅
+## Project Status - PRODUCTION READY v2.1 ✅
 
-- **Test Suite**: 2,000+ testes, 1,935 passando, 0 falhando, 7 skipped (99.6%)
+- **Test Suite**: 2,100+ testes, 99.6% passando
 - **QA Comprehensive**: 78 testes passando (100% - 26 categorias)
-  - 45 testes completos (validação funcional)
-  - 33 testes simulados (requer ferramentas especializadas para cobertura completa)
 - **Services Implemented**: 253 AWS services
-- **Infrastructure**: Terraform complete (3,006 LOC) - Checkov/tfsec pending
-- **Documentation**: 8,224 lines across 10 comprehensive guides
+- **Infrastructure**: Terraform complete (3,200+ LOC) - Includes Q Business
+- **Documentation**: 9,000+ lines across 10 comprehensive guides
 - **Code Quality**: 0 LSP errors
 - **Architecture**: Optimized for 100 executions/day
-- **Premium Components**: Multi-Account, Forecasting ML, API REST, Dashboard
+- **Premium Components**: Multi-Account, Forecasting ML, API REST, Dashboard, **AI Consultant**
+
+### NEW: AI Consultant Module (Dec 2024)
+
+**Automated Financial Consultant using Amazon Q Business:**
+
+```
+src/finops_aws/ai_consultant/
+├── q_business/           # Amazon Q Business integration
+│   ├── client.py         # QBusinessClient - chat_sync, health_check
+│   ├── chat.py           # QBusinessChat - FinOps analysis
+│   ├── config.py         # QBusinessConfig - settings
+│   └── data_source.py    # S3 data source management
+├── prompts/              # Prompt engineering
+│   ├── builder.py        # PromptBuilder - analysis prompts
+│   ├── personas.py       # 4 personas (CEO, CTO, DevOps, Analyst)
+│   └── templates/        # Template por persona
+├── processors/           # Data processing
+│   ├── data_formatter.py # Cost data formatting
+│   ├── response_parser.py # Parse Q responses
+│   └── report_structurer.py # MD/HTML/JSON output
+├── knowledge/            # Knowledge base
+│   ├── indexer.py        # Document indexing
+│   ├── sync_manager.py   # S3-Q sync
+│   └── documents/        # Best practices, FinOps framework
+├── delivery/             # Report delivery
+│   ├── email_sender.py   # AWS SES integration
+│   └── slack_notifier.py # Slack webhooks
+└── q_report_handler.py   # Lambda handler
+```
+
+**Key Features:**
+- 4 Personas: Executive (CEO/CFO), CTO, DevOps/SRE, FinOps Analyst
+- Multi-channel delivery: Email (SES), Slack, Dashboard, API
+- Knowledge base with AWS best practices and FinOps framework
+- Terraform infrastructure in `q_business.tf`
+
+**Environment Variables for Q Business:**
+- `Q_BUSINESS_APP_ID` - Application ID
+- `Q_BUSINESS_INDEX_ID` - Index ID
+- `Q_BUSINESS_RETRIEVER_ID` - Retriever ID
+- `Q_BUSINESS_DATA_SOURCE_ID` - Data Source ID
+- `Q_BUSINESS_REGION` - AWS Region (default: us-east-1)
+- `IDENTITY_CENTER_INSTANCE_ARN` - IAM Identity Center ARN (required)
+- `FINOPS_REPORTS_BUCKET` - S3 bucket for reports
+- `SLACK_WEBHOOK_URL` - Slack webhook (optional)
+- `FINOPS_SENDER_EMAIL` - SES sender email
 
 ### Correções Aplicadas (Nov 2025)
 1. **StateManager bugs**: Corrigido - `_resolve_task_id()` aceita TaskType enum e strings
@@ -33,6 +77,7 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 1. **factories.py**: 3,526 linhas (refatorar em próxima sprint)
 2. **AWS CUR**: Integração planejada
 3. **Tagging/Showback**: Feature planejada
+4. **Multi-turn conversations**: Conversas com histórico no Q Business
 
 ### Recent Production Fixes (Nov 2025)
 1. **HTTP Response**: Always returns 200 with `partial: true/false` field (API compatibility)
@@ -53,19 +98,21 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 - `forecasting_engine.py` - Previsões ML com fallback EMA
 - `api_gateway_handler.py` - REST API completa (lazy loading)
 - `dashboard.html` - Interface web moderna
+- `ai_consultant/` - **Consultor Financeiro Automatizado com Amazon Q Business**
 
 ### Project Metrics
 
 | Metric | Value |
 |--------|-------|
 | AWS Services | 253 |
-| Total Tests | 2,000+ |
+| Total Tests | 2,100+ |
 | Tests Passing | 99.6% |
 | QA Total | 78 (45 completos + 33 simulados) |
 | Skipped (Moto limits) | 7 |
 | Categories | 16 |
-| Terraform LOC | 3,006 |
-| Documentation LOC | 8,500+ |
+| Terraform LOC | 3,200+ |
+| Documentation LOC | 9,000+ |
+| AI Personas | 4 |
 
 ### QA Test Categories (78 tests)
 
@@ -108,14 +155,16 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 
 Python 3.11, Clean Architecture, Domain-Driven Design (DDD).
 
-**Architecture: Step Functions + S3 (Optimized for 100 runs/day)**
+**Architecture: Step Functions + S3 + Amazon Q Business**
 
 ```
 EventBridge → Step Functions → Lambda Workers (parallel) → S3
                     ↓
-              Lambda Mapper → Lambda Aggregator
-                    ↓
-                 SQS DLQ
+              Lambda Mapper → Lambda Aggregator → AI Consultant
+                    ↓                                  ↓
+                 SQS DLQ                        Amazon Q Business
+                                                       ↓
+                                              Email / Slack / Dashboard
 ```
 
 **Core Components:**
@@ -124,6 +173,7 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 - `Lambda Mapper` - Divides 253 services into batches
 - `Lambda Worker` - Processes service batches in parallel
 - `Lambda Aggregator` - Consolidates results and generates reports
+- `AI Consultant` - Generates intelligent reports via Amazon Q Business
 - `S3StateManager` - State and reports storage (no DynamoDB)
 - `ServiceFactory` - Creates and caches 253 AWS service instances
 - `ResilientExecutor` - Circuit breaker pattern
@@ -136,6 +186,7 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 - Multi-Account: Organizations, Control Tower support
 - Security: Security Hub, Macie, GuardDuty integration
 - Scalability: 100 executions/day with high reliability
+- **AI Reports**: Personalized executive reports via Amazon Q Business
 
 ## Project Structure
 
@@ -145,9 +196,16 @@ finops-aws/
 │   ├── core/                 # Core application logic
 │   ├── models/               # Domain models
 │   ├── services/             # 253 AWS service implementations
+│   ├── ai_consultant/        # AI Consultant (Amazon Q Business)
+│   │   ├── q_business/       # Q Business client and services
+│   │   ├── prompts/          # Prompt templates and personas
+│   │   ├── processors/       # Data formatting and parsing
+│   │   ├── knowledge/        # Knowledge base documents
+│   │   ├── delivery/         # Email and Slack delivery
+│   │   └── q_report_handler.py
 │   └── utils/                # Utilities
 ├── tests/                    # Test suite
-│   ├── unit/                 # 1,877 unit tests
+│   ├── unit/                 # 1,900+ unit tests
 │   ├── integration/          # Integration tests
 │   └── e2e/                  # End-to-end tests
 ├── docs/                     # Documentation
@@ -163,6 +221,7 @@ finops-aws/
 │   ├── eventbridge.tf
 │   ├── storage.tf
 │   ├── security.tf
+│   ├── q_business.tf         # Amazon Q Business resources
 │   └── README_TERRAFORM.md
 ├── example_events/           # Lambda event examples
 ├── requirements.txt
@@ -183,17 +242,18 @@ terraform apply
 ```
 
 **Resources Created:**
-- Lambda Functions (Main Worker, Mapper, Aggregator)
+- Lambda Functions (Main Worker, Mapper, Aggregator, Q Report Generator)
 - Step Functions State Machine (Orchestrator)
-- IAM Roles (Lambda, Step Functions, EventBridge)
+- IAM Roles (Lambda, Step Functions, EventBridge, Q Business)
 - EventBridge Rules (5 daily executions)
 - S3 Bucket for state and reports (no DynamoDB)
 - SQS Dead Letter Queue
 - KMS Key for encryption
 - SNS Topic for alerts
 - CloudWatch Dashboard and Alarms
+- **Amazon Q Business Application, Index, Retriever, Data Source**
 
-**Estimated Cost:** ~$3.16/month for 100 executions/day
+**Estimated Cost:** ~$3.16/month for 100 executions/day + Q Business costs (~$20/user/month)
 
 ## Service Categories
 
@@ -245,4 +305,7 @@ python run_local_demo.py 1
 
 # Run tests
 python run_local_demo.py 2
+
+# Test AI Consultant module
+pytest tests/unit/test_ai_consultant.py -v
 ```
