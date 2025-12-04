@@ -104,19 +104,19 @@ src/finops_aws/ai_consultant/
 
 | Metric | Value |
 |--------|-------|
-| AWS Services | 253 |
-| Total Tests | 2,100+ |
+| AWS Services | 252 |
+| Total Tests | 2,200+ |
 | Tests Passing | 99.6% |
-| QA Total | 78 (45 completos + 33 simulados) |
-| Skipped (Moto limits) | 7 |
-| Categories | 16 |
+| **QA Total** | **157 testes** |
+| QA Suites | 4 (comprehensive, extended, enterprise, backend_ml) |
+| Categories | 35+ |
 | Terraform LOC | 3,200+ |
 | Documentation LOC | 9,000+ |
 | AI Personas | 4 |
 
-### QA Test Categories (78 tests)
+### QA Test Suites (157 tests - Dec 2024)
 
-#### Comprehensive Suite (45 tests)
+#### test_qa_comprehensive.py (45 tests)
 | Category | Tests | Coverage |
 |----------|-------|----------|
 | Smoke Testing | 6 | Build stability |
@@ -150,6 +150,34 @@ src/finops_aws/ai_consultant/
 | Capacity Testing | 2 | Max throughput |
 | Scalability Testing | 1 | Scale behavior |
 | Code Coverage Metrics | 2 | Test ratios |
+
+#### Enterprise Suite (47 tests) - NEW Dec 2024
+| Category | Tests | Coverage |
+|----------|-------|----------|
+| API Contract Testing | 7 | Schema validation |
+| ML/AI Testing | 8 | AI Consultant module |
+| Observability Testing | 6 | Logs, metrics, tracing |
+| OWASP Security | 6 | Top 10 vulnerabilities |
+| Data Quality | 5 | Integrity, consistency |
+| Chaos Engineering Adv | 3 | Cascading failures |
+| Microservices | 3 | Idempotency, consistency |
+| FinOps Specific | 6 | Cost accuracy, coverage |
+| Code Quality Metrics | 4 | TODOs, docstrings |
+| Regression Prevention | 4 | Known bug prevention |
+
+#### Backend & ML Suite (39 tests) - NEW Dec 2024
+| Category | Tests | Coverage |
+|----------|-------|----------|
+| Backend Unit Testing | 5 | Services, Factories |
+| Database/State Testing | 3 | S3 StateManager |
+| Service Integration | 3 | Module integration |
+| Error Handling | 4 | Edge cases |
+| ML Fairness/Accuracy | 5 | AI Consultant |
+| Configuration Testing | 3 | Config validation |
+| Memory/Resource | 3 | Leak detection |
+| Async/Concurrency | 2 | Thread safety |
+| Idempotency Testing | 2 | Same input/output |
+| Boundary Value Testing | 4 | Edge values |
 
 ## System Architecture
 

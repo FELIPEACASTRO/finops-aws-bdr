@@ -15,13 +15,14 @@ Autor: FinOps AWS Team
 Data: Dezembro 2024
 """
 
-from .q_business import QBusinessClient, QBusinessConfig
+from .q_business import QBusinessClient, QBusinessConfig, QBusinessChat
 from .prompts import PromptBuilder, PromptPersona
 from .processors import DataFormatter, ResponseParser, ReportStructurer
 
 __all__ = [
     'QBusinessClient',
     'QBusinessConfig', 
+    'QBusinessChat',
     'PromptBuilder',
     'PromptPersona',
     'DataFormatter',
