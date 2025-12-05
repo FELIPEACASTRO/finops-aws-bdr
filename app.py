@@ -368,6 +368,105 @@ def get_aws_analysis():
                     })
             except Exception:
                 pass
+            
+            try:
+                encryption = s3.get_bucket_encryption(Bucket=bucket_name)
+            except Exception:
+                result['recommendations'].append({
+                    'type': 'S3_ENCRYPTION',
+                    'resource': bucket_name,
+                    'description': f'Habilitar criptografia no bucket {bucket_name}',
+                    'impact': 'high',
+                    'savings': 0,
+                    'source': 'S3 Security'
+                })
+            
+            try:
+                public_access = s3.get_public_access_block(Bucket=bucket_name)
+                config = public_access.get('PublicAccessBlockConfiguration', {})
+                if not all([config.get('BlockPublicAcls'), config.get('BlockPublicPolicy'), 
+                           config.get('IgnorePublicAcls'), config.get('RestrictPublicBuckets')]):
+                    result['recommendations'].append({
+                        'type': 'S3_PUBLIC_ACCESS',
+                        'resource': bucket_name,
+                        'description': f'Bloquear acesso público no bucket {bucket_name}',
+                        'impact': 'high',
+                        'savings': 0,
+                        'source': 'S3 Security'
+                    })
+            except Exception:
+                pass
+        
+        for reservation in instances.get('Reservations', []):
+            for instance in reservation.get('Instances', []):
+                instance_id = instance.get('InstanceId', '')
+                instance_type = instance.get('InstanceType', '')
+                state = instance.get('State', {}).get('Name', '')
+                
+                if state == 'stopped':
+                    result['recommendations'].append({
+                        'type': 'EC2_STOPPED',
+                        'resource': instance_id,
+                        'description': f'Instância EC2 {instance_id} está parada - considere terminar ou usar',
+                        'impact': 'medium',
+                        'savings': 5.0,
+                        'source': 'EC2 Analysis'
+                    })
+                
+                if state == 'running':
+                    volumes = instance.get('BlockDeviceMappings', [])
+                    for vol in volumes:
+                        ebs = vol.get('Ebs', {})
+                        if not ebs.get('DeleteOnTermination', True):
+                            result['recommendations'].append({
+                                'type': 'EBS_ORPHAN_RISK',
+                                'resource': ebs.get('VolumeId', instance_id),
+                                'description': f'Volume EBS não será deletado ao terminar {instance_id}',
+                                'impact': 'low',
+                                'savings': 0,
+                                'source': 'EC2 Analysis'
+                            })
+        
+        for db in db_instances.get('DBInstances', []):
+            db_id = db.get('DBInstanceIdentifier', '')
+            multi_az = db.get('MultiAZ', False)
+            storage_encrypted = db.get('StorageEncrypted', False)
+            backup_retention = db.get('BackupRetentionPeriod', 0)
+            
+            if not storage_encrypted:
+                result['recommendations'].append({
+                    'type': 'RDS_ENCRYPTION',
+                    'resource': db_id,
+                    'description': f'Habilitar criptografia no RDS {db_id}',
+                    'impact': 'high',
+                    'savings': 0,
+                    'source': 'RDS Security'
+                })
+            
+            if backup_retention < 7:
+                result['recommendations'].append({
+                    'type': 'RDS_BACKUP',
+                    'resource': db_id,
+                    'description': f'Aumentar retenção de backup do RDS {db_id} (atual: {backup_retention} dias)',
+                    'impact': 'medium',
+                    'savings': 0,
+                    'source': 'RDS Best Practice'
+                })
+        
+        for func in functions.get('Functions', []):
+            func_name = func.get('FunctionName', '')
+            memory = func.get('MemorySize', 128)
+            timeout = func.get('Timeout', 3)
+            
+            if memory > 512:
+                result['recommendations'].append({
+                    'type': 'LAMBDA_MEMORY',
+                    'resource': func_name,
+                    'description': f'Avaliar redução de memória do Lambda {func_name} ({memory}MB)',
+                    'impact': 'low',
+                    'savings': 2.0,
+                    'source': 'Lambda Optimization'
+                })
                 
     except Exception as e:
         result['resources'] = {'error': str(e)}

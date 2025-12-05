@@ -81,8 +81,39 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 | `docs/USER_MANUAL.md` | End-user manual |
 | `docs/HEAD_FIRST_FINOPS.md` | Executive guide to FinOps |
 
+## AWS Integrations (Implemented)
+
+O dashboard agora integra com múltiplos serviços AWS para gerar recomendações:
+
+| Integração | Função | Requisitos |
+|------------|--------|------------|
+| **AWS Compute Optimizer** | Right-sizing EC2 | Instâncias EC2 ativas |
+| **AWS Cost Explorer (RI/SP)** | Reserved Instances e Savings Plans | Uso suficiente para recomendações |
+| **AWS Trusted Advisor** | Verificações de custo e segurança | Business/Enterprise Support |
+| **Amazon Q Business** | Análise inteligente com IA | `Q_BUSINESS_APPLICATION_ID` configurado |
+
+### Verificações Locais (Sempre Ativas)
+
+- **S3**: Versionamento, Criptografia, Bloqueio de Acesso Público
+- **EC2**: Instâncias paradas, Volumes EBS órfãos
+- **RDS**: Criptografia, Retenção de backup
+- **Lambda**: Otimização de memória
+
+### Configuração Amazon Q Business
+
+Para habilitar a IA:
+```bash
+export Q_BUSINESS_APPLICATION_ID=seu-app-id
+```
+
 ## Recent Changes (December 2024)
 
+- **Integrações AWS Completas (Dec 5)**:
+  - Implementado AWS Compute Optimizer para right-sizing EC2
+  - Implementado Cost Explorer para Reserved Instances e Savings Plans
+  - Implementado Trusted Advisor para verificações de custo/segurança
+  - Implementado Amazon Q Business para análise com IA
+  - Adicionadas verificações locais: S3, EC2, RDS, Lambda
 - **Code Quality Fixes (Dec 5)**:
   - Fixed 3 bare `except:` anti-patterns in `sqs_service.py` and `multi_account_handler.py`
   - Updated asyncio test runner to use `asyncio.run()` for Python 3.11+ compatibility
