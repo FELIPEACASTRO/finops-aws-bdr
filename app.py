@@ -13,6 +13,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 app = Flask(__name__)
 
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 def get_aws_analysis():
     """Executa análise completa da conta AWS."""
     import boto3

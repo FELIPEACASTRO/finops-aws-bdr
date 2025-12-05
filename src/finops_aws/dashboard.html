@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinOps AWS - Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -171,23 +172,23 @@
         <div class="grid">
             <div class="card">
                 <div class="card-title">Custo Total (30d)</div>
-                <div class="card-value" id="total-cost">$0.00</div>
-                <div class="card-change" id="cost-change">-</div>
+                <div class="card-value" id="total-cost">...</div>
+                <div class="card-change" id="cost-change">Carregando</div>
             </div>
             <div class="card">
                 <div class="card-title">Economia Potencial</div>
-                <div class="card-value" id="savings">$0.00</div>
-                <div class="card-change positive">↓ 18.5% de economia</div>
+                <div class="card-value" id="savings">...</div>
+                <div class="card-change positive">↓ economia estimada</div>
             </div>
             <div class="card">
                 <div class="card-title">Serviços Analisados</div>
-                <div class="card-value" id="services-count">252</div>
-                <div class="card-change">100% do catálogo AWS</div>
+                <div class="card-value" id="services-count">...</div>
+                <div class="card-change">AWS Cost Explorer</div>
             </div>
             <div class="card">
                 <div class="card-title">Recomendações</div>
-                <div class="card-value" id="recommendations-count">0</div>
-                <div class="card-change" id="recommendations-priority">-</div>
+                <div class="card-value" id="recommendations-count">...</div>
+                <div class="card-change" id="recommendations-priority">Otimizações</div>
             </div>
         </div>
 
@@ -254,8 +255,12 @@
         const API_BASE = window.location.origin + '/api';
         
         async function startAnalysis(type) {
+            const btn = document.getElementById('btn-' + (type === 'full' ? 'full' : type === 'costs_only' ? 'costs' : 'recommendations'));
+            if (btn) btn.disabled = true;
+            
             try {
-                setStatus(`<div class="loading"></div> Iniciando análise do tipo: ${type}...`, 'loading');
+                setStatus('<span style="color: #f59e0b;">⏳ Iniciando análise...</span>');
+                showAlert('Análise iniciada! Aguarde...', 'success');
                 
                 const response = await fetch(`${API_BASE}/v1/analysis`, {
                     method: 'POST',
@@ -266,83 +271,127 @@
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
-                showAlert(`✅ Análise iniciada (ID: ${data.execution_id.substring(0, 8)}...)`, 'success');
-                setStatus(`Processando... ID: ${data.execution_id}`, 'loading');
+                setStatus('<span style="color: #10b981;">✅ Análise concluída! Carregando dados...</span>');
                 
-                setTimeout(refreshData, 5000);
+                await refreshData();
+                showAlert('Dados atualizados com sucesso!', 'success');
             } catch (error) {
-                showAlert(`❌ Erro: ${error.message}`, 'error');
-                setStatus('Erro ao iniciar análise', 'error');
+                showAlert('Erro: ' + error.message, 'error');
+                setStatus('<span style="color: #ef4444;">❌ Erro na análise</span>');
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
         
         async function refreshData() {
+            const btn = document.getElementById('btn-refresh');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Carregando...';
+            }
+            
             try {
-                const response = await fetch(`${API_BASE}/v1/reports/latest`);
+                setStatus('<span style="color: #f59e0b;">⏳ Buscando dados da AWS...</span>');
+                console.log('Iniciando busca de dados...');
+                
+                const response = await fetch(API_BASE + '/v1/reports/latest');
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
-                    setStatus('Nenhum relatório disponível. Execute uma análise!', 'info');
+                    setStatus('<span style="color: #94a3b8;">ℹ️ Nenhum relatório. Clique em "Análise Completa"</span>');
+                    if (btn) { btn.disabled = false; btn.textContent = 'Atualizar'; }
                     return;
                 }
                 
                 const data = await response.json();
-                const report = data.report.summary;
+                console.log('Dados recebidos:', data);
                 
-                document.getElementById('total-cost').textContent = `$${report.total_cost.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
-                document.getElementById('savings').textContent = `$${report.total_savings_potential.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
-                document.getElementById('recommendations-count').textContent = report.recommendations_count || 0;
+                if (data.status !== 'success' || !data.report) {
+                    throw new Error('Resposta inválida da API');
+                }
                 
-                updateServicesTable(data.report.details.costs.by_service);
-                updateRecommendationsTable(data.report.details.recommendations);
+                const report = data.report;
+                const summary = report.summary || {};
+                const details = report.details || {};
                 
-                setStatus(`✅ Última atualização: ${new Date(report.end_time).toLocaleString('pt-BR')}`, 'success');
+                const totalCost = summary.total_cost || 0;
+                const savings = summary.total_savings_potential || 0;
+                const recsCount = summary.recommendations_count || 0;
+                const svcsCount = summary.services_analyzed || 0;
+                
+                console.log('Custo:', totalCost, 'Economia:', savings);
+                
+                document.getElementById('total-cost').textContent = '$' + totalCost.toFixed(2);
+                document.getElementById('savings').textContent = '$' + savings.toFixed(2);
+                document.getElementById('recommendations-count').textContent = recsCount;
+                document.getElementById('services-count').textContent = svcsCount;
+                
+                const costsByService = details.costs ? details.costs.by_service : {};
+                const recommendations = details.recommendations || [];
+                
+                updateServicesTable(costsByService);
+                updateRecommendationsTable(recommendations);
+                
+                const now = new Date().toLocaleString('pt-BR');
+                setStatus('<span style="color: #10b981;">✅ Atualizado em ' + now + ' | Custo: $' + totalCost.toFixed(2) + '</span>');
+                showAlert('Dados carregados: $' + totalCost.toFixed(2) + ' em ' + svcsCount + ' serviços', 'success');
             } catch (error) {
-                console.log('Dados ainda não disponíveis:', error.message);
+                console.error('Erro:', error);
+                setStatus('<span style="color: #ef4444;">❌ Erro: ' + error.message + '</span>');
+                showAlert('Erro ao carregar: ' + error.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Atualizar';
+                }
             }
         }
         
         function updateServicesTable(services) {
-            const sorted = Object.entries(services).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            const html = sorted.map(([name, cost]) => `
-                <tr>
-                    <td>${name}</td>
-                    <td>$${cost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                    <td>${((cost / Object.values(services).reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%</td>
-                    <td>→ Estável</td>
-                    <td><span class="status-badge badge-warning">Monitor</span></td>
-                </tr>
-            `).join('');
-            document.getElementById('services-table').innerHTML = html || '<tr><td colspan="5">Sem dados</td></tr>';
+            const entries = Object.entries(services);
+            if (entries.length === 0) {
+                document.getElementById('services-table').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Nenhum serviço encontrado</td></tr>';
+                return;
+            }
+            const total = entries.reduce((sum, [_, cost]) => sum + cost, 0);
+            const sorted = entries.sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const html = sorted.map(([name, cost]) => {
+                const pct = total > 0 ? ((cost / total) * 100).toFixed(1) : 0;
+                return '<tr><td>' + name + '</td><td>$' + cost.toFixed(4) + '</td><td>' + pct + '%</td><td>→ Estável</td><td><span class="status-badge badge-warning">Monitor</span></td></tr>';
+            }).join('');
+            document.getElementById('services-table').innerHTML = html;
         }
         
         function updateRecommendationsTable(recommendations) {
-            const top = recommendations.slice(0, 10);
-            const html = top.map(rec => `
-                <tr>
-                    <td>${rec.title || rec.type || 'Recomendação'}</td>
-                    <td>${rec.resource_id || rec.service || '-'}</td>
-                    <td>$${(rec.savings || 0).toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                    <td><span class="status-badge ${rec.priority === 'HIGH' ? 'badge-error' : rec.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success'}">${rec.priority || 'MÉDIA'}</span></td>
-                    <td><button onclick="alert('Abra AWS Console para aplicar')">Aplicar</button></td>
-                </tr>
-            `).join('');
-            document.getElementById('recommendations-table').innerHTML = html || '<tr><td colspan="5">Sem recomendações</td></tr>';
+            if (!recommendations || recommendations.length === 0) {
+                document.getElementById('recommendations-table').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#10b981;">✅ Nenhuma recomendação pendente</td></tr>';
+                return;
+            }
+            const html = recommendations.slice(0, 10).map(rec => {
+                const badgeClass = rec.priority === 'HIGH' ? 'badge-error' : rec.priority === 'MEDIUM' ? 'badge-warning' : 'badge-success';
+                return '<tr><td>' + (rec.title || rec.type) + '</td><td>' + (rec.resource_id || '-') + '</td><td>$' + (rec.savings || 0).toFixed(2) + '</td><td><span class="status-badge ' + badgeClass + '">' + (rec.priority || 'MÉDIA') + '</span></td><td><button onclick="window.open(\'https://console.aws.amazon.com/s3\',\'_blank\')">Ver AWS</button></td></tr>';
+            }).join('');
+            document.getElementById('recommendations-table').innerHTML = html;
         }
         
-        function setStatus(message, type) {
+        function setStatus(message) {
             document.getElementById('status').innerHTML = message;
         }
         
         function showAlert(message, type) {
             const alerts = document.getElementById('alerts');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alerts.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
+            if (!alerts) return;
+            const div = document.createElement('div');
+            div.className = 'alert alert-' + type;
+            div.innerHTML = message;
+            div.style.animation = 'fadeIn 0.3s ease';
+            alerts.appendChild(div);
+            setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 4000);
         }
         
-        // Carrega dados iniciais
-        window.addEventListener('load', refreshData);
+        window.addEventListener('load', function() {
+            refreshData();
+        });
     </script>
 </body>
 </html>
