@@ -1,13 +1,17 @@
 """
-AI Consultant - Módulo de Consultoria Financeira Automatizada com Amazon Q
+AI Consultant - Modulo de Consultoria Financeira Automatizada
 
-Este módulo integra o FinOps AWS com Amazon Q Business para gerar
-relatórios inteligentes de otimização de custos AWS.
+Este modulo integra o FinOps AWS com multiplos provedores de IA:
+- Amazon Q Business (AWS nativo)
+- OpenAI ChatGPT
+- Google Gemini
+- Perplexity AI
 
 Componentes:
-- q_business: Cliente e serviços Amazon Q Business
+- providers: Provedores de IA (Strategy Pattern)
+- q_business: Cliente e servicos Amazon Q Business
 - prompts: Templates e builders de prompts
-- processors: Formatação e parsing de dados
+- processors: Formatacao e parsing de dados
 - knowledge: Base de conhecimento e documentos
 - delivery: Canais de entrega (email, Slack, PDF)
 
@@ -19,6 +23,18 @@ from .q_business import QBusinessClient, QBusinessConfig, QBusinessChat
 from .prompts import PromptBuilder, PromptPersona
 from .processors import DataFormatter, ResponseParser, ReportStructurer
 
+from .providers import (
+    BaseAIProvider,
+    AIProviderConfig,
+    AIResponse,
+    AIProviderFactory,
+    AIProviderRegistry,
+    AmazonQProvider,
+    OpenAIProvider,
+    GeminiProvider,
+    PerplexityProvider
+)
+
 __all__ = [
     'QBusinessClient',
     'QBusinessConfig', 
@@ -27,7 +43,16 @@ __all__ = [
     'PromptPersona',
     'DataFormatter',
     'ResponseParser',
-    'ReportStructurer'
+    'ReportStructurer',
+    'BaseAIProvider',
+    'AIProviderConfig',
+    'AIResponse',
+    'AIProviderFactory',
+    'AIProviderRegistry',
+    'AmazonQProvider',
+    'OpenAIProvider',
+    'GeminiProvider',
+    'PerplexityProvider'
 ]
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
