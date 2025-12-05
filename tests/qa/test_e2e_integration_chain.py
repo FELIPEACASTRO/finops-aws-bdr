@@ -382,7 +382,7 @@ class TestServiceFactoryResilientExecutorIntegration:
             manager.complete_task(TaskType.COST_ANALYSIS, result)
             return result
         
-        result = asyncio.get_event_loop().run_until_complete(run_test())
+        result = asyncio.run(run_test())
         
         assert result['used'] == True
         assert 'cost' in services_used

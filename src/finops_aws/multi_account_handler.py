@@ -46,7 +46,7 @@ class MultiAccountOrchestrator:
                     'name': 'Current Account',
                     'arn': current_account['Arn']
                 }]
-            except:
+            except Exception:
                 accounts = []
         
         return accounts
