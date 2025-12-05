@@ -207,7 +207,7 @@ class BatchService(BaseAWSService):
         try:
             self.batch_client.describe_compute_environments(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_compute_environments(self) -> List[BatchComputeEnvironment]:
@@ -227,7 +227,7 @@ class BatchService(BaseAWSService):
                         compute_resources=env.get('computeResources', {}),
                         tags=env.get('tags', {})
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return environments
     
@@ -247,7 +247,7 @@ class BatchService(BaseAWSService):
                         scheduling_policy_arn=queue.get('schedulingPolicyArn', ''),
                         tags=queue.get('tags', {})
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return queues
     
@@ -269,7 +269,7 @@ class BatchService(BaseAWSService):
                         retry_strategy=job_def.get('retryStrategy'),
                         tags=job_def.get('tags', {})
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return definitions
     

@@ -152,7 +152,7 @@ class EC2FinOpsService(BaseAWSService):
         try:
             self.ec2_client.describe_instances(MaxResults=5)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -463,7 +463,7 @@ class EC2FinOpsService(BaseAWSService):
                         priority='HIGH',
                         action='Fazer downsize do tipo de instância'
                     ))
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         for ri in reserved:

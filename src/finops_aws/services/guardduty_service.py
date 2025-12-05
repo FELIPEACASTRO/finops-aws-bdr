@@ -180,7 +180,7 @@ class GuardDutyService(BaseAWSService):
         try:
             self.guardduty_client.list_detectors(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_detectors(self) -> List[Detector]:

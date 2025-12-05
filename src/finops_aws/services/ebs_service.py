@@ -96,7 +96,7 @@ class EBSService(BaseAWSService):
         try:
             self.ec2_client.describe_volumes(MaxResults=5)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:

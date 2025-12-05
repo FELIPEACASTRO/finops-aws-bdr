@@ -276,14 +276,14 @@ class SQSService(BaseAWSService):
                 import json
                 try:
                     redrive_policy = json.loads(attrs.get("RedrivePolicy", "{}"))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
             
             tags = {}
             try:
                 tags_response = client.list_queue_tags(QueueUrl=queue_url)
                 tags = tags_response.get("Tags", {})
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             return SQSQueue(

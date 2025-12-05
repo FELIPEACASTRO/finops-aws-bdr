@@ -141,7 +141,7 @@ class ELBService(BaseAWSService):
         try:
             self.elbv2_client.describe_load_balancers(PageSize=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -381,7 +381,7 @@ class ELBService(BaseAWSService):
                             action='Consolidar ALBs'
                         ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         orphan_tgs = [tg for tg in target_groups if not tg.load_balancer_arns]

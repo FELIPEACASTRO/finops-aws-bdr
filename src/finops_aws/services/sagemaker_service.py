@@ -118,7 +118,7 @@ class SageMakerService(BaseAWSService):
         try:
             self.sagemaker_client.list_notebook_instances(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -167,7 +167,7 @@ class SageMakerService(BaseAWSService):
                         production_variants=detail.get('ProductionVariants', [])
                     )
                     endpoints.append(endpoint)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return endpoints
@@ -203,7 +203,7 @@ class SageMakerService(BaseAWSService):
                         volume_size_in_gb=resource_config.get('VolumeSizeInGB', 0)
                     )
                     jobs.append(training_job)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return jobs

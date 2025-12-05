@@ -135,7 +135,7 @@ class ACMService(BaseAWSService):
         try:
             self.acm_client.list_certificates(MaxItems=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_certificates(self) -> List[Certificate]:

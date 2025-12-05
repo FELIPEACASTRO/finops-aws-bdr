@@ -230,7 +230,7 @@ class APIGatewayService(BaseAWSService):
         try:
             self.apigw_client.get_rest_apis(limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_rest_apis(self) -> List[RestAPI]:
@@ -250,7 +250,7 @@ class APIGatewayService(BaseAWSService):
                         tags=api.get('tags', {}),
                         disable_execute_api_endpoint=api.get('disableExecuteApiEndpoint', False)
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return apis
     
@@ -271,7 +271,7 @@ class APIGatewayService(BaseAWSService):
                         cors_configuration=api.get('CorsConfiguration', {}),
                         tags=api.get('Tags', {})
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return apis
     
@@ -299,7 +299,7 @@ class APIGatewayService(BaseAWSService):
                     last_updated_date=stage.get('lastUpdatedDate'),
                     tags=stage.get('tags', {})
                 ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return stages
     
@@ -318,7 +318,7 @@ class APIGatewayService(BaseAWSService):
                         quota=plan.get('quota', {}),
                         tags=plan.get('tags', {})
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return plans
     

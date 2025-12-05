@@ -255,7 +255,7 @@ class AthenaService(BaseAWSService):
                             output_location=result_config.get('OutputLocation'),
                             encryption_configuration=result_config.get('EncryptionConfiguration', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         workgroups.append(AthenaWorkgroup(
                             name=wg.get('Name', ''),
                             state=wg.get('State', 'ENABLED'),

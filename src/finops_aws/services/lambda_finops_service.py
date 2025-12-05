@@ -111,7 +111,7 @@ class LambdaFinOpsService(BaseAWSService):
         try:
             self.lambda_client.list_functions(MaxItems=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -263,7 +263,7 @@ class LambdaFinOpsService(BaseAWSService):
                 total_invocations += metrics.invocations
                 total_errors += metrics.errors
                 total_throttles += metrics.throttles
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         return ServiceMetrics(
@@ -363,7 +363,7 @@ class LambdaFinOpsService(BaseAWSService):
                         action='Investigar logs de erros'
                     ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         deprecated_runtimes = ['python2.7', 'python3.6', 'nodejs10.x', 'nodejs12.x', 'ruby2.5', 'dotnetcore2.1']

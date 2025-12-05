@@ -86,7 +86,7 @@ class CloudFrontService(BaseAWSService):
         try:
             self.cloudfront_client.list_distributions(MaxItems='1')
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -218,7 +218,7 @@ class CloudFrontService(BaseAWSService):
                 metrics = self.get_distribution_metrics(dist.distribution_id, days=7)
                 total_requests += metrics.get('total_requests', 0)
                 total_bytes += metrics.get('bytes_downloaded_gb', 0)
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         enabled_count = len([d for d in distributions if d.enabled])
@@ -288,7 +288,7 @@ class CloudFrontService(BaseAWSService):
                         action='Otimizar políticas de cache'
                     ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             if dist.price_class == 'PriceClass_All':

@@ -343,7 +343,7 @@ class LakeFormationService(BaseAWSService):
                                 partition_keys=table.get('PartitionKeys', []),
                                 parameters=table.get('Parameters', {})
                             ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     continue
         except Exception as e:
             self.logger.error(f"Erro ao listar tabelas: {e}")

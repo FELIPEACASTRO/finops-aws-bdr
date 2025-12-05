@@ -308,7 +308,7 @@ class DataSyncService(BaseAWSService):
                             error_detail=details.get('ErrorDetail'),
                             creation_time=details.get('CreationTime')
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         tasks.append(DataSyncTask(
                             task_arn=task.get('TaskArn', ''),
                             name=task.get('Name', ''),
@@ -365,7 +365,7 @@ class DataSyncService(BaseAWSService):
                             endpoint_type=details.get('EndpointType', 'PUBLIC'),
                             private_link_config=details.get('PrivateLinkConfig', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         agents.append(DataSyncAgent(
                             agent_arn=agent.get('AgentArn', ''),
                             name=agent.get('Name', ''),

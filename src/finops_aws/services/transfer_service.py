@@ -182,7 +182,7 @@ class TransferFamilyService(BaseAWSService):
         try:
             self.transfer_client.list_servers(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_servers(self) -> List[TransferServer]:
@@ -209,7 +209,7 @@ class TransferFamilyService(BaseAWSService):
                             structured_log_destinations=server.get('StructuredLogDestinations', []),
                             tags=server.get('Tags', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         servers.append(TransferServer(
                             server_id=server_id,
                             arn=server_item.get('Arn', ''),
@@ -219,7 +219,7 @@ class TransferFamilyService(BaseAWSService):
                             state=server_item.get('State', 'ONLINE'),
                             user_count=server_item.get('UserCount', 0)
                         ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return servers
     
@@ -238,7 +238,7 @@ class TransferFamilyService(BaseAWSService):
                         role=user_item.get('Role', ''),
                         ssh_public_key_count=user_item.get('SshPublicKeyCount', 0)
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return users
     
@@ -255,7 +255,7 @@ class TransferFamilyService(BaseAWSService):
                         access_role=conn.get('AccessRole', ''),
                         logging_role=conn.get('LoggingRole', '')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return connectors
     

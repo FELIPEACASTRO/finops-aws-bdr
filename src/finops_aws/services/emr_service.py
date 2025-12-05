@@ -148,7 +148,7 @@ class EMRService(BaseAWSService):
         try:
             self.emr_client.list_clusters(ClusterStates=['RUNNING', 'WAITING'])
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -190,7 +190,7 @@ class EMRService(BaseAWSService):
                         end_time=cluster_summary.get('Status', {}).get('Timeline', {}).get('EndDateTime')
                     )
                     clusters.append(cluster)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return clusters
@@ -243,7 +243,7 @@ class EMRService(BaseAWSService):
                         updated_at=app.get('updatedAt')
                     )
                     applications.append(application)
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         
         return applications
@@ -348,7 +348,7 @@ class EMRService(BaseAWSService):
                             ))
                             break
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             if cluster.status == 'WAITING':

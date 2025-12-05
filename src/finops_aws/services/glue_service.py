@@ -151,7 +151,7 @@ class GlueService(BaseAWSService):
         try:
             self.glue_client.get_jobs(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -297,7 +297,7 @@ class GlueService(BaseAWSService):
                 total_runs += len(runs)
                 failed_runs += len([r for r in runs if r.state == 'FAILED'])
                 total_dpu_hours += sum(r.dpu_seconds / 3600 for r in runs)
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         return ServiceMetrics(
@@ -381,7 +381,7 @@ class GlueService(BaseAWSService):
                                 action='Ajustar timeout'
                             ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             if job.glue_version in ['1.0', '2.0']:

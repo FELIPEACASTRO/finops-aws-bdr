@@ -205,7 +205,7 @@ class CodeCommitService(BaseAWSService):
         try:
             self.codecommit_client.list_repositories(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_repositories(self) -> List[Repository]:
@@ -259,7 +259,7 @@ class CodeCommitService(BaseAWSService):
                             repository_name=repository_name,
                             commit_id=branch.get('commitId')
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         branches.append(Branch(
                             name=branch_name,
                             repository_name=repository_name
@@ -327,7 +327,7 @@ class CodeCommitService(BaseAWSService):
                         creation_date=template.get('creationDate'),
                         last_modified_date=template.get('lastModifiedDate')
                     ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         except Exception as e:
             self.logger.error(f"Erro ao listar approval rule templates: {e}")

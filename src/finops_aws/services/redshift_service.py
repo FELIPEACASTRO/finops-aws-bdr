@@ -151,7 +151,7 @@ class RedshiftService(BaseAWSService):
         try:
             self.redshift_client.describe_clusters(MaxRecords=20)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -216,7 +216,7 @@ class RedshiftService(BaseAWSService):
                         creation_date=wg.get('creationDate')
                     )
                     workgroups.append(workgroup)
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         
         return workgroups
@@ -379,7 +379,7 @@ class RedshiftService(BaseAWSService):
                         action='Considerar RA3 nodes com managed storage'
                     ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             if not cluster.encrypted:

@@ -366,7 +366,7 @@ class SimpleAWSService(BaseAWSService):
             client_name = self.CLIENT_NAME or self.SERVICE_NAME.lower()
             try:
                 self._service_client = self._client_factory.get_client(client_name)
-            except Exception:
+            except Exception as e:  # noqa: E722
                 self._service_client = None
         return self._service_client
     
@@ -374,7 +374,7 @@ class SimpleAWSService(BaseAWSService):
         """Verifica saúde do serviço"""
         try:
             return self.service_client is not None
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> Union[List[Dict[str, Any]], Dict[str, Any]]:

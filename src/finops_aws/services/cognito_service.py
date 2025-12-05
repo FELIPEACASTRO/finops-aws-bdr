@@ -237,7 +237,7 @@ class CognitoService(BaseAWSService):
         try:
             self.cognito_idp_client.list_user_pools(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_user_pools(self) -> List[UserPool]:
@@ -265,14 +265,14 @@ class CognitoService(BaseAWSService):
                             user_pool_tags=pool_detail.get('UserPoolTags', {}),
                             deletion_protection=pool_detail.get('DeletionProtection', 'INACTIVE')
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         user_pools.append(UserPool(
                             id=pool['Id'],
                             name=pool['Name'],
                             creation_date=pool.get('CreationDate'),
                             last_modified_date=pool.get('LastModifiedDate')
                         ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return user_pools
     
@@ -303,13 +303,13 @@ class CognitoService(BaseAWSService):
                             allowed_oauth_flows=client_detail.get('AllowedOAuthFlows', []),
                             allowed_oauth_scopes=client_detail.get('AllowedOAuthScopes', [])
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         clients.append(UserPoolClient(
                             client_id=client['ClientId'],
                             user_pool_id=user_pool_id,
                             client_name=client.get('ClientName')
                         ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return clients
     
@@ -334,12 +334,12 @@ class CognitoService(BaseAWSService):
                             open_id_connect_provider_arns=details.get('OpenIdConnectProviderARNs', []),
                             identity_pool_tags=details.get('IdentityPoolTags', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         identity_pools.append(IdentityPool(
                             identity_pool_id=pool['IdentityPoolId'],
                             identity_pool_name=pool['IdentityPoolName']
                         ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return identity_pools
     

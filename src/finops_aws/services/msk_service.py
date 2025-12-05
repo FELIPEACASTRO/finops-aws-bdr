@@ -210,7 +210,7 @@ class MSKService(BaseAWSService):
         try:
             self.msk_client.list_clusters_v2(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_clusters(self) -> List[MSKCluster]:

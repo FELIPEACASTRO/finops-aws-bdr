@@ -82,7 +82,7 @@ class S3Service(BaseAWSService):
         try:
             self.s3_client.list_buckets()
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:
@@ -134,25 +134,25 @@ class S3Service(BaseAWSService):
                 try:
                     location = self.s3_client.get_bucket_location(Bucket=bucket.name)
                     bucket.region = location.get('LocationConstraint') or 'us-east-1'
-                except Exception:
+                except Exception as e:  # noqa: E722
                     bucket.region = 'unknown'
                 
                 try:
                     versioning = self.s3_client.get_bucket_versioning(Bucket=bucket.name)
                     bucket.versioning_enabled = versioning.get('Status') == 'Enabled'
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
                     encryption = self.s3_client.get_bucket_encryption(Bucket=bucket.name)
                     bucket.encryption_enabled = bool(encryption.get('ServerSideEncryptionConfiguration'))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
                     lifecycle = self.s3_client.get_bucket_lifecycle_configuration(Bucket=bucket.name)
                     bucket.lifecycle_rules = len(lifecycle.get('Rules', []))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
@@ -164,7 +164,7 @@ class S3Service(BaseAWSService):
                         config.get('BlockPublicPolicy', False),
                         config.get('RestrictPublicBuckets', False)
                     ])
-                except Exception:
+                except Exception as e:  # noqa: E722
                     bucket.public_access_blocked = False
                 
                 buckets.append(bucket)
@@ -196,25 +196,25 @@ class S3Service(BaseAWSService):
                 try:
                     location = self.s3_client.get_bucket_location(Bucket=bucket.name)
                     bucket.region = location.get('LocationConstraint') or 'us-east-1'
-                except Exception:
+                except Exception as e:  # noqa: E722
                     bucket.region = 'unknown'
                 
                 try:
                     versioning = self.s3_client.get_bucket_versioning(Bucket=bucket.name)
                     bucket.versioning_enabled = versioning.get('Status') == 'Enabled'
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
                     encryption = self.s3_client.get_bucket_encryption(Bucket=bucket.name)
                     bucket.encryption_enabled = bool(encryption.get('ServerSideEncryptionConfiguration'))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
                     lifecycle = self.s3_client.get_bucket_lifecycle_configuration(Bucket=bucket.name)
                     bucket.lifecycle_rules = len(lifecycle.get('Rules', []))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 try:
@@ -226,7 +226,7 @@ class S3Service(BaseAWSService):
                         config.get('BlockPublicPolicy', False),
                         config.get('RestrictPublicBuckets', False)
                     ])
-                except Exception:
+                except Exception as e:  # noqa: E722
                     bucket.public_access_blocked = False
                 
                 buckets.append(bucket)

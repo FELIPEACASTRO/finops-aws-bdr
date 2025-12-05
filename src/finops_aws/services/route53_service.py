@@ -95,7 +95,7 @@ class Route53Service(BaseAWSService):
         try:
             self.route53_client.list_hosted_zones(MaxItems='1')
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     

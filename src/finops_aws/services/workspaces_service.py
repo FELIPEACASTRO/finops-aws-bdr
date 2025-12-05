@@ -497,7 +497,7 @@ class WorkSpacesService(BaseAWSService):
                 return datapoints[-1].get('Average')
             return None
             
-        except Exception:
+        except Exception as e:  # noqa: E722
             return None
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

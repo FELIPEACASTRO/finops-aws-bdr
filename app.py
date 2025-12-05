@@ -8,7 +8,7 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, send_file, render_template_string
+from flask import Flask, jsonify, send_file, render_template_string, request
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
@@ -6267,6 +6267,112 @@ def get_latest_report():
         }
         
         return jsonify(report)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/export/<format>')
+def export_report(format):
+    """Exporta relatório em diferentes formatos (csv, json, html)."""
+    from flask import Response
+    try:
+        from src.finops_aws.dashboard import export_to_csv, export_to_json, export_to_html
+        
+        analysis = get_aws_analysis()
+        timestamp = datetime.now().strftime("%Y%m%d")
+        
+        if format == 'csv':
+            content = export_to_csv(analysis)
+            return Response(
+                content,
+                mimetype='text/csv; charset=utf-8',
+                headers={'Content-Disposition': f'attachment; filename=finops_report_{timestamp}.csv'}
+            )
+        elif format == 'html':
+            content = export_to_html(analysis)
+            return Response(content, mimetype='text/html; charset=utf-8')
+        else:
+            content = export_to_json(analysis)
+            return Response(
+                content,
+                mimetype='application/json; charset=utf-8',
+                headers={'Content-Disposition': f'attachment; filename=finops_report_{timestamp}.json'}
+            )
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/multi-region')
+def multi_region_analysis():
+    """Analisa todas as regiões AWS."""
+    try:
+        from src.finops_aws.dashboard import get_all_regions_analysis, get_region_costs
+        
+        if not os.environ.get('AWS_ACCESS_KEY_ID'):
+            return jsonify({
+                'status': 'error',
+                'message': 'Credenciais AWS não configuradas'
+            }), 400
+        
+        multi_region_data = get_all_regions_analysis(max_workers=3)
+        
+        try:
+            region_costs = get_region_costs()
+            multi_region_data['costs_by_region'] = region_costs
+        except Exception:
+            multi_region_data['costs_by_region'] = {}
+        
+        return jsonify({
+            'status': 'success',
+            'data': multi_region_data
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/amazon-q', methods=['POST'])
+def amazon_q_analysis():
+    """Obtém análise inteligente do Amazon Q Business."""
+    try:
+        q_app_id = os.environ.get('Q_BUSINESS_APPLICATION_ID')
+        if not q_app_id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Amazon Q Business não configurado. Configure Q_BUSINESS_APPLICATION_ID.',
+                'help': 'Adicione Q_BUSINESS_APPLICATION_ID nas variáveis de ambiente'
+            }), 400
+        
+        from src.finops_aws.dashboard.integrations import get_amazon_q_insights
+        
+        analysis = get_aws_analysis()
+        
+        persona = 'EXECUTIVE'
+        try:
+            if request.is_json and request.json:
+                persona = request.json.get('persona', 'EXECUTIVE').upper()
+                if persona not in ['EXECUTIVE', 'CTO', 'DEVOPS', 'ANALYST']:
+                    persona = 'EXECUTIVE'
+        except Exception:
+            pass
+        
+        insights = get_amazon_q_insights(
+            costs=analysis.get('costs', {}),
+            resources=analysis.get('resources', {}),
+            persona=persona
+        )
+        
+        if insights:
+            return jsonify({
+                'status': 'success',
+                'insights': insights,
+                'persona': persona
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Não foi possível obter insights do Amazon Q'
+            }), 500
+            
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 

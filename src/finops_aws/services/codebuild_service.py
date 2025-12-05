@@ -221,7 +221,7 @@ class CodeBuildService(BaseAWSService):
         try:
             self.codebuild_client.list_projects(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_projects(self) -> List[BuildProject]:

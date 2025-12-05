@@ -246,7 +246,7 @@ class CodeDeployService(BaseAWSService):
         try:
             self.codedeploy_client.list_applications(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_applications(self) -> List[DeploymentApplication]:
@@ -370,7 +370,7 @@ class CodeDeployService(BaseAWSService):
                             minimum_healthy_hosts=config.get('minimumHealthyHosts', {}),
                             traffic_routing_config=config.get('trafficRoutingConfig', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         pass
         except Exception as e:
             self.logger.error(f"Erro ao listar deployment configs: {e}")

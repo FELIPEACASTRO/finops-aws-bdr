@@ -98,7 +98,7 @@ class RDSService:
         try:
             self.rds_client.describe_db_instances(MaxRecords=5)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_rds_instances(self) -> List[RDSInstance]:

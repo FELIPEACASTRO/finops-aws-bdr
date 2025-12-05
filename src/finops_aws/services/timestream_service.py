@@ -223,7 +223,7 @@ class TimestreamService(BaseAWSService):
                             ResourceARN=db['Arn']
                         )
                         database.tags = {t['Key']: t['Value'] for t in tags_response.get('Tags', [])}
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         pass
                     
                     databases.append(database)
@@ -268,7 +268,7 @@ class TimestreamService(BaseAWSService):
                                 ResourceARN=table['Arn']
                             )
                             t.tags = {tag['Key']: tag['Value'] for tag in tags_response.get('Tags', [])}
-                        except Exception:
+                        except Exception as e:  # noqa: E722
                             pass
                         
                         tables.append(t)

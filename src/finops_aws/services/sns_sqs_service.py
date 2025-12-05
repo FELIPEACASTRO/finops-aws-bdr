@@ -111,7 +111,7 @@ class SNSSQSService(BaseAWSService):
         try:
             self.sns_client.list_topics()
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -143,7 +143,7 @@ class SNSSQSService(BaseAWSService):
                         content_based_deduplication=attributes.get('ContentBasedDeduplication', 'false') == 'true'
                     )
                     topics.append(sns_topic)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return topics
@@ -171,7 +171,7 @@ class SNSSQSService(BaseAWSService):
                     import json
                     try:
                         dlq_arn = json.loads(redrive_policy).get('deadLetterTargetArn')
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         pass
                 
                 sqs_queue = SQSQueue(
@@ -191,7 +191,7 @@ class SNSSQSService(BaseAWSService):
                     dead_letter_target_arn=dlq_arn
                 )
                 queues.append(sqs_queue)
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         return queues

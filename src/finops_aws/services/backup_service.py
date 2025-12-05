@@ -111,7 +111,7 @@ class BackupService(BaseAWSService):
         try:
             self.backup_client.list_backup_vaults(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     

@@ -158,7 +158,7 @@ class StepFunctionsService(BaseAWSService):
         try:
             self.sfn_client.list_state_machines(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_state_machines(self) -> List[StateMachine]:
@@ -184,14 +184,14 @@ class StepFunctionsService(BaseAWSService):
                             label=details.get('label', ''),
                             revision_id=details.get('revisionId', '')
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         machines.append(StateMachine(
                             state_machine_arn=sm.get('stateMachineArn', ''),
                             name=sm.get('name', ''),
                             type=sm.get('type', 'STANDARD'),
                             creation_date=sm.get('creationDate')
                         ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return machines
     
@@ -215,7 +215,7 @@ class StepFunctionsService(BaseAWSService):
                     count += 1
                 if count >= max_results:
                     break
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return executions
     
@@ -230,7 +230,7 @@ class StepFunctionsService(BaseAWSService):
                         name=activity.get('name', ''),
                         creation_date=activity.get('creationDate')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return activities
     

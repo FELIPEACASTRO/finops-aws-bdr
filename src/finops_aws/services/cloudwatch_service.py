@@ -209,7 +209,7 @@ class CloudWatchService(BaseAWSService):
         try:
             self.logs_client.describe_log_groups(limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_log_groups(self) -> List[LogGroup]:
@@ -228,7 +228,7 @@ class CloudWatchService(BaseAWSService):
                         kms_key_id=lg.get('kmsKeyId'),
                         data_protection_status=lg.get('dataProtectionStatus')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return log_groups
     
@@ -254,7 +254,7 @@ class CloudWatchService(BaseAWSService):
                         ok_actions=alarm.get('OKActions', []),
                         insufficient_data_actions=alarm.get('InsufficientDataActions', [])
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return alarms
     
@@ -270,7 +270,7 @@ class CloudWatchService(BaseAWSService):
                         size=db.get('Size', 0),
                         last_modified=db.get('LastModified')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return dashboards
     
@@ -288,7 +288,7 @@ class CloudWatchService(BaseAWSService):
                         creation_date=stream.get('CreationDate'),
                         output_format=stream.get('OutputFormat', 'json')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return streams
     

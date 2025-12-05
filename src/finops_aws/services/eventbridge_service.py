@@ -269,7 +269,7 @@ class EventBridgeService(BaseAWSService):
         try:
             self.events_client.list_event_buses(Limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_event_buses(self) -> List[EventBus]:
@@ -282,7 +282,7 @@ class EventBridgeService(BaseAWSService):
                     arn=bus.get('Arn'),
                     policy=bus.get('Policy')
                 ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return event_buses
     
@@ -299,7 +299,7 @@ class EventBridgeService(BaseAWSService):
                             EventBusName=event_bus_name
                         )
                         targets_count = len(targets_response.get('Targets', []))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         pass
                     
                     rules.append(EventRule(
@@ -313,7 +313,7 @@ class EventBridgeService(BaseAWSService):
                         managed_by=rule.get('ManagedBy'),
                         targets_count=targets_count
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return rules
     
@@ -332,7 +332,7 @@ class EventBridgeService(BaseAWSService):
                     event_count=archive.get('EventCount', 0),
                     creation_time=archive.get('CreationTime')
                 ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return archives
     
@@ -353,7 +353,7 @@ class EventBridgeService(BaseAWSService):
                         last_modified_time=pipe.get('LastModifiedTime'),
                         enrichment=pipe.get('Enrichment')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return pipes
     
@@ -367,7 +367,7 @@ class EventBridgeService(BaseAWSService):
                         registry_name=registry.get('RegistryName', ''),
                         registry_arn=registry.get('RegistryArn')
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return registries
     

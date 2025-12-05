@@ -181,7 +181,7 @@ class KMSService(BaseAWSService):
         try:
             self.kms_client.list_keys(Limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_keys(self) -> List[KMSKey]:
@@ -216,7 +216,7 @@ class KMSService(BaseAWSService):
                         try:
                             aliases_response = self.kms_client.list_aliases(KeyId=key_id)
                             key.aliases = [a.get('AliasName', '') for a in aliases_response.get('Aliases', [])]
-                        except Exception:
+                        except Exception as e:  # noqa: E722
                             pass
                         
                         keys.append(key)

@@ -188,7 +188,7 @@ class InspectorService(BaseAWSService):
         try:
             self.inspector_client.batch_get_account_status(accountIds=[])
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_account_status(self) -> List[AccountStatus]:

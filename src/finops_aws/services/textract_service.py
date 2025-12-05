@@ -352,7 +352,7 @@ class TextractService(BaseAWSService):
                             output_config=details.get('OutputConfig', {}),
                             evaluation_metrics=details.get('EvaluationMetrics', [])
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         versions.append(AdapterVersion(
                             adapter_id=adapter_id,
                             adapter_version=ver.get('AdapterVersion', ''),

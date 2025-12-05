@@ -112,7 +112,7 @@ class KinesisService(BaseAWSService):
         try:
             self.kinesis_client.list_streams(Limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -142,7 +142,7 @@ class KinesisService(BaseAWSService):
                         stream_creation_timestamp=summary.get('StreamCreationTimestamp')
                     )
                     streams.append(stream)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return streams
@@ -190,7 +190,7 @@ class KinesisService(BaseAWSService):
                         last_update_timestamp=desc.get('LastUpdateTimestamp')
                     )
                     streams.append(stream)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         
         return streams
@@ -338,7 +338,7 @@ class KinesisService(BaseAWSService):
                                 action='Migrar para On-Demand ou reduzir shards'
                             ))
                     
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
             
             if stream.retention_period_hours > 24:

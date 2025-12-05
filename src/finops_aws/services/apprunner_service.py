@@ -270,7 +270,7 @@ class AppRunnerServiceManager(BaseAWSService):
                             health_check_configuration=svc_detail.get('HealthCheckConfiguration', {}),
                             network_configuration=svc_detail.get('NetworkConfiguration', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         services.append(AppRunnerService(
                             service_arn=svc.get('ServiceArn', ''),
                             service_name=svc.get('ServiceName', ''),

@@ -397,7 +397,7 @@ class RekognitionService(BaseAWSService):
                             regions_of_interest=details.get('RegionsOfInterest', []),
                             data_sharing_preference=details.get('DataSharingPreference', {})
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         continue
         except Exception as e:
             self.logger.error(f"Erro ao listar stream processors: {e}")
@@ -422,7 +422,7 @@ class RekognitionService(BaseAWSService):
                             face_model_version=details.get('FaceModelVersion', ''),
                             user_count=details.get('UserCount', 0)
                         ))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         continue
         except Exception as e:
             self.logger.error(f"Erro ao listar coleções de faces: {e}")

@@ -169,7 +169,7 @@ class VPCNetworkService(BaseAWSService):
         try:
             self.ec2_client.describe_vpcs(MaxResults=5)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     
@@ -478,7 +478,7 @@ class VPCNetworkService(BaseAWSService):
                         action='Implementar VPC Endpoints para S3/DynamoDB'
                     ))
                 
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
         
         for vpn in vpn_connections:

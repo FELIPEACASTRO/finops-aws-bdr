@@ -115,7 +115,7 @@ class ECSContainerService(BaseAWSService):
         try:
             self.ecs_client.list_clusters(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:

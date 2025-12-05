@@ -171,7 +171,7 @@ class CloudTrailService(BaseAWSService):
         try:
             self.cloudtrail_client.describe_trails()
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_trails(self) -> List[Trail]:
@@ -202,7 +202,7 @@ class CloudTrailService(BaseAWSService):
                 try:
                     status = self.cloudtrail_client.get_trail_status(Name=trail.name)
                     trail.is_logging = status.get('IsLogging', False)
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
                 
                 trails.append(trail)

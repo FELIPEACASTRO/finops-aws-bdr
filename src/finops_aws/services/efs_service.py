@@ -84,7 +84,7 @@ class EFSService(BaseAWSService):
         try:
             self.efs_client.describe_file_systems(MaxItems=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:
@@ -146,7 +146,7 @@ class EFSService(BaseAWSService):
                             FileSystemId=fs.file_system_id
                         )
                         fs.lifecycle_policies = len(lifecycle.get('LifecyclePolicies', []))
-                    except Exception:
+                    except Exception as e:  # noqa: E722
                         pass
                     
                     file_systems.append(fs)

@@ -264,7 +264,7 @@ class OpenSearchService(BaseAWSService):
                     tag_response = self.opensearch_client.list_tags(ARN=arn)
                     for tag in tag_response.get('TagList', []):
                         tags[tag['Key']] = tag['Value']
-            except Exception:
+            except Exception as e:  # noqa: E722
                 pass
             
             return OpenSearchDomain(
@@ -458,7 +458,7 @@ class OpenSearchService(BaseAWSService):
             from ..core.factories import AWSServiceType
             sts = self.client_factory.get_client(AWSServiceType.STS)
             return sts.get_caller_identity()['Account']
-        except Exception:
+        except Exception as e:  # noqa: E722
             return '000000000000'
     
     def get_recommendations(self) -> List[ServiceRecommendation]:

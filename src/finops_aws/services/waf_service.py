@@ -192,7 +192,7 @@ class WAFService(BaseAWSService):
         try:
             self.wafv2_client.list_web_acls(Scope='REGIONAL', Limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_web_acls(self, scope: str = 'REGIONAL') -> List[WebACL]:
@@ -219,14 +219,14 @@ class WAFService(BaseAWSService):
                         capacity=acl_detail.get('Capacity', 0),
                         managed_by_firewall_manager=acl_detail.get('ManagedByFirewallManager', False)
                     ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     web_acls.append(WebACL(
                         name=acl['Name'],
                         id=acl['Id'],
                         arn=acl.get('ARN'),
                         scope=scope
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return web_acls
     
@@ -252,14 +252,14 @@ class WAFService(BaseAWSService):
                         rules=rg_detail.get('Rules', []),
                         visibility_config=rg_detail.get('VisibilityConfig', {})
                     ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     rule_groups.append(RuleGroup(
                         name=rg['Name'],
                         id=rg['Id'],
                         arn=rg.get('ARN'),
                         scope=scope
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return rule_groups
     
@@ -284,14 +284,14 @@ class WAFService(BaseAWSService):
                         ip_address_version=ip_detail.get('IPAddressVersion', 'IPV4'),
                         addresses=ip_detail.get('Addresses', [])
                     ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     ip_sets.append(IPSet(
                         name=ip_set['Name'],
                         id=ip_set['Id'],
                         arn=ip_set.get('ARN'),
                         scope=scope
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return ip_sets
     
@@ -315,14 +315,14 @@ class WAFService(BaseAWSService):
                         scope=scope,
                         regular_expression_list=[r.get('RegexString', '') for r in regex_detail.get('RegularExpressionList', [])]
                     ))
-                except Exception:
+                except Exception as e:  # noqa: E722
                     regex_sets.append(RegexPatternSet(
                         name=regex_set['Name'],
                         id=regex_set['Id'],
                         arn=regex_set.get('ARN'),
                         scope=scope
                     ))
-        except Exception:
+        except Exception as e:  # noqa: E722
             pass
         return regex_sets
     

@@ -200,6 +200,12 @@
                 <button onclick="startAnalysis('recommendations_only')" id="btn-recommendations">Apenas Recomendações</button>
                 <button onclick="refreshData()" id="btn-refresh">Atualizar</button>
             </div>
+            <div class="actions" style="margin-top: 10px;">
+                <button onclick="exportReport('csv')" style="background: #10b981;">📥 Exportar CSV</button>
+                <button onclick="exportReport('json')" style="background: #8b5cf6;">📥 Exportar JSON</button>
+                <button onclick="exportReport('html')" style="background: #f59e0b;">🖨️ Versão Impressão</button>
+                <button onclick="analyzeMultiRegion()" style="background: #06b6d4;">🌍 Multi-Region</button>
+            </div>
             <div id="status" style="margin-top: 15px;"></div>
         </div>
 
@@ -387,6 +393,45 @@
             div.style.animation = 'fadeIn 0.3s ease';
             alerts.appendChild(div);
             setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 4000);
+        }
+        
+        function exportReport(format) {
+            showAlert('Gerando relatório ' + format.toUpperCase() + '...', 'success');
+            if (format === 'html') {
+                window.open(API_BASE + '/v1/export/html', '_blank');
+            } else {
+                const link = document.createElement('a');
+                link.href = API_BASE + '/v1/export/' + format;
+                link.download = 'finops_report.' + format;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+        
+        async function analyzeMultiRegion() {
+            showAlert('Iniciando análise multi-region...', 'success');
+            setStatus('<span style="color: #f59e0b;">⏳ Analisando todas as regiões AWS...</span>');
+            
+            try {
+                const response = await fetch(API_BASE + '/v1/multi-region');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const summary = data.data.summary || {};
+                    const regions = summary.regions_with_resources || 0;
+                    const savings = summary.total_potential_savings || 0;
+                    const recs = summary.total_recommendations || 0;
+                    
+                    showAlert('Multi-region: ' + regions + ' regiões com recursos, $' + savings.toFixed(2) + ' economia potencial', 'success');
+                    setStatus('<span style="color: #10b981;">✅ ' + summary.total_regions + ' regiões analisadas | ' + recs + ' recomendações | $' + savings.toFixed(2) + ' economia</span>');
+                } else {
+                    throw new Error(data.message || 'Erro na análise');
+                }
+            } catch (error) {
+                showAlert('Erro multi-region: ' + error.message, 'error');
+                setStatus('<span style="color: #ef4444;">❌ Erro: ' + error.message + '</span>');
+            }
         }
         
         window.addEventListener('load', function() {

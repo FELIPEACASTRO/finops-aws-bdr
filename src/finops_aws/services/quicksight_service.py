@@ -267,7 +267,7 @@ class QuickSightService(BaseAWSService):
             try:
                 sts = self._client_factory.get_client('sts')
                 self._account_id = sts.get_caller_identity()['Account']
-            except Exception:
+            except Exception as e:  # noqa: E722
                 self._account_id = "000000000000"
         return self._account_id
 

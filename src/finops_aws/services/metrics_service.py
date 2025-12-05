@@ -83,7 +83,7 @@ class MetricsService:
         try:
             self.ec2.describe_instances(MaxResults=5)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
 
     @retry_with_backoff(max_retries=3)

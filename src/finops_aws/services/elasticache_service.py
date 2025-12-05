@@ -107,7 +107,7 @@ class ElastiCacheService(BaseAWSService):
         try:
             self.elasticache_client.describe_cache_clusters(MaxRecords=20)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:

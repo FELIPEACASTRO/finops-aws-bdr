@@ -193,7 +193,7 @@ class CodePipelineService(BaseAWSService):
         try:
             self.codepipeline_client.list_pipelines(maxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_pipelines(self) -> List[Pipeline]:

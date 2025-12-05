@@ -74,7 +74,7 @@ class SecretsManagerService(BaseAWSService):
         try:
             self.secretsmanager_client.list_secrets(MaxResults=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     

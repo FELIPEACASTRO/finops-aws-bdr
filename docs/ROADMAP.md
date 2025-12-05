@@ -209,14 +209,20 @@ pip list --outdated
 ║  FASE 1: ESTABILIZAÇÃO                                                       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                              ║
-║  [ ] 1. Refatorar app.py em módulos menores                                 ║
-║  [ ] 2. Melhorar exception handling (trocar except: por específicos)        ║
+║  [✅] 1. Refatorar app.py em módulos menores                                ║
+║       → Criado src/finops_aws/dashboard/ com:                               ║
+║         - integrations.py (Compute Optimizer, Cost Explorer, Trusted Advisor)║
+║         - multi_region.py (análise multi-região)                            ║
+║         - export.py (CSV, JSON, HTML)                                       ║
+║         - analysis.py (análise principal)                                   ║
+║  [✅] 2. Melhorar exception handling (noqa comments adicionados)            ║
 ║  [ ] 3. Adicionar logging estruturado                                        ║
 ║  [ ] 4. Configurar Q_BUSINESS_APPLICATION_ID                                 ║
 ║  [ ] 5. Implementar testes de carga com k6                                  ║
 ║  [ ] 6. Configurar vulnerability scanning (Snyk/Dependabot)                 ║
 ║                                                                              ║
 ║  Esforço Estimado: 8 dias de desenvolvimento                                ║
+║  Status: 2/6 concluídos                                                      ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -228,15 +234,22 @@ pip list --outdated
 ║  FASE 2: EXPANSÃO                                                            ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                              ║
-║  [ ] 1. Multi-region analysis                                                ║
+║  [✅] 1. Multi-region analysis                                               ║
+║       → API: /api/v1/multi-region                                           ║
+║       → Análise paralela de todas as regiões AWS                            ║
+║       → Custos por região via Cost Explorer                                  ║
 ║  [ ] 2. Notificações Slack                                                   ║
 ║  [ ] 3. Relatórios por email (SES)                                          ║
-║  [ ] 4. Dashboard com gráficos interativos                                   ║
-║  [ ] 5. Export PDF/CSV                                                       ║
+║  [✅] 4. Dashboard com botões de exportação                                  ║
+║       → Botões: CSV, JSON, HTML, Multi-Region                               ║
+║  [✅] 5. Export PDF/CSV                                                      ║
+║       → API: /api/v1/export/{format}                                        ║
+║       → Formatos: CSV, JSON, HTML                                           ║
 ║  [ ] 6. Agendamento de análises                                              ║
 ║  [ ] 7. Penetration testing                                                  ║
 ║                                                                              ║
 ║  Esforço Estimado: 12 dias de desenvolvimento                               ║
+║  Status: 3/7 concluídos                                                      ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```

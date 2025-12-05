@@ -200,7 +200,7 @@ class ConfigService(BaseAWSService):
         try:
             self.config_client.describe_configuration_recorders()
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_config_rules(self) -> List[ConfigRule]:
@@ -228,7 +228,7 @@ class ConfigService(BaseAWSService):
                     )
                     for comp in compliance.get('ComplianceByConfigRules', []):
                         rule.compliance_status = comp.get('Compliance', {}).get('ComplianceType', 'NOT_APPLICABLE')
-                except Exception:
+                except Exception as e:  # noqa: E722
                     pass
         except Exception as e:
             self.logger.error(f"Erro ao listar regras Config: {e}")

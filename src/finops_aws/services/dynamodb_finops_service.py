@@ -89,7 +89,7 @@ class DynamoDBFinOpsService(BaseAWSService):
         try:
             self.dynamodb_client.list_tables(Limit=1)
             return True
-        except Exception:
+        except Exception as e:  # noqa: E722
             return False
     
     def get_resources(self) -> List[Dict[str, Any]]:
