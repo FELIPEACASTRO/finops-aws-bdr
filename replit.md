@@ -162,7 +162,7 @@ GEMINI_MODEL=gemini-2.5-flash  # opcional
 
 # Perplexity AI (opcional)
 PERPLEXITY_API_KEY=pplx-...
-PERPLEXITY_MODEL=llama-3.1-sonar-large-128k-online  # opcional
+PERPLEXITY_MODEL=sonar  # opcional, default: sonar (sonar-pro tem bugs conhecidos)
 ```
 
 ## AI Providers Directory Structure
@@ -182,14 +182,23 @@ src/finops_aws/ai_consultant/
 
 ## Recent Changes (December 2024)
 
+- **Correções de Prompts e Idioma (Dec 5 - MAIS RECENTE)**:
+  - Prompts atualizados para garantir respostas 100% em Português do Brasil
+  - Relatórios agora são EXTREMAMENTE detalhados com dados, justificativas e cálculos
+  - Cada recomendação inclui: Por que, Como implementar, Preços AWS, ROI esperado, Risco
+  - Perplexity: Modelo padrão alterado de sonar-pro para sonar (sonar-pro tem bugs de resposta incompleta)
+  - Gemini: Funcionando com relatórios de ~8.300 caracteres em ~20s
+  - Perplexity: Funcionando com relatórios de ~9.900 caracteres em ~28s
+
 - **Testes Multi-IA Validados (Dec 5)**:
-  - Perplexity: ✅ Testado com sonar-pro (1.797 tokens, 25s, 10 fontes citadas)
-  - Gemini: ✅ Testado com gemini-2.5-flash (3.865 tokens, 21s)
+  - Perplexity: ✅ Testado com sonar (9.896 chars, 28s, busca online)
+  - Gemini: ✅ Testado com gemini-2.5-flash (8.319 chars, 20s)
   - OpenAI: ⚠️ Requer créditos em platform.openai.com/account/billing
   - Amazon Q: ⚠️ Requer Q_BUSINESS_APPLICATION_ID
 
 - **Correções de Provedores (Dec 5)**:
-  - Perplexity: Migrado para modelos sonar/sonar-pro (llama-3.1-sonar-* descontinuados)
+  - Perplexity: Modelo padrão alterado para "sonar" (sonar-pro retorna respostas incompletas)
+  - Perplexity: Modelos suportados: sonar, sonar-pro, sonar-reasoning
   - Gemini: Configurações de segurança ajustadas (BLOCK_NONE)
   - Gemini: Suporte dual para GEMINI_API_KEY e GOOGLE_API_KEY
   - Gemini: Tratamento robusto de respostas bloqueadas

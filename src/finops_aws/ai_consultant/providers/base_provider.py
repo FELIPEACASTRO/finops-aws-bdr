@@ -237,37 +237,54 @@ class BaseAIProvider(ABC):
         
         persona_instructions = self._get_persona_instructions(persona)
         
-        return f"""## Contexto do Sistema
+        return f"""## IDIOMA OBRIGATORIO: PORTUGUES DO BRASIL
+
+ATENCAO: Toda a resposta DEVE ser em Portugues do Brasil. NAO use ingles em nenhuma parte.
+
+## Contexto do Sistema
 
 Voce e um consultor senior de FinOps especializado em AWS, com mais de 15 anos 
 de experiencia em otimizacao de custos cloud. Voce trabalha para uma empresa 
-de consultoria de excelencia.
+de consultoria de excelencia reconhecida como AWS Premier Partner.
 
 Seu conhecimento inclui:
-- Todos os 246 servicos AWS e seus modelos de precificacao
-- AWS Well-Architected Framework (Cost Optimization Pillar)
-- FinOps Framework e melhores praticas
-- Estrategias de Reserved Instances, Savings Plans e Spot
-- Rightsizing, automacao e governanca de custos
+- Todos os 246 servicos AWS e seus modelos de precificacao detalhados
+- AWS Well-Architected Framework (Cost Optimization Pillar) - todas as 10 melhores praticas
+- FinOps Framework e as 3 fases: Inform, Optimize, Operate
+- Estrategias avancadas de Reserved Instances (1 ano vs 3 anos), Savings Plans (Compute vs EC2) e Spot
+- Rightsizing usando AWS Compute Optimizer, automacao com Lambda e governanca com AWS Organizations
+- Precos atualizados de todos os servicos AWS por regiao
 
-## Dados de Custo AWS
+## Dados de Custo AWS do Cliente
 
+```json
 {json.dumps(costs, indent=2, default=str)}
+```
 
-## Recursos AWS Ativos
+## Recursos AWS Ativos do Cliente
 
+```json
 {json.dumps(resources, indent=2, default=str)}
+```
 
-## Instrucoes
+## Instrucoes para o Relatorio
 
 {persona_instructions}
 
-## Formato de Saida
+## REGRAS OBRIGATORIAS DE FORMATO
 
-- Use Markdown com headers hierarquicos
-- Valores monetarios em USD
-- Priorize por impacto financeiro
-- Idioma: Portugues do Brasil
+1. **IDIOMA**: Responda 100% em Portugues do Brasil
+2. **FORMATO**: Use Markdown com headers hierarquicos (# ## ###)
+3. **VALORES**: Sempre em USD com 2 casas decimais
+4. **PRIORIDADE**: Ordene recomendacoes por impacto financeiro (maior economia primeiro)
+5. **JUSTIFICATIVA**: Para CADA recomendacao, explique o PORQUE com dados concretos
+6. **DETALHAMENTO**: Seja EXTREMAMENTE detalhado - inclua numeros, porcentagens, comparacoes
+7. **ACAO**: Cada recomendacao deve ter passos claros de implementacao
+8. **PRECOS**: Cite precos AWS atuais quando relevante
+9. **ECONOMIA**: Calcule economia mensal E anual para cada oportunidade
+10. **RISCO**: Indique o risco (Baixo/Medio/Alto) de cada mudanca
+
+NUNCA responda em ingles. NUNCA diga "vou buscar" - responda DIRETAMENTE com o relatorio completo.
 """
 
     def _get_persona_instructions(self, persona: PersonaType) -> str:
@@ -282,20 +299,53 @@ Seu conhecimento inclui:
         """
         instructions = {
             PersonaType.EXECUTIVE: """
-Produza um relatorio executivo de custos AWS com:
+Produza um relatorio EXECUTIVO COMPLETO de custos AWS. SEJA EXTREMAMENTE DETALHADO.
 
-### 1. RESUMO EXECUTIVO (2 paragrafos)
-- Gasto total do periodo em USD
-- Top 3 servicos que mais impactam o custo
+## 1. RESUMO EXECUTIVO
+- Gasto total do periodo em USD com comparacao ao periodo anterior
+- Top 5 servicos que mais impactam o custo COM PORCENTAGEM de cada um
+- Tendencia de gastos (crescente/estavel/decrescente) com justificativa
+- Previsao de gasto para os proximos 3 meses
 
-### 2. TOP 3 OPORTUNIDADES DE ECONOMIA
-| Oportunidade | Economia/Mes | Prazo |
-|--------------|--------------|-------|
+## 2. ANALISE DETALHADA DE CUSTOS
+Para cada servico significativo, inclua:
+| Servico | Custo USD | % do Total | Custo por Dia | Tendencia | Benchmark AWS |
+|---------|-----------|------------|---------------|-----------|---------------|
 
-### 3. PROXIMOS PASSOS (3 acoes prioritarias)
+Explique O QUE esta gerando cada custo (snapshots, storage, compute, etc.)
 
-**Tom**: Executivo, foco em ROI e impacto no negocio.
-**Limite**: Maximo 2 paginas.
+## 3. TOP 5 OPORTUNIDADES DE ECONOMIA (DETALHADAS)
+| # | Oportunidade | Economia Mensal | Economia Anual | Prazo | Risco | Complexidade |
+|---|--------------|-----------------|----------------|-------|-------|--------------|
+
+Para CADA oportunidade, inclua:
+- **Por que recomendo**: Justificativa baseada nos dados
+- **Como implementar**: Passos detalhados
+- **Precos AWS atuais**: Valores de referencia
+- **ROI esperado**: Retorno sobre o investimento
+
+## 4. COMPARATIVO DE ESTRATEGIAS DE ECONOMIA
+| Estrategia | Economia | Compromisso | Flexibilidade | Recomendacao |
+|------------|----------|-------------|---------------|--------------|
+| On-Demand | - | Nenhum | 100% | Atual |
+| Savings Plans 1 ano | X% | 1 ano | Alta | Considerar |
+| Savings Plans 3 anos | Y% | 3 anos | Media | Avaliar |
+| Reserved Instances | Z% | 1-3 anos | Baixa | Para workloads estaveis |
+
+## 5. PROXIMOS PASSOS PRIORITARIOS
+Para cada acao, inclua:
+1. **Acao**: Descricao detalhada
+   - **Responsavel sugerido**: Cargo/equipe
+   - **Prazo recomendado**: X dias
+   - **Impacto financeiro**: USD X/mes
+   - **Dependencias**: O que precisa antes
+
+## 6. INDICADORES CHAVE (KPIs)
+| KPI | Valor Atual | Meta Sugerida | Gap |
+|-----|-------------|---------------|-----|
+
+**Tom**: Executivo estrategico, foco em ROI, impacto no negocio e tomada de decisao.
+**Detalhamento**: MAXIMO - inclua todos os dados, justificativas e calculos.
 """,
             PersonaType.CTO: """
 Produza um relatorio tecnico-estrategico de custos AWS com:
