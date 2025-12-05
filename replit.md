@@ -145,6 +145,14 @@ export Q_BUSINESS_APPLICATION_ID=seu-app-id
 
 ## Recent Changes (December 2024)
 
+- **Refatoração Arquitetural com Design Patterns (Dec 5)**:
+  - Criado módulo `src/finops_aws/analyzers/` com Strategy Pattern
+  - 6 analyzers implementados: compute, storage, database, network, security, analytics
+  - Hierarquia de exceções tipadas em `domain/exceptions.py`
+  - Factory Pattern + Registry para criação de analyzers
+  - Template Method em BaseAnalyzer para estrutura comum
+  - Integração via Facade em `dashboard/analysis.py`
+  - Documentação completa em `docs/ARCHITECTURE_AND_PATTERNS.md`
 - **Integrações AWS Completas (Dec 5)**:
   - Implementado AWS Compute Optimizer para right-sizing EC2
   - Implementado Cost Explorer para Reserved Instances e Savings Plans
