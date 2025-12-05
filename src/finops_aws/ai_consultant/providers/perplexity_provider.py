@@ -116,7 +116,7 @@ class PerplexityProvider(BaseAIProvider):
             
             status["healthy"] = True
             status["details"] = {
-                "current_model": self.config.model or "sonar-pro",
+                "current_model": self.config.model or "sonar",
                 "online_search": True
             }
             
@@ -145,7 +145,7 @@ class PerplexityProvider(BaseAIProvider):
         Returns:
             AIResponse com resposta e citacoes
         """
-        model = self.config.model or "sonar-pro"
+        model = self.config.model or "sonar"
         
         messages = []
         
@@ -235,26 +235,28 @@ class PerplexityProvider(BaseAIProvider):
         
         prompt += """
 
-## Instrucoes Adicionais para Perplexity
+## Instrucoes OBRIGATORIAS
 
-Por favor, busque online:
-1. Precos atualizados dos servicos AWS mencionados
-2. Comparativo com alternativas (Reserved Instances, Savings Plans)
-3. Artigos recentes sobre otimizacao AWS
-4. Best practices atualizadas do AWS Well-Architected
+IMPORTANTE: Responda DIRETAMENTE com o relatorio completo em Markdown.
+NAO diga "vou buscar" ou "deixe-me pesquisar" - va direto ao conteudo.
 
-Cite todas as fontes consultadas."""
+Enriqueça o relatorio com:
+1. Precos atualizados dos servicos AWS mencionados (se disponiveis)
+2. Comparativo com Reserved Instances e Savings Plans
+3. Best practices do AWS Well-Architected Framework
+4. Cite as fontes ao final do relatorio"""
         
-        system_prompt = """Voce e um consultor FinOps AWS com acesso a informacoes em tempo real.
+        system_prompt = """Voce e um consultor FinOps AWS senior.
 
-Use sua capacidade de busca online para:
-- Verificar precos AWS atualizados
-- Encontrar best practices recentes
-- Citar fontes confiaveis (AWS docs, blogs oficiais)
+REGRAS OBRIGATORIAS:
+1. NUNCA diga "vou buscar" ou "deixe-me pesquisar" - responda DIRETAMENTE
+2. Gere o relatorio COMPLETO imediatamente em Markdown
+3. Inclua todas as recomendacoes de otimizacao
+4. Cite fontes no final (nao durante o texto)
+5. Responda em Portugues do Brasil
+6. Formate com headers, tabelas e listas
 
-Responda em Portugues do Brasil.
-Use Markdown para formatacao.
-Sempre cite as fontes consultadas."""
+Comece o relatorio com "# Relatorio" e va direto ao conteudo."""
         
         return self.chat(
             message=prompt,

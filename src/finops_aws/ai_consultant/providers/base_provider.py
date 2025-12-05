@@ -85,7 +85,7 @@ class AIProviderConfig:
             
         elif provider_type == AIProviderType.PERPLEXITY:
             config.api_key = os.environ.get('PERPLEXITY_API_KEY')
-            config.model = os.environ.get('PERPLEXITY_MODEL', 'sonar-pro')
+            config.model = os.environ.get('PERPLEXITY_MODEL', 'sonar')
             
         return config
 
