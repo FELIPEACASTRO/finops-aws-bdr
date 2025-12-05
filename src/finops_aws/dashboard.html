@@ -320,20 +320,35 @@
                 const summary = report.summary || {};
                 const details = report.details || {};
                 
-                const totalCost = summary.total_cost || 0;
-                const savings = summary.total_savings_potential || 0;
-                const recsCount = summary.recommendations_count || 0;
-                const svcsCount = summary.services_analyzed || 0;
+                // Pegar dados do summary ou calcular a partir de details
+                const costsByService = details.costs ? details.costs.by_service : {};
+                const recommendations = details.recommendations || [];
                 
-                console.log('Custo:', totalCost, 'Economia:', savings);
+                // Calcular custo total a partir dos serviços
+                let totalCost = summary.total_cost || 0;
+                if (totalCost === 0 && details.costs && details.costs.total) {
+                    totalCost = details.costs.total;
+                }
+                if (totalCost === 0) {
+                    totalCost = Object.values(costsByService).reduce((sum, cost) => sum + cost, 0);
+                }
+                
+                // Economia potencial
+                let savings = summary.total_savings_potential || 0;
+                if (savings === 0 && recommendations.length > 0) {
+                    savings = recommendations.reduce((sum, rec) => sum + (rec.savings || 0), 0);
+                }
+                
+                // Contadores
+                const recsCount = summary.recommendations_count || recommendations.length;
+                const svcsCount = summary.services_analyzed || Object.keys(costsByService).length;
+                
+                console.log('Custo:', totalCost, 'Economia:', savings, 'Recomendacoes:', recsCount, 'Servicos:', svcsCount);
                 
                 document.getElementById('total-cost').textContent = '$' + totalCost.toFixed(2);
                 document.getElementById('savings').textContent = '$' + savings.toFixed(2);
                 document.getElementById('recommendations-count').textContent = recsCount;
                 document.getElementById('services-count').textContent = svcsCount;
-                
-                const costsByService = details.costs ? details.costs.by_service : {};
-                const recommendations = details.recommendations || [];
                 
                 updateServicesTable(costsByService);
                 updateRecommendationsTable(recommendations);

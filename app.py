@@ -14,6 +14,38 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 app = Flask(__name__)
 
+# Cache simples para evitar re-análise a cada requisição
+_analysis_cache = {
+    'data': None,
+    'timestamp': None,
+    'ttl_seconds': 300  # Cache por 5 minutos
+}
+
+def get_cached_analysis():
+    """Retorna análise do cache ou executa nova se expirado."""
+    now = datetime.now()
+    
+    # Se tem cache válido, usa
+    if (_analysis_cache['data'] is not None and 
+        _analysis_cache['timestamp'] is not None):
+        age = (now - _analysis_cache['timestamp']).total_seconds()
+        if age < _analysis_cache['ttl_seconds']:
+            return _analysis_cache['data']
+    
+    # Executa nova análise
+    analysis = get_aws_analysis_internal()
+    
+    # Salva no cache
+    _analysis_cache['data'] = analysis
+    _analysis_cache['timestamp'] = now
+    
+    return analysis
+
+def invalidate_cache():
+    """Invalida o cache para forçar nova análise."""
+    _analysis_cache['data'] = None
+    _analysis_cache['timestamp'] = None
+
 @app.after_request
 def add_header(response):
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -6092,9 +6124,9 @@ Forneça 3-5 recomendações específicas para reduzir custos."""
     return insights
 
 
-def get_aws_analysis():
+def get_aws_analysis_internal():
     """
-    Executa análise completa de custos e recursos AWS.
+    Executa análise completa de custos e recursos AWS (interno).
     
     Usa o módulo refatorado src/finops_aws/dashboard para análise,
     passando get_all_services_analysis como função de callback.
@@ -6107,6 +6139,10 @@ def get_aws_analysis():
     )
     
     return result
+
+def get_aws_analysis():
+    """Wrapper que usa cache para análise AWS."""
+    return get_cached_analysis()
 
 
 @app.route('/')
@@ -6132,6 +6168,9 @@ def health():
 def run_analysis():
     """Executa análise completa de custos AWS."""
     try:
+        # Invalida cache para forçar nova análise
+        invalidate_cache()
+        
         analysis = get_aws_analysis()
         
         execution_id = f"exec-{datetime.now().strftime('%Y%m%d%H%M%S')}"
