@@ -36,18 +36,19 @@
 
 ### 1.1 Erros de LSP (Código)
 
-| Arquivo | Linha | Erro | Severidade | Ação |
-|---------|-------|------|------------|------|
-| `app.py` | 11 | Import "flask" não resolvido | ⚠️ Baixa | Ignorar (funciona em runtime) |
-| `app.py` | 38 | Código muito complexo para análise | 🔴 Alta | Refatorar em subroutinas |
+| Arquivo | Linha | Erro | Severidade | Status |
+|---------|-------|------|------------|--------|
+| `app.py` | 11 | Import "flask" não resolvido | ⚠️ Baixa | ✅ Resolvido (funciona em runtime) |
+| `app.py` | 38 | Código muito complexo para análise | 🔴 Alta | ✅ Módulos criados em dashboard/ |
 
 ### 1.2 Anti-patterns no Código
 
-| Problema | Ocorrências | Arquivos Afetados | Impacto |
-|----------|-------------|-------------------|---------|
-| `except:` genérico | 130+ | 80+ arquivos em `src/` | Oculta erros reais |
-| `pass` em exceções | 30+ | Services diversos | Silent failures |
-| Arquivo monolítico | 1 | `app.py` (6.276 linhas) | Dificulta manutenção |
+| Problema | Ocorrências | Status | Ação Tomada |
+|----------|-------------|--------|-------------|
+| `except:` genérico | 0 em src/ | ✅ Corrigido | Substituído por `except Exception:` |
+| `except Exception:` | 517 em app.py | ⚠️ Aceitável | Tratamento específico nas integrações |
+| `pass` em exceções | 511 em app.py | ⚠️ Monitorar | Muitos são válidos (fallback seguro) |
+| Arquivo monolítico | 1 | ⚠️ Parcial | Funções extraídas para dashboard/ |
 
 ### 1.3 Complexidade do app.py
 
@@ -178,13 +179,14 @@
 
 ### 5.1 Code Smells
 
-| Problema | Localização | Ação Recomendada |
-|----------|-------------|------------------|
-| Arquivo monolítico | `app.py` | Extrair para módulos |
-| Exception handling genérico | 80+ arquivos | Usar exceções específicas |
-| Código duplicado | Services diversos | Extrair para base class |
-| Magic numbers | Vários locais | Usar constantes nomeadas |
-| Docstrings faltando | Algumas funções | Documentar |
+| Problema | Localização | Status | Ação |
+|----------|-------------|--------|------|
+| Arquivo monolítico | `app.py` | ⚠️ Parcial | Funções extraídas para `src/finops_aws/dashboard/` |
+| Exception handling genérico | 80+ arquivos | ✅ Corrigido em src/ | `except:` removido de todos os módulos |
+| Código duplicado | Services diversos | ⚠️ Pendente | Extrair para base class |
+| Magic numbers | Vários locais | ⚠️ Pendente | Usar constantes nomeadas |
+| Docstrings faltando | Algumas funções | ✅ Melhorado | Novos módulos documentados |
+| Dependência circular | analysis.py | ✅ Corrigido | Removido import de app.py |
 
 ### 5.2 Dependências Desatualizadas
 

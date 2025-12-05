@@ -2,6 +2,7 @@
 FinOps AWS Dashboard Module
 
 Módulo para análise de custos AWS e integração com dashboard web.
+Contém funções para integrações AWS, análise multi-região e exportação.
 """
 
 from .integrations import (
@@ -12,6 +13,7 @@ from .integrations import (
 )
 from .multi_region import get_all_regions_analysis, get_region_costs
 from .export import export_to_csv, export_to_json, export_to_html, save_report
+from .analysis import get_dashboard_analysis
 
 __all__ = [
     'get_compute_optimizer_recommendations',
@@ -24,4 +26,5 @@ __all__ = [
     'export_to_json',
     'export_to_html',
     'save_report',
+    'get_dashboard_analysis',
 ]

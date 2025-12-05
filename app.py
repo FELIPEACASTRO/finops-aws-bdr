@@ -6093,88 +6093,18 @@ Forneça 3-5 recomendações específicas para reduzir custos."""
 
 
 def get_aws_analysis():
-    """Executa análise completa de custos e recursos AWS."""
-    import boto3
-    import os
-    from datetime import datetime, timedelta
+    """
+    Executa análise completa de custos e recursos AWS.
     
-    region = os.environ.get('AWS_REGION', 'us-east-1')
+    Usa o módulo refatorado src/finops_aws/dashboard para análise,
+    passando get_all_services_analysis como função de callback.
+    """
+    from src.finops_aws.dashboard import get_dashboard_analysis
     
-    result = {
-        'costs': {},
-        'resources': {},
-        'recommendations': [],
-        'integrations': {
-            'all_services': False,
-            'compute_optimizer': False,
-            'cost_explorer_ri': False,
-            'trusted_advisor': False,
-            'amazon_q': False
-        }
-    }
-    
-    try:
-        ce = boto3.client('ce', region_name='us-east-1')
-        end_date = datetime.now().strftime('%Y-%m-%d')
-        start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-        
-        cost_response = ce.get_cost_and_usage(
-            TimePeriod={'Start': start_date, 'End': end_date},
-            Granularity='MONTHLY',
-            Metrics=['UnblendedCost'],
-            GroupBy=[{'Type': 'DIMENSION', 'Key': 'SERVICE'}]
-        )
-        
-        total_cost = 0
-        cost_by_service = {}
-        
-        for result_item in cost_response.get('ResultsByTime', []):
-            for group in result_item.get('Groups', []):
-                service_name = group.get('Keys', ['Unknown'])[0]
-                cost = float(group.get('Metrics', {}).get('UnblendedCost', {}).get('Amount', 0))
-                cost_by_service[service_name] = cost_by_service.get(service_name, 0) + cost
-                total_cost += cost
-        
-        result['costs'] = {
-            'total': round(total_cost, 2),
-            'by_service': {k: round(v, 4) for k, v in sorted(cost_by_service.items(), key=lambda x: x[1], reverse=True)[:20]}
-        }
-    except Exception as e:
-        result['costs'] = {'error': str(e)}
-    
-    try:
-        sts = boto3.client('sts')
-        account_id = sts.get_caller_identity()['Account']
-        result['account_id'] = account_id
-    except Exception:
-        result['account_id'] = 'Unknown'
-    
-    all_services_recs, all_services_resources = get_all_services_analysis(region)
-    if all_services_recs:
-        result['recommendations'].extend(all_services_recs)
-    if all_services_resources:
-        result['resources'] = all_services_resources
-        result['integrations']['all_services'] = True
-    
-    co_recs = get_compute_optimizer_recommendations(region)
-    if co_recs:
-        result['recommendations'].extend(co_recs)
-        result['integrations']['compute_optimizer'] = True
-    
-    ri_recs = get_cost_explorer_ri_recommendations(region)
-    if ri_recs:
-        result['recommendations'].extend(ri_recs)
-        result['integrations']['cost_explorer_ri'] = True
-    
-    ta_recs = get_trusted_advisor_recommendations()
-    if ta_recs:
-        result['recommendations'].extend(ta_recs)
-        result['integrations']['trusted_advisor'] = True
-    
-    q_insights = get_amazon_q_insights(result.get('costs', {}), result.get('resources', {}))
-    if q_insights:
-        result['recommendations'].extend(q_insights)
-        result['integrations']['amazon_q'] = True
+    result = get_dashboard_analysis(
+        all_services_func=get_all_services_analysis,
+        include_multi_region=False
+    )
     
     return result
 
@@ -6236,11 +6166,11 @@ def get_latest_report():
         for rec in analysis.get('recommendations', []):
             formatted_recs.append({
                 'type': rec.get('type', ''),
-                'title': rec.get('description', ''),
-                'service': rec.get('source', ''),
-                'resource_id': rec.get('resource', ''),
+                'title': rec.get('title', rec.get('description', '')),
+                'service': rec.get('service', rec.get('source', '')),
+                'resource_id': rec.get('resource_id', rec.get('resource', '')),
                 'savings': rec.get('savings', 0),
-                'priority': 'HIGH' if rec.get('impact') == 'high' else 'MEDIUM' if rec.get('impact') == 'medium' else 'LOW'
+                'priority': rec.get('priority', 'MEDIUM')
             })
         
         report = {

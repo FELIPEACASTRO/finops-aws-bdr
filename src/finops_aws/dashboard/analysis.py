@@ -2,12 +2,13 @@
 Main Analysis Module for FinOps Dashboard
 
 Módulo principal de análise que consolida todas as fontes de dados.
+NOTA: Este módulo não deve importar de app.py para evitar dependência circular.
 """
 
 import os
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable, Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -22,11 +23,19 @@ from .integrations import (
 logger = logging.getLogger(__name__)
 
 
-def get_aws_analysis(include_multi_region: bool = False) -> Dict[str, Any]:
+def get_dashboard_analysis(
+    all_services_func: Optional[Callable] = None,
+    include_multi_region: bool = False
+) -> Dict[str, Any]:
     """
-    Executa análise completa de custos e recursos AWS.
+    Executa análise completa de custos e recursos AWS para o dashboard.
+    
+    Esta função é chamada pelos endpoints da API quando precisam de análise
+    completa. Ela não importa de app.py para evitar dependência circular.
     
     Args:
+        all_services_func: Função opcional para análise de todos os serviços.
+                          Quando None, usa apenas as integrações.
         include_multi_region: Se True, analisa todas as regiões
         
     Returns:
@@ -59,42 +68,60 @@ def get_aws_analysis(include_multi_region: bool = False) -> Dict[str, Any]:
     except ClientError:
         pass
     
-    from app import get_all_services_analysis
-    all_services_recs, all_services_resources = get_all_services_analysis(region)
-    if all_services_recs:
-        result['recommendations'].extend(all_services_recs)
-        result['integrations']['all_services'] = True
-    if all_services_resources:
-        result['resources'].update(all_services_resources)
+    if all_services_func:
+        try:
+            all_services_recs, all_services_resources = all_services_func(region)
+            if all_services_recs:
+                result['recommendations'].extend(_normalize_recommendations(all_services_recs))
+                result['integrations']['all_services'] = True
+            if all_services_resources:
+                result['resources'].update(all_services_resources)
+        except Exception as e:
+            logger.error(f"Erro na análise de serviços: {e}")
     
-    co_recs = get_compute_optimizer_recommendations(region)
-    if co_recs:
-        result['recommendations'].extend(co_recs)
-        result['integrations']['compute_optimizer'] = True
+    try:
+        co_recs = get_compute_optimizer_recommendations(region)
+        if co_recs:
+            result['recommendations'].extend(co_recs)
+            result['integrations']['compute_optimizer'] = True
+    except Exception as e:
+        logger.error(f"Erro no Compute Optimizer: {e}")
     
-    ri_recs = get_cost_explorer_ri_recommendations(region)
-    if ri_recs:
-        result['recommendations'].extend(ri_recs)
-        result['integrations']['cost_explorer_ri'] = True
+    try:
+        ri_recs = get_cost_explorer_ri_recommendations(region)
+        if ri_recs:
+            result['recommendations'].extend(ri_recs)
+            result['integrations']['cost_explorer_ri'] = True
+    except Exception as e:
+        logger.error(f"Erro no Cost Explorer RI: {e}")
     
-    ta_recs = get_trusted_advisor_recommendations()
-    if ta_recs:
-        result['recommendations'].extend(ta_recs)
-        result['integrations']['trusted_advisor'] = True
+    try:
+        ta_recs = get_trusted_advisor_recommendations()
+        if ta_recs:
+            result['recommendations'].extend(ta_recs)
+            result['integrations']['trusted_advisor'] = True
+    except Exception as e:
+        logger.error(f"Erro no Trusted Advisor: {e}")
     
-    q_insights = get_amazon_q_insights(result.get('costs', {}), result.get('resources', {}))
-    if q_insights:
-        result['recommendations'].extend(q_insights)
-        result['integrations']['amazon_q'] = True
+    try:
+        q_insights = get_amazon_q_insights(result.get('costs', {}), result.get('resources', {}))
+        if q_insights:
+            result['recommendations'].extend(q_insights)
+            result['integrations']['amazon_q'] = True
+    except Exception as e:
+        logger.error(f"Erro no Amazon Q: {e}")
     
     if include_multi_region:
-        from .multi_region import get_all_regions_analysis
-        multi_region_data = get_all_regions_analysis()
-        result['multi_region'] = multi_region_data
-        result['integrations']['multi_region'] = True
-        
-        for rec in multi_region_data.get('consolidated_recommendations', []):
-            result['recommendations'].append(rec)
+        try:
+            from .multi_region import get_all_regions_analysis
+            multi_region_data = get_all_regions_analysis(max_workers=3)
+            result['multi_region'] = multi_region_data
+            result['integrations']['multi_region'] = True
+            
+            for rec in multi_region_data.get('consolidated_recommendations', []):
+                result['recommendations'].append(rec)
+        except Exception as e:
+            logger.error(f"Erro na análise multi-region: {e}")
     
     result['recommendations'] = _deduplicate_recommendations(result['recommendations'])
     result['recommendations'].sort(key=lambda x: x.get('savings', 0), reverse=True)
@@ -102,6 +129,47 @@ def get_aws_analysis(include_multi_region: bool = False) -> Dict[str, Any]:
     result['summary'] = _generate_summary(result)
     
     return result
+
+
+def _normalize_recommendations(recommendations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Normaliza o formato das recomendações para consistência.
+    
+    Converte campos antigos para o novo padrão:
+    - resource -> resource_id
+    - impact -> priority
+    - source -> service
+    
+    Args:
+        recommendations: Lista de recomendações em formato antigo ou novo
+        
+    Returns:
+        Lista de recomendações normalizadas
+    """
+    normalized = []
+    
+    priority_map = {
+        'high': 'HIGH',
+        'medium': 'MEDIUM',
+        'low': 'LOW',
+        'HIGH': 'HIGH',
+        'MEDIUM': 'MEDIUM',
+        'LOW': 'LOW'
+    }
+    
+    for rec in recommendations:
+        normalized_rec = {
+            'type': rec.get('type', 'UNKNOWN'),
+            'resource_id': rec.get('resource_id', rec.get('resource', 'N/A')),
+            'title': rec.get('title', rec.get('description', '')),
+            'description': rec.get('description', rec.get('title', '')),
+            'priority': priority_map.get(rec.get('priority', rec.get('impact', 'MEDIUM')), 'MEDIUM'),
+            'savings': rec.get('savings', 0),
+            'service': rec.get('service', rec.get('source', 'Analysis'))
+        }
+        normalized.append(normalized_rec)
+    
+    return normalized
 
 
 def _get_cost_data() -> Dict[str, Any]:
@@ -150,10 +218,10 @@ def _get_cost_data() -> Dict[str, Any]:
         
     except ClientError as e:
         logger.error(f"Erro ao obter custos: {e}")
-        costs = {'error': str(e)}
+        costs = {'error': str(e), 'total': 0, 'by_service': {}}
     except Exception as e:
         logger.error(f"Erro inesperado ao obter custos: {e}")
-        costs = {'error': str(e)}
+        costs = {'error': str(e), 'total': 0, 'by_service': {}}
     
     return costs
 
@@ -171,7 +239,8 @@ def _deduplicate_recommendations(recommendations: List[Dict[str, Any]]) -> List[
     seen = {}
     
     for rec in recommendations:
-        key = f"{rec.get('type', '')}:{rec.get('resource_id', rec.get('resource', ''))}"
+        resource_id = rec.get('resource_id', rec.get('resource', ''))
+        key = f"{rec.get('type', '')}:{resource_id}"
         
         if key not in seen or rec.get('savings', 0) > seen[key].get('savings', 0):
             seen[key] = rec
@@ -200,10 +269,16 @@ def _generate_summary(result: Dict[str, Any]) -> Dict[str, Any]:
     
     integrations_active = sum(1 for v in result.get('integrations', {}).values() if v)
     
+    total_cost = costs.get('total', 0)
+    if total_cost > 0:
+        savings_pct = round((total_savings / total_cost) * 100, 1)
+    else:
+        savings_pct = 0
+    
     return {
-        'total_cost': costs.get('total', 0),
+        'total_cost': total_cost,
         'total_potential_savings': round(total_savings, 2),
-        'savings_percentage': round((total_savings / costs.get('total', 1)) * 100, 1) if costs.get('total', 0) > 0 else 0,
+        'savings_percentage': savings_pct,
         'recommendations_count': len(recommendations),
         'high_priority_count': high_priority,
         'medium_priority_count': medium_priority,
