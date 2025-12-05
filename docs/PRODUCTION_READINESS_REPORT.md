@@ -47,7 +47,7 @@
 | **Testes E2E** | ✅ APROVADO | 10/10 | 56/56 testes (100%) |
 | **Score QA Expert** | ✅ APROVADO | 9.7/10 | 10 especialistas, 100% consenso |
 | **Infraestrutura** | ✅ APROVADO | 9.5/10 | Terraform 3.400+ LOC validado |
-| **Documentação** | ✅ APROVADO | 9.5/10 | 10.800+ linhas completas |
+| **Documentação** | ✅ APROVADO | 9.5/10 | 10.300+ linhas completas |
 | **Resiliência** | ✅ APROVADO | 9.8/10 | Circuit Breaker + Retry Handler |
 | **Multi-Account** | ✅ APROVADO | 9.5/10 | AWS Organizations suportado |
 | **Segurança** | ✅ APROVADO | 9.6/10 | SAST sem vulnerabilidades |
@@ -81,7 +81,7 @@
 ║  ✅ Funciona (253 serviços testados)                                         ║
 ║  ✅ É resiliente (CircuitBreaker + Retry)                                    ║
 ║  ✅ É monitorável (CloudWatch + X-Ray)                                       ║
-║  ✅ É documentado (10.800+ linhas de docs)                                   ║
+║  ✅ É documentado (10.300+ linhas de docs)                                   ║
 ║  ✅ É escalável (100+ execuções/dia)                                         ║
 ║  ✅ É seguro (permissões read-only)                                          ║
 ║  ✅ É testado (9.7/10 score QA)                                              ║
@@ -241,7 +241,7 @@
 | Cobertura de testes | 90%+ | 95% | ✅ Excede |
 | Taxa de sucesso E2E | 100% | 100% | ✅ Atinge |
 | Score QA | 9.0+ | 9.7 | ✅ Excede |
-| Documentação | Completa | 10.800+ linhas | ✅ Excede |
+| Documentação | Completa | 10.300+ linhas | ✅ Excede |
 | Resiliência | CircuitBreaker | Implementado | ✅ Atinge |
 | Execuções/dia | 100 | Suportado | ✅ Atinge |
 | Custo operacional | <$10/mês | ~$3/mês | ✅ Excede |
@@ -376,7 +376,7 @@
 ║  • Cobertura: 95%+                                                           ║
 ║  • Consenso Especialistas: 100%                                              ║
 ║  • Serviços AWS: 253 (100% do catálogo)                                      ║
-║  • Documentação: 10.800+ linhas                                              ║
+║  • Documentação: 10.300+ linhas                                              ║
 ║                                                                              ║
 ║  PARA APRESENTAÇÃO A GRANDE EMPRESA:                                         ║
 ║                                                                              ║

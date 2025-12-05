@@ -43,7 +43,7 @@ Este documento é um guia completo, escrito em linguagem simples, para você ent
 | Score QA | 9.7/10 | Aprovado por 10 especialistas QA mundiais |
 | Categorias de Serviços | 16 | Compute, Storage, Database, AI/ML, etc. |
 | Infraestrutura Terraform | 3.400+ linhas | Deploy automatizado em 15 minutos |
-| Documentação Técnica | 10.800+ linhas | Tudo documentado em detalhes |
+| Documentação Técnica | 10.300+ linhas | Tudo documentado em detalhes |
 
 ---
 

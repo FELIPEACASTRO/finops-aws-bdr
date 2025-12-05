@@ -38,7 +38,7 @@
 | **Testes E2E** | 56 (100%) | ✅ |
 | **Score QA Expert** | 9.7/10 | ✅ |
 | **Terraform LOC** | 3.000+ | ✅ |
-| **Documentação LOC** | 10.800+ | ✅ |
+| **Documentação LOC** | 10.300+ | ✅ |
 
 ---
 

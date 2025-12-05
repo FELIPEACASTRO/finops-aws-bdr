@@ -42,7 +42,7 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 ║  │ Cobertura de Código  │ 95%+    │ ████████████████████████████         │  ║
 ║  │ Serviços AWS         │ 253/253 │ ████████████████████████████  100%   │  ║
 ║  │ Terraform LOC        │ 3.400+  │ Deploy automatizado em 15min         │  ║
-║  │ Documentação         │ 10.800+ │ Linhas de docs detalhados            │  ║
+║  │ Documentação         │ 10.300+ │ Linhas de docs detalhados            │  ║
 ║  └────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                              ║
 ║  STATUS: ✅ ENTERPRISE-READY (Aprovado para produção)                        ║
