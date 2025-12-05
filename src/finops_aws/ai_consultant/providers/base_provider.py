@@ -80,7 +80,7 @@ class AIProviderConfig:
             config.model = os.environ.get('OPENAI_MODEL', 'gpt-4o')
             
         elif provider_type == AIProviderType.GEMINI:
-            config.api_key = os.environ.get('GEMINI_API_KEY')
+            config.api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
             config.model = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
             
         elif provider_type == AIProviderType.PERPLEXITY:

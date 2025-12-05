@@ -64,10 +64,10 @@ class GeminiProvider(BaseAIProvider):
             try:
                 import google.generativeai as genai
                 
-                api_key = self.config.api_key or os.environ.get('GEMINI_API_KEY')
+                api_key = self.config.api_key or os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
                 
                 if not api_key:
-                    raise ValueError("GEMINI_API_KEY nao configurado")
+                    raise ValueError("GEMINI_API_KEY ou GOOGLE_API_KEY nao configurado")
                 
                 genai.configure(api_key=api_key)
                 
@@ -96,10 +96,10 @@ class GeminiProvider(BaseAIProvider):
             "details": {}
         }
         
-        api_key = self.config.api_key or os.environ.get('GEMINI_API_KEY')
+        api_key = self.config.api_key or os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
         
         if not api_key:
-            status["details"]["error"] = "GEMINI_API_KEY nao configurado"
+            status["details"]["error"] = "GEMINI_API_KEY ou GOOGLE_API_KEY nao configurado"
             return status
         
         try:
