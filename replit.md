@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution includes an Automated Financial Consultant powered by Amazon Q Business for intelligent report generation.
+FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution includes an **Automated Financial Consultant powered by Multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity) for intelligent report generation.
 
 ## User Preferences
 
@@ -24,34 +24,59 @@ Web Dashboard → API Layer → Analysis Facade
    Factory               Module                  Module
    (Strategy)              │                        │
         │                  ▼                        │
-   6 Analyzers      AWS APIs:                       │
-        │        - Compute Optimizer               │
-        │        - Cost Explorer RI                │
-        │        - Trusted Advisor                 │
-        │        - Amazon Q Business               │
-        │                  │                        │
+   6 Analyzers      AWS APIs + AI Providers         │
+        │        ┌──────────────────────┐          │
+        │        │ - Compute Optimizer  │          │
+        │        │ - Cost Explorer RI   │          │
+        │        │ - Trusted Advisor    │          │
+        │        │ - AI Providers:      │          │
+        │        │   * Amazon Q Business│          │
+        │        │   * OpenAI ChatGPT   │          │
+        │        │   * Google Gemini    │          │
+        │        │   * Perplexity AI    │          │
+        │        └──────────────────────┘          │
         └──────────────────┼────────────────────────┘
                            ▼
-                     boto3 Clients
+                 boto3 + AI SDK Clients
                            │
                            ▼
-                      AWS Cloud
+                  AWS Cloud + AI APIs
 ```
 
 **Key Architectural Components:**
 - **Analyzers (Strategy Pattern)**: 6 analyzers modulares (Compute, Storage, Database, Network, Security, Analytics)
-- **Factory + Registry**: Criação dinâmica de analyzers
+- **AI Providers (Strategy Pattern)**: 4 provedores de IA intercambiáveis
+- **Factory + Registry**: Criação dinâmica de analyzers e AI providers
 - **Template Method**: Estrutura comum de análise
 - **Facade**: API simplificada para o dashboard
 - **Exception Hierarchy**: 15 tipos de exceções tipadas
 
-**AI Consultant (Amazon Q Business)**:
-- 4 personas: EXECUTIVE, CTO, DEVOPS, ANALYST
-- Prompts especializados para cada audiência
-- Respostas em Português do Brasil
-- Integração via `Q_BUSINESS_APPLICATION_ID`
+## AI Consultant - Multi-Provider Architecture
 
-## Amazon Q Business - Prompts e Respostas
+### Provedores de IA Suportados
+
+| Provedor | Modelo | API Key | Características |
+|----------|--------|---------|-----------------|
+| **Amazon Q Business** | Q Business | Não (IAM) | RAG nativo, segurança AWS |
+| **OpenAI ChatGPT** | gpt-4o, gpt-4o-mini | Sim | Alta precisão, grande contexto |
+| **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro | Sim | Contexto 2M, custo-benefício |
+| **Perplexity AI** | llama-3.1-sonar-large-128k-online | Sim | Busca online, citações |
+
+### Uso Programático
+
+```python
+from finops_aws.ai_consultant.providers import AIProviderFactory, PersonaType
+
+# Criar provedor específico
+provider = AIProviderFactory.create("openai")
+
+# Ou seleção automática
+available = AIProviderFactory.create_all_available()
+
+# Gerar relatório
+response = provider.generate_report(costs, resources, PersonaType.EXECUTIVE)
+print(response.content)
+```
 
 ### Personas Disponíveis
 
@@ -61,109 +86,6 @@ Web Dashboard → API Layer → Analysis Facade
 | **CTO** | CTO/VP Eng | Arquitetura, trade-offs | Roadmap, diagramas |
 | **DEVOPS** | DevOps/SRE | Scripts, AWS CLI | Comandos copy-paste |
 | **ANALYST** | FinOps | KPIs, métricas | Tabelas, benchmarks |
-
-### Estrutura do Prompt
-
-```markdown
-## Contexto do Sistema
-Você é um consultor senior de FinOps especializado em AWS...
-
-## Dados de Custo AWS
-**Custo Total (30 dias):** $X.XX
-**Top Serviços:** [lista com valores]
-
-## Recursos AWS Ativos
-- ec2_instances: X
-- s3_buckets: Y
-- rds_instances: Z
-
-## Instruções
-[Template específico da persona]
-```
-
-### Exemplo de Resposta (EXECUTIVE)
-
-```markdown
-# Relatório Executivo FinOps
-
-## Resumo Executivo
-O custo total foi de **$0.15**, distribuído entre RDS (95%) e S3 (3%).
-
-## Top 3 Oportunidades
-| # | Oportunidade | Economia/Mês |
-|---|--------------|--------------|
-| 1 | Versionamento S3 | $0 (governança) |
-| 2 | Lifecycle policies | $0-5 |
-| 3 | Dimensionamento RDS | TBD |
-
-## Próximos Passos
-1. Habilitar versionamento S3 (esta semana)
-2. Implementar lifecycle policies (2 semanas)
-3. Revisar utilização RDS (este mês)
-```
-
-### Exemplo de Resposta (CTO)
-
-```markdown
-# Relatório Técnico FinOps
-
-## Distribuição de Recursos
-| Categoria | Custo/Mês | % Total |
-|-----------|-----------|---------|
-| Database | $0.14 | 95% |
-| Storage | $0.004 | 3% |
-
-## Roadmap de Modernização
-**Fase 1 (0-30d)**: Lifecycle policies S3
-**Fase 2 (30-90d)**: Avaliar Aurora Serverless
-**Fase 3 (90-180d)**: FinOps as Code
-```
-
-### Exemplo de Resposta (DEVOPS)
-
-```markdown
-# Relatório Operacional
-
-## Ações Imediatas
-
-### 1. Habilitar Versionamento S3
-```bash
-aws s3api put-bucket-versioning \
-  --bucket meu-bucket \
-  --versioning-configuration Status=Enabled
-```
-
-### 2. Criar Lifecycle Policy
-```bash
-cat > lifecycle.json << 'EOF'
-{
-  "Rules": [{"ID": "TransitionToIA", "Status": "Enabled", ...}]
-}
-EOF
-
-aws s3api put-bucket-lifecycle-configuration \
-  --bucket meu-bucket \
-  --lifecycle-configuration file://lifecycle.json
-```
-
-### Exemplo de Resposta (ANALYST)
-
-```markdown
-# Relatório Analítico FinOps
-
-## Dashboard de Métricas
-| KPI | Valor | Meta | Status |
-|-----|-------|------|--------|
-| Custo Total | $0.15 | $10 | 🟢 |
-| Cobertura RI/SP | 0% | 70% | 🔴 |
-| Waste Ratio | 0% | <5% | 🟢 |
-
-## Análise por Serviço
-| Serviço | Custo | % Total | Tendência |
-|---------|-------|---------|-----------|
-| RDS | $0.14 | 95% | ➡️ Estável |
-| S3 | $0.004 | 3% | ➡️ Estável |
-```
 
 ## Quality Metrics (Verified)
 
@@ -176,14 +98,16 @@ aws s3api put-bucket-lifecycle-configuration \
 | **Total Tests** | 2,204 | 100% passing |
 | **AWS Services Suportados** | 246 | 60% boto3 coverage |
 | **Verificações de Otimização** | 23 | Serviços com regras específicas |
-| **Design Patterns** | 5 | Strategy, Factory, Template, Registry, Facade |
+| **Design Patterns** | 6 | Strategy, Factory, Template, Registry, Facade, Singleton |
 | **Exception Types** | 15 | Hierarquia tipada |
+| **AI Providers** | 4 | Amazon Q, OpenAI, Gemini, Perplexity |
 
 ## Key Documentation Files
 
 | File | Description |
 |------|-------------|
 | `docs/TECHNICAL_GUIDE.md` | Guia técnico completo |
+| `docs/AI_PROVIDERS_GUIDE.md` | Guia de provedores de IA |
 | `docs/PROMPTS_AMAZON_Q.md` | Prompts detalhados do Amazon Q |
 | `docs/USER_MANUAL.md` | Manual do usuário |
 | `docs/HEAD_FIRST_FINOPS.md` | Guia executivo FinOps |
@@ -199,6 +123,9 @@ aws s3api put-bucket-lifecycle-configuration \
 | **AWS Cost Explorer** | RI e Savings Plans | Dados de uso |
 | **AWS Trusted Advisor** | Verificações de custo | Business/Enterprise |
 | **Amazon Q Business** | Análise com IA | Q_BUSINESS_APPLICATION_ID |
+| **OpenAI ChatGPT** | Análise com IA | OPENAI_API_KEY |
+| **Google Gemini** | Análise com IA | GEMINI_API_KEY |
+| **Perplexity AI** | Análise com IA + busca | PERPLEXITY_API_KEY |
 
 ## Verificações de Otimização (23 serviços)
 
@@ -224,9 +151,44 @@ AWS_REGION=us-east-1
 
 # Amazon Q Business (opcional)
 Q_BUSINESS_APPLICATION_ID=seu-app-id
+
+# OpenAI ChatGPT (opcional)
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o  # opcional, default: gpt-4o
+
+# Google Gemini (opcional)
+GEMINI_API_KEY=AIza...
+GEMINI_MODEL=gemini-2.5-flash  # opcional
+
+# Perplexity AI (opcional)
+PERPLEXITY_API_KEY=pplx-...
+PERPLEXITY_MODEL=llama-3.1-sonar-large-128k-online  # opcional
+```
+
+## AI Providers Directory Structure
+
+```
+src/finops_aws/ai_consultant/
+├── providers/
+│   ├── __init__.py          # Exports públicos
+│   ├── base_provider.py     # BaseAIProvider (ABC)
+│   ├── provider_factory.py  # AIProviderFactory + Registry
+│   ├── amazon_q_provider.py # Amazon Q Business
+│   ├── openai_provider.py   # OpenAI ChatGPT
+│   ├── gemini_provider.py   # Google Gemini
+│   └── perplexity_provider.py # Perplexity AI
+└── ...
 ```
 
 ## Recent Changes (December 2024)
+
+- **Suporte Multi-IA (Dec 5)**:
+  - Implementado Strategy Pattern para AI providers
+  - Adicionado OpenAI ChatGPT (GPT-4o)
+  - Adicionado Google Gemini (2.5)
+  - Adicionado Perplexity AI (com busca online)
+  - Factory + Registry para seleção dinâmica
+  - Documentação AI_PROVIDERS_GUIDE.md
 
 - **Documentação Atualizada (Dec 5)**:
   - TECHNICAL_GUIDE.md com arquitetura completa

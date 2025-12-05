@@ -235,7 +235,8 @@ def get_ai_insights(
     Returns:
         Lista de insights gerados pela IA
     """
-    from ..ai_consultant.providers import AIProviderFactory, PersonaType
+    from ..ai_consultant.providers import AIProviderFactory
+    from ..ai_consultant.providers.base_provider import PersonaType
     
     insights = []
     
