@@ -2,7 +2,14 @@
 Main Analysis Module for FinOps Dashboard
 
 Módulo principal de análise que consolida todas as fontes de dados.
-NOTA: Este módulo não deve importar de app.py para evitar dependência circular.
+
+Design Patterns:
+- Facade: Simplifica acesso à análise complexa
+- Strategy: Usa analyzers modulares
+
+SOLID:
+- SRP: Coordena análise, não implementa
+- OCP: Extensível via novos analyzers
 """
 
 import os
@@ -21,6 +28,50 @@ from .integrations import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def get_analyzers_analysis(region: str) -> tuple[List[Dict], Dict[str, Any]]:
+    """
+    Executa análise usando os analyzers modulares (Strategy Pattern).
+    
+    Usa AnalyzerFactory para criar e executar todos os analyzers:
+    - ComputeAnalyzer
+    - StorageAnalyzer
+    - DatabaseAnalyzer
+    - NetworkAnalyzer
+    - SecurityAnalyzer
+    - AnalyticsAnalyzer
+    
+    Args:
+        region: Região AWS para análise
+        
+    Returns:
+        Tuple (recommendations, resources)
+    """
+    try:
+        from ..analyzers import AnalyzerFactory
+        
+        factory = AnalyzerFactory()
+        result = factory.analyze_all(region)
+        
+        recommendations = [rec.to_dict() for rec in result.recommendations]
+        resources = result.resources
+        resources['_services_analyzed_list'] = result.services_analyzed
+        resources['_services_analyzed_count'] = len(result.services_analyzed)
+        
+        logger.info(
+            f"Analyzers executados: {len(result.services_analyzed)} serviços, "
+            f"{len(recommendations)} recomendações"
+        )
+        
+        return recommendations, resources
+        
+    except ImportError as e:
+        logger.warning(f"Analyzers não disponíveis: {e}")
+        return [], {}
+    except Exception as e:
+        logger.error(f"Erro nos analyzers: {e}")
+        return [], {}
 
 
 def get_dashboard_analysis(
@@ -48,6 +99,7 @@ def get_dashboard_analysis(
         'resources': {},
         'recommendations': [],
         'integrations': {
+            'analyzers': False,
             'all_services': False,
             'compute_optimizer': False,
             'cost_explorer_ri': False,
@@ -67,6 +119,13 @@ def get_dashboard_analysis(
         result['account_id'] = sts.get_caller_identity()['Account']
     except ClientError:
         pass
+    
+    analyzer_recs, analyzer_resources = get_analyzers_analysis(region)
+    if analyzer_recs:
+        result['recommendations'].extend(_normalize_recommendations(analyzer_recs))
+        result['integrations']['analyzers'] = True
+    if analyzer_resources:
+        result['resources'].update(analyzer_resources)
     
     if all_services_func:
         try:
