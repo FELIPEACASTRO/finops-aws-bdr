@@ -1,18 +1,111 @@
-# FinOps AWS - Guia de Deploy com Terraform
+# FinOps AWS - Guia Ultra-Detalhado de Deploy com Terraform
 
 ## Visão Geral
 
-Este guia descreve como fazer o deploy do **FinOps AWS** na AWS usando Terraform. A infraestrutura inclui:
+Este guia passo a passo explica como fazer o deploy do **FinOps AWS** na sua conta AWS usando Terraform. Não importa seu nível técnico - cada etapa está explicada em detalhes com analogias do dia a dia.
 
-- **Step Functions** - Orquestração do fluxo de execução
-- **AWS Lambda** - Funções de análise (Mapper, Worker, Aggregator)
-- **EventBridge** - Agendamento de execuções automáticas
-- **S3** - Estado e relatórios (substituindo DynamoDB)
-- **SQS DLQ** - Dead Letter Queue para erros
-- **CloudWatch** - Logs, métricas e dashboard
-- **SNS** - Alertas e notificações
-- **KMS** - Criptografia de dados sensíveis
-- **IAM** - Permissões mínimas necessárias
+---
+
+## O Que é Terraform?
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    O QUE É TERRAFORM?                                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  ANALOGIA: Pense no Terraform como uma "receita de bolo" para infraestrutura║
+║                                                                              ║
+║  SEM TERRAFORM (Manual):                                                     ║
+║  ─────────────────────────────────────────────────────────────────────────   ║
+║  1. Abra o Console AWS                                                       ║
+║  2. Clique em Lambda > Create Function                                       ║
+║  3. Preencha 15 campos                                                       ║
+║  4. Crie uma Role IAM                                                        ║
+║  5. Preencha mais 20 campos                                                  ║
+║  6. Repita para Step Functions                                               ║
+║  7. Repita para S3                                                           ║
+║  8. Configure EventBridge                                                    ║
+║  9. ... 2 horas depois ...                                                   ║
+║                                                                              ║
+║  COM TERRAFORM:                                                              ║
+║  ─────────────────────────────────────────────────────────────────────────   ║
+║  1. terraform init                                                           ║
+║  2. terraform apply                                                          ║
+║  3. PRONTO! Tudo criado em 15 minutos                                        ║
+║                                                                              ║
+║  BENEFÍCIOS:                                                                 ║
+║  ✅ Reproduzível - mesma infraestrutura toda vez                             ║
+║  ✅ Versionável - histórico no Git                                           ║
+║  ✅ Revisável - code review antes de aplicar                                 ║
+║  ✅ Documentado - código É a documentação                                    ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## O Que Será Criado
+
+O Terraform vai criar automaticamente:
+
+| Recurso | Quantidade | Para Que Serve |
+|---------|------------|----------------|
+| **Lambda Functions** | 4 | Processamento (Mapper, Worker, Aggregator, Handler) |
+| **Step Functions** | 1 | Orquestração do fluxo de análise |
+| **S3 Bucket** | 1 | Armazenamento de estado e relatórios |
+| **EventBridge Rules** | 5 | Agendamento (5 execuções/dia) |
+| **SQS Queue** | 1 | Dead Letter Queue para erros |
+| **SNS Topic** | 1 | Alertas e notificações |
+| **IAM Roles** | 4 | Permissões mínimas para cada componente |
+| **KMS Key** | 1 | Criptografia de dados sensíveis |
+| **CloudWatch** | 5 | Log Groups e métricas |
+
+### Diagrama da Arquitetura
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ARQUITETURA CRIADA PELO TERRAFORM                         ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  ┌─────────────────┐                                                         ║
+║  │  EventBridge    │  ← Dispara 5x por dia (6h, 10h, 14h, 18h, 22h)         ║
+║  │  (Agendador)    │                                                         ║
+║  └────────┬────────┘                                                         ║
+║           │                                                                  ║
+║           ▼                                                                  ║
+║  ┌─────────────────┐                                                         ║
+║  │ Step Functions  │  ← Orquestra todo o fluxo                               ║
+║  │ (State Machine) │                                                         ║
+║  └────────┬────────┘                                                         ║
+║           │                                                                  ║
+║     ┌─────┴─────┐                                                            ║
+║     ▼           ▼                                                            ║
+║  ┌─────────┐ ┌─────────┐                                                     ║
+║  │ Lambda  │ │ Lambda  │  ← Workers paralelos analisam serviços              ║
+║  │ Worker 1│ │ Worker N│                                                     ║
+║  └────┬────┘ └────┬────┘                                                     ║
+║       │           │                                                          ║
+║       └─────┬─────┘                                                          ║
+║             │                                                                ║
+║             ▼                                                                ║
+║  ┌─────────────────┐     ┌─────────┐                                         ║
+║  │ Lambda          │────▶│   S3    │  ← Armazena relatórios                  ║
+║  │ Aggregator      │     │ (State) │                                         ║
+║  └────────┬────────┘     └─────────┘                                         ║
+║           │                                                                  ║
+║           ▼                                                                  ║
+║  ┌─────────────────┐                                                         ║
+║  │      SNS        │  ← Envia alertas por email/Slack                        ║
+║  │   (Alertas)     │                                                         ║
+║  └─────────────────┘                                                         ║
+║                                                                              ║
+║  ┌─────────────────┐                                                         ║
+║  │     SQS DLQ     │  ← Captura erros para análise                           ║
+║  │ (Dead Letter)   │                                                         ║
+║  └─────────────────┘                                                         ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
 
 ---
 
@@ -21,41 +114,104 @@ Este guia descreve como fazer o deploy do **FinOps AWS** na AWS usando Terraform
 ### 1. Ferramentas Necessárias
 
 ```bash
-# Terraform >= 1.5.0
+# 1. Terraform >= 1.5.0
 terraform --version
+# Esperado: Terraform v1.5.x ou superior
 
-# AWS CLI configurado
+# 2. AWS CLI configurado
 aws --version
-aws sts get-caller-identity
+# Esperado: aws-cli/2.x.x
 
-# Python 3.11 (para build do layer)
+# Verificar se está autenticado
+aws sts get-caller-identity
+# Esperado: Retorna seu Account ID, ARN, etc.
+
+# 3. Python 3.11 (para build do layer)
 python3 --version
+# Esperado: Python 3.11.x
 ```
 
-### 2. Permissões AWS
+### 2. Como Instalar as Ferramentas
 
-O usuário/role que executar o Terraform precisa das seguintes permissões:
+#### Instalando Terraform
 
-- `iam:*` - Para criar roles e policies
-- `lambda:*` - Para criar a função Lambda
-- `s3:*` - Para criar buckets
-- `states:*` - Para criar Step Functions
-- `events:*` - Para criar regras EventBridge
-- `logs:*` - Para criar log groups
-- `kms:*` - Para criar chaves KMS
-- `sns:*` - Para criar tópicos SNS
+```bash
+# macOS (Homebrew)
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
 
-### 3. Backend S3 (Opcional mas Recomendado)
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
 
-Crie o bucket para o state do Terraform:
+# Windows
+# Baixe de https://developer.hashicorp.com/terraform/downloads
+# Ou use chocolatey: choco install terraform
+```
+
+#### Instalando AWS CLI
+
+```bash
+# macOS
+brew install awscli
+
+# Ubuntu/Debian
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Windows
+# Baixe de https://aws.amazon.com/cli/
+```
+
+### 3. Permissões AWS Necessárias
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    PERMISSÕES NECESSÁRIAS PARA DEPLOY                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  O usuário que executa o Terraform precisa criar recursos.                   ║
+║  Recomendamos usar AdministratorAccess para o deploy inicial.                ║
+║                                                                              ║
+║  PERMISSÕES MÍNIMAS (se não puder usar AdministratorAccess):                 ║
+║                                                                              ║
+║  • iam:* (criar roles e policies)                                            ║
+║  • lambda:* (criar funções Lambda)                                           ║
+║  • s3:* (criar buckets)                                                      ║
+║  • states:* (criar Step Functions)                                           ║
+║  • events:* (criar EventBridge rules)                                        ║
+║  • logs:* (criar log groups)                                                 ║
+║  • kms:* (criar chaves KMS)                                                  ║
+║  • sns:* (criar tópicos SNS)                                                 ║
+║  • sqs:* (criar filas SQS)                                                   ║
+║                                                                              ║
+║  IMPORTANTE: Estas são permissões para CRIAR a infraestrutura.               ║
+║  O FinOps AWS em execução usa apenas permissões ReadOnly!                    ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## Passo a Passo do Deploy
+
+### Passo 1: Preparar Backend S3 (Opcional, Recomendado)
+
+O backend S3 armazena o estado do Terraform. Isso permite:
+- Trabalho em equipe (múltiplas pessoas usando o mesmo state)
+- Histórico de mudanças (versionamento)
+- Lock para evitar conflitos (DynamoDB)
 
 ```bash
 # Criar bucket para state
-aws s3 mb s3://finops-aws-terraform-state --region us-east-1
+aws s3 mb s3://finops-aws-terraform-state-SEU-ACCOUNT-ID --region us-east-1
 
 # Habilitar versionamento
 aws s3api put-bucket-versioning \
-  --bucket finops-aws-terraform-state \
+  --bucket finops-aws-terraform-state-SEU-ACCOUNT-ID \
   --versioning-configuration Status=Enabled
 
 # Criar tabela DynamoDB para lock
@@ -67,222 +223,254 @@ aws dynamodb create-table \
   --region us-east-1
 ```
 
----
-
-## Configuração
-
-### 1. Copiar Arquivo de Variáveis
+### Passo 2: Configurar Variáveis
 
 ```bash
+# Entre na pasta do Terraform
 cd infrastructure/terraform
+
+# Copie o arquivo de exemplo
 cp terraform.tfvars.example terraform.tfvars
+
+# Edite as variáveis
+nano terraform.tfvars  # ou use seu editor preferido
 ```
 
-### 2. Editar Configurações
-
-Abra `terraform.tfvars` e ajuste:
+**Conteúdo do terraform.tfvars:**
 
 ```hcl
-# Seu ambiente
+# ============================================
+# CONFIGURAÇÕES OBRIGATÓRIAS
+# ============================================
+
+# Nome do ambiente (dev, staging, prod)
 environment = "prod"
-aws_region  = "us-east-1"
-owner       = "seu-time"
-alert_email = "seu-email@empresa.com"
 
-# Agendamento (5 execuções por dia - UTC)
+# Região AWS principal
+aws_region = "us-east-1"
+
+# Email para receber alertas de economia
+alert_email = "finops@suaempresa.com"
+
+# ============================================
+# CONFIGURAÇÕES OPCIONAIS
+# ============================================
+
+# Horários de execução (cron expressions)
+# Padrão: 5 execuções por dia
 schedule_expressions = [
-  "cron(0 6 * * ? *)",   # 06:00 UTC = 03:00 BRT
-  "cron(0 9 * * ? *)",   # 09:00 UTC = 06:00 BRT
-  "cron(0 12 * * ? *)",  # 12:00 UTC = 09:00 BRT
-  "cron(0 15 * * ? *)",  # 15:00 UTC = 12:00 BRT
-  "cron(0 18 * * ? *)"   # 18:00 UTC = 15:00 BRT
+  "cron(0 6 * * ? *)",   # 6h da manhã
+  "cron(0 10 * * ? *)",  # 10h da manhã
+  "cron(0 14 * * ? *)",  # 2h da tarde
+  "cron(0 18 * * ? *)",  # 6h da tarde
+  "cron(0 22 * * ? *)"   # 10h da noite
 ]
 
-# Regiões para análise
-target_regions = [
-  "us-east-1",
-  "us-east-2",
-  "sa-east-1"
-]
+# Tags para identificação e governança
+tags = {
+  Project     = "FinOps"
+  Environment = "Production"
+  Owner       = "CloudTeam"
+  CostCenter  = "12345"
+}
+
+# ============================================
+# CONFIGURAÇÕES AVANÇADAS (raramente alteradas)
+# ============================================
+
+# Memória das Lambda Functions
+lambda_memory_mapper     = 256
+lambda_memory_worker     = 512
+lambda_memory_aggregator = 1024
+
+# Timeout das Lambda Functions (segundos)
+lambda_timeout_mapper     = 30
+lambda_timeout_worker     = 300
+lambda_timeout_aggregator = 600
+
+# Retenção de logs (dias)
+log_retention_days = 30
 ```
 
----
-
-## Deploy
-
-### 1. Inicializar Terraform
+### Passo 3: Inicializar Terraform
 
 ```bash
-cd infrastructure/terraform
-
-# Inicializar providers e backend
 terraform init
 ```
 
-### 2. Planejar Mudanças
+**Saída esperada:**
 
-```bash
-# Ver o que será criado
-terraform plan -out=tfplan
+```
+Initializing the backend...
 
-# Revisar o plano detalhadamente
-terraform show tfplan
+Initializing provider plugins...
+- Finding hashicorp/aws versions matching ">= 4.0.0"...
+- Installing hashicorp/aws v5.31.0...
+- Installed hashicorp/aws v5.31.0 (signed by HashiCorp)
+
+Terraform has created a lock file .terraform.lock.hcl to record the provider
+selections it made above. Include this file in your version control repository
+so that Terraform can guarantee to make the same selections by default when
+you run "terraform init" in the future.
+
+Terraform has been successfully initialized!
 ```
 
-### 3. Aplicar
+### Passo 4: Revisar o Plano
 
 ```bash
-# Aplicar as mudanças
-terraform apply tfplan
+terraform plan
+```
 
-# Ou aplicar diretamente (com confirmação)
+Este comando mostra TUDO que será criado. Revise com atenção!
+
+**Saída esperada (resumida):**
+
+```
+Terraform will perform the following actions:
+
+  # aws_lambda_function.finops_mapper will be created
+  + resource "aws_lambda_function" "finops_mapper" {
+      + function_name = "finops-aws-mapper-prod"
+      + memory_size   = 256
+      + timeout       = 30
+      ...
+    }
+
+  # aws_lambda_function.finops_worker will be created
+  ...
+
+  # aws_sfn_state_machine.finops will be created
+  ...
+
+  # aws_s3_bucket.finops_state will be created
+  ...
+
+Plan: 25 to add, 0 to change, 0 to destroy.
+```
+
+### Passo 5: Aplicar o Deploy
+
+```bash
 terraform apply
 ```
 
-### 4. Verificar Deploy
+Digite `yes` quando solicitado:
+
+```
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+```
+
+**Tempo estimado:** 5-10 minutos
+
+**Saída esperada ao final:**
+
+```
+Apply complete! Resources: 25 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+lambda_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:finops-aws-handler-prod"
+state_machine_arn = "arn:aws:states:us-east-1:123456789012:stateMachine:finops-aws-prod"
+s3_bucket_name = "finops-aws-state-prod-123456789012"
+```
+
+### Passo 6: Verificar o Deploy
 
 ```bash
-# Ver outputs
-terraform output
+# Verificar Lambda Functions
+aws lambda list-functions --query 'Functions[?contains(FunctionName, `finops`)].[FunctionName,Runtime,MemorySize]' --output table
 
-# Testar a função
-aws lambda invoke \
-  --function-name finops-aws-prod \
-  --payload '{"analysis_type": "full"}' \
-  response.json
+# Verificar Step Functions
+aws stepfunctions list-state-machines --query 'stateMachines[?contains(name, `finops`)].[name,status]' --output table
 
-# Ver resultado
-cat response.json | jq
+# Verificar S3 Bucket
+aws s3 ls | grep finops
+
+# Verificar EventBridge Rules
+aws events list-rules --query 'Rules[?contains(Name, `finops`)].[Name,State]' --output table
 ```
 
 ---
 
-## Estrutura de Arquivos
+## Executando Manualmente
 
-```
-infrastructure/terraform/
-├── main.tf              # Provider e configurações principais
-├── variables.tf         # Definição de variáveis
-├── versions.tf          # Constraints de versão
-├── iam.tf               # Roles e policies IAM
-├── lambda.tf            # Função Lambda e layer
-├── eventbridge.tf       # Agendamentos
-├── storage.tf           # S3 Bucket (estado e relatórios)
-├── security.tf          # KMS e SNS
-├── outputs.tf           # Outputs do deploy
-├── terraform.tfvars.example  # Exemplo de configuração
-└── README_TERRAFORM.md  # Este arquivo
-```
+Após o deploy, você pode testar executando manualmente:
 
----
+```bash
+# Disparar execução manual da Step Function
+aws stepfunctions start-execution \
+  --state-machine-arn "arn:aws:states:us-east-1:123456789012:stateMachine:finops-aws-prod" \
+  --input '{"source": "manual-test"}'
 
-## Configurações Importantes
-
-### Agendamento (EventBridge)
-
-O sistema suporta até 5 execuções por dia conforme seu requisito:
-
-```hcl
-schedule_expressions = [
-  "cron(0 6 * * ? *)",   # Execução 1
-  "cron(0 9 * * ? *)",   # Execução 2
-  "cron(0 12 * * ? *)",  # Execução 3
-  "cron(0 15 * * ? *)",  # Execução 4
-  "cron(0 18 * * ? *)"   # Execução 5
-]
-```
-
-**Nota:** Horários em UTC. Para converter para horário de Brasília (BRT), subtraia 3 horas.
-
-### Multi-Account (Opcional)
-
-Para analisar múltiplas contas AWS:
-
-```hcl
-enable_multi_account   = true
-organization_role_name = "FinOpsReadOnlyRole"
-target_account_ids = [
-  "111111111111",
-  "222222222222"
-]
-```
-
-**Requisito:** Criar a role `FinOpsReadOnlyRole` em cada conta-alvo com trust policy para a conta principal.
-
-### Segurança
-
-```hcl
-# Criptografia KMS (recomendado para produção)
-enable_kms_encryption = true
-
-# X-Ray tracing para debugging
-enable_xray_tracing = true
-
-# Alertas por email
-enable_alerts = true
-alert_email   = "finops@empresa.com"
+# Verificar execução
+aws stepfunctions list-executions \
+  --state-machine-arn "arn:aws:states:us-east-1:123456789012:stateMachine:finops-aws-prod" \
+  --query 'executions[0].[executionArn,status,startDate]' \
+  --output table
 ```
 
 ---
 
 ## Custos Estimados
 
-Para 5 execuções diárias com configuração padrão:
-
-| Serviço | Custo Mensal Estimado |
-|---------|----------------------|
-| Step Functions (100 exec/dia) | ~$1.50 |
-| Lambda (Mapper, Worker, Aggregator) | ~$0.35 |
-| S3 (estado + relatórios) | ~$0.05 |
-| CloudWatch Logs/Dashboard | ~$1.00 |
-| SQS DLQ | ~$0.01 |
-| EventBridge | ~$0.00 |
-| **Total** | **~$3.16/mês** (100 exec/dia) |
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    CUSTOS ESTIMADOS MENSAIS                                  ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  CENÁRIO: 5 execuções por dia, 100 serviços analisados por execução          ║
+║                                                                              ║
+║  RECURSO                    │ UNIDADES          │ CUSTO/MÊS                  ║
+║  ─────────────────────────────────────────────────────────────────────────   ║
+║  Lambda (execuções)         │ 150/dia × 30      │ ~$0.50                     ║
+║  Lambda (memória/tempo)     │ 512MB × 5min      │ ~$1.00                     ║
+║  Step Functions             │ 150 transições/dia│ ~$0.20                     ║
+║  S3 (armazenamento)         │ ~1GB              │ ~$0.02                     ║
+║  S3 (requests)              │ ~1000/dia         │ ~$0.05                     ║
+║  CloudWatch Logs            │ ~500MB            │ ~$0.25                     ║
+║  EventBridge                │ 5 regras          │ ~$0.00                     ║
+║  ─────────────────────────────────────────────────────────────────────────   ║
+║  TOTAL ESTIMADO             │                   │ ~$2-3/mês                  ║
+║                                                                              ║
+║  ⚠️  NOTA: Economia identificada típica é $5.000-50.000/mês                 ║
+║      ROI: Custo de $3 para economizar $10.000+ = 333.000% ROI               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
 
 ---
 
-## Comandos Úteis
+## Atualizando a Infraestrutura
 
-### Invocar Lambda Manualmente
-
-```bash
-# Análise completa
-aws lambda invoke \
-  --function-name finops-aws-prod \
-  --payload '{"analysis_type": "full"}' \
-  response.json
-
-# Apenas custos
-aws lambda invoke \
-  --function-name finops-aws-prod \
-  --payload '{"analysis_type": "costs_only"}' \
-  response.json
-
-# Apenas recomendações
-aws lambda invoke \
-  --function-name finops-aws-prod \
-  --payload '{"analysis_type": "recommendations_only"}' \
-  response.json
-```
-
-### Ver Logs
+Para atualizar após mudanças no código:
 
 ```bash
-# Últimos logs
-aws logs tail /aws/lambda/finops-aws-prod --follow
+# Atualizar código Python (rebuild layer)
+cd ../../
+zip -r lambda-layer.zip src/
 
-# Buscar erros
-aws logs filter-log-events \
-  --log-group-name /aws/lambda/finops-aws-prod \
-  --filter-pattern "ERROR"
+# Voltar e aplicar
+cd infrastructure/terraform
+terraform apply
 ```
 
-### Atualizar Código
+---
+
+## Destruindo a Infraestrutura
+
+Para remover tudo criado pelo Terraform:
 
 ```bash
-# Após modificar o código Python
-terraform apply -target=data.archive_file.function -target=aws_lambda_function.main
+# ATENÇÃO: Isso remove TUDO!
+terraform destroy
 ```
+
+**Importante:** Isso é irreversível. Todos os relatórios armazenados no S3 serão perdidos.
 
 ---
 
@@ -290,68 +478,100 @@ terraform apply -target=data.archive_file.function -target=aws_lambda_function.m
 
 ### Erro: "Access Denied"
 
-Verifique se o usuário tem permissões suficientes:
-
-```bash
-aws sts get-caller-identity
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ERRO: Access Denied                                                         ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  CAUSA: Usuário não tem permissões necessárias                               ║
+║                                                                              ║
+║  SOLUÇÃO:                                                                    ║
+║  1. Verifique se está usando o usuário correto:                              ║
+║     aws sts get-caller-identity                                              ║
+║                                                                              ║
+║  2. Adicione permissões necessárias ao usuário                               ║
+║     (veja seção de Permissões acima)                                         ║
+║                                                                              ║
+║  3. Se usa MFA, certifique-se de ter sessão válida                           ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
-### Erro: "Timeout"
+### Erro: "Bucket already exists"
 
-Aumente o timeout do Lambda:
-
-```hcl
-lambda_timeout = 600  # 10 minutos
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ERRO: Bucket already exists                                                 ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  CAUSA: Nome de bucket S3 já está em uso (globalmente único)                 ║
+║                                                                              ║
+║  SOLUÇÃO:                                                                    ║
+║  1. Edite terraform.tfvars                                                   ║
+║  2. Mude o prefixo do bucket:                                                ║
+║     bucket_prefix = "finops-aws-minha-empresa"                               ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
-### Erro: "Memory Limit"
+### Erro: "Lambda timeout"
 
-Aumente a memória:
-
-```hcl
-lambda_memory_size = 1024  # 1GB
 ```
-
-### Erro: "Rate Exceeded"
-
-Adicione mais tempo entre execuções ou reduza o número de regiões:
-
-```hcl
-target_regions = ["us-east-1", "sa-east-1"]
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  ERRO: Task timed out                                                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  CAUSA: Lambda demorou mais que o timeout configurado                        ║
+║                                                                              ║
+║  SOLUÇÃO:                                                                    ║
+║  1. Aumente o timeout em terraform.tfvars:                                   ║
+║     lambda_timeout_worker = 600  # 10 minutos                                ║
+║                                                                              ║
+║  2. Aplique a mudança:                                                       ║
+║     terraform apply                                                          ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## Destruir Infraestrutura
+## Estrutura dos Arquivos Terraform
 
-```bash
-# CUIDADO: Remove todos os recursos
-terraform destroy
-
-# Destruir com confirmação automática
-terraform destroy -auto-approve
+```
+infrastructure/terraform/
+├── main.tf              # Recursos principais (Lambda, Step Functions)
+├── variables.tf         # Definição de variáveis
+├── outputs.tf           # Saídas do deploy (ARNs, URLs)
+├── providers.tf         # Configuração do provider AWS
+├── backend.tf           # Configuração do backend S3
+├── iam.tf               # Roles e policies IAM
+├── s3.tf                # Bucket S3
+├── eventbridge.tf       # Regras de agendamento
+├── cloudwatch.tf        # Log groups e métricas
+├── kms.tf               # Chaves de criptografia
+├── sns.tf               # Tópicos de alertas
+├── sqs.tf               # Dead letter queue
+├── terraform.tfvars     # SUAS configurações (não commitar!)
+└── terraform.tfvars.example  # Exemplo de configurações
 ```
 
-**Nota:** O bucket S3 não será destruído em produção devido ao `force_destroy = false`.
+---
+
+## Conclusão
+
+Após seguir este guia, você terá:
+
+1. ✅ Infraestrutura completa do FinOps AWS na sua conta
+2. ✅ 5 execuções automáticas por dia
+3. ✅ Alertas configurados por email
+4. ✅ Relatórios salvos no S3
+5. ✅ Logs completos no CloudWatch
+
+**Próximos passos:**
+1. Verifique os primeiros relatórios após 24h
+2. Configure alertas adicionais (Slack, etc.)
+3. Ajuste thresholds de economia conforme sua realidade
 
 ---
 
-## Suporte
-
-Para dúvidas ou problemas:
-
-1. Verifique os logs no CloudWatch
-2. Consulte a documentação em `docs/`
-3. Revise as configurações em `terraform.tfvars`
-
----
-
-## Próximos Passos
-
-Após o deploy:
-
-1. ✅ Confirme que a função foi criada: `terraform output lambda_function_name`
-2. ✅ Verifique o agendamento no EventBridge Console
-3. ✅ Configure alertas de email (confirme a subscription no SNS)
-4. ✅ Execute manualmente para testar
-5. ✅ Revise os relatórios no bucket S3
+**FinOps AWS v2.1** | Guia Terraform atualizado em Dezembro 2024
