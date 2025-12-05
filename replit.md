@@ -92,21 +92,31 @@ O dashboard agora integra com múltiplos serviços AWS para gerar recomendaçõe
 | **AWS Trusted Advisor** | Verificações de custo e segurança | Business/Enterprise Support |
 | **Amazon Q Business** | Análise inteligente com IA | `Q_BUSINESS_APPLICATION_ID` configurado |
 
-### Serviços AWS Analisados (40+ serviços)
+### Serviços AWS Analisados (200+ serviços)
 
 | Categoria | Serviços |
 |-----------|----------|
-| **Compute** | EC2, Lambda, ECS, EKS, Elastic Beanstalk |
-| **Storage** | S3, EBS, EFS, Glacier |
-| **Database** | RDS, DynamoDB, ElastiCache, Redshift, DocumentDB, Neptune |
-| **Networking** | VPC, ELB/ALB, CloudFront, Route53, NAT Gateway, EIP |
-| **Analytics** | EMR, Kinesis, Glue, Athena, OpenSearch |
-| **ML/AI** | SageMaker (notebooks, endpoints) |
-| **Integration** | SNS, SQS, EventBridge, Step Functions, API Gateway, AppSync |
-| **Security** | IAM, KMS, Secrets Manager, ACM, WAF |
-| **DevOps** | CodeBuild, CodePipeline, ECR |
-| **Messaging** | Amazon MQ, MSK (Kafka) |
-| **Other** | CloudWatch Logs, Backup, Transfer Family |
+| **Compute** | EC2, Lambda, ECS, EKS, Elastic Beanstalk, Batch, Lightsail, App Runner, Outposts |
+| **Storage** | S3, EBS, EFS, FSx, Storage Gateway, Snow Family, Backup, Data Lifecycle Manager |
+| **Database** | RDS, DynamoDB, ElastiCache, MemoryDB, Redshift, DocumentDB, Neptune, Keyspaces, QLDB, Timestream |
+| **Networking** | VPC, ELB/ALB/NLB, CloudFront, Route53, API Gateway, Global Accelerator, Direct Connect, App Mesh, Cloud Map, PrivateLink, Network Firewall |
+| **Analytics** | EMR, Kinesis, Glue, Athena, OpenSearch, QuickSight, Data Pipeline, Lake Formation, MSK, CloudSearch |
+| **ML/AI** | SageMaker, Bedrock, Comprehend, Rekognition, Textract, Translate, Polly, Transcribe, Lex, Personalize, Forecast, Kendra, Fraud Detector, Lookout |
+| **Integration** | SNS, SQS, EventBridge, Step Functions, MQ, AppSync, AppFlow |
+| **Security** | IAM, Cognito, SSO, Directory Service, KMS, Secrets Manager, ACM, WAF, Shield, Firewall Manager, GuardDuty, Inspector, Macie, Detective, Security Hub, Audit Manager, RAM |
+| **DevOps** | CodeCommit, CodeBuild, CodeDeploy, CodePipeline, CodeArtifact, CodeStar, ECR, Amplify, Cloud9, X-Ray |
+| **Management** | CloudWatch, CloudTrail, Config, Systems Manager, Organizations, Control Tower, Service Catalog, License Manager, Trusted Advisor, Health Dashboard, Budgets |
+| **Media** | MediaConvert, MediaLive, MediaPackage, MediaStore, MediaTailor, Elastic Transcoder, IVS |
+| **IoT** | IoT Core, IoT Analytics, IoT Events, IoT Greengrass, IoT SiteWise, IoT TwinMaker, IoT FleetWise |
+| **Mobile** | Pinpoint, Device Farm, Location Service |
+| **End User** | WorkSpaces, AppStream, WorkDocs, WorkMail |
+| **Game** | GameLift |
+| **Blockchain** | Managed Blockchain |
+| **Robotics** | RoboMaker |
+| **Satellite** | Ground Station |
+| **Quantum** | Braket |
+| **Migration** | Migration Hub, DMS, SMS, Transfer Family, DataSync, MGN |
+| **Other** | Connect, SES, Chime, Proton, AppConfig, CloudFormation, OpsWorks, and 30+ more |
 
 ### Verificações de Otimização
 
