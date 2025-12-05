@@ -310,28 +310,28 @@ Comandos copy-paste ready para cada otimização.
 
 ### 1. Habilitar Versionamento S3
 
-**Recurso**: elasticbeanstalk-us-east-1-928283252572
+**Recurso**: minha-empresa-app-bucket
 **Problema**: Bucket sem versionamento (risco de perda de dados)
 **Prioridade**: ALTA
 
 \`\`\`bash
 # Verificar status atual
 aws s3api get-bucket-versioning \
-  --bucket elasticbeanstalk-us-east-1-928283252572
+  --bucket minha-empresa-app-bucket
 
 # Habilitar versionamento
 aws s3api put-bucket-versioning \
-  --bucket elasticbeanstalk-us-east-1-928283252572 \
+  --bucket minha-empresa-app-bucket \
   --versioning-configuration Status=Enabled
 
 # Verificar se foi habilitado
 aws s3api get-bucket-versioning \
-  --bucket elasticbeanstalk-us-east-1-928283252572
+  --bucket minha-empresa-app-bucket
 \`\`\`
 
 ### 2. Configurar Lifecycle Policy
 
-**Recurso**: elasticbeanstalk-us-east-1-928283252572
+**Recurso**: minha-empresa-app-bucket
 **Problema**: Sem transição automática para classes econômicas
 **Prioridade**: MÉDIA
 
@@ -356,12 +356,12 @@ EOF
 
 # Aplicar lifecycle
 aws s3api put-bucket-lifecycle-configuration \
-  --bucket elasticbeanstalk-us-east-1-928283252572 \
+  --bucket minha-empresa-app-bucket \
   --lifecycle-configuration file://lifecycle.json
 
 # Verificar configuração
 aws s3api get-bucket-lifecycle-configuration \
-  --bucket elasticbeanstalk-us-east-1-928283252572
+  --bucket minha-empresa-app-bucket
 \`\`\`
 
 ### 3. Criar Alarme de Custo
@@ -378,7 +378,7 @@ aws cloudwatch put-metric-alarm \
   --comparison-operator GreaterThanThreshold \
   --dimensions Name=Currency,Value=USD \
   --evaluation-periods 1 \
-  --alarm-actions arn:aws:sns:us-east-1:928283252572:cost-alerts
+  --alarm-actions arn:aws:sns:us-east-1:123456789012:cost-alerts
 \`\`\`
 
 ## Script de Automação
