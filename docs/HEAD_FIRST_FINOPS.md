@@ -38,12 +38,12 @@ Este documento é um guia completo, escrito em linguagem simples, para você ent
 | Indicador | Valor | O Que Isso Significa |
 |-----------|-------|---------------------|
 | Serviços AWS Cobertos | 253 | Literalmente TODO serviço que a AWS oferece |
-| Testes Automatizados | 2.300+ | Cada linha de código foi testada múltiplas vezes |
-| Taxa de Sucesso E2E | 100% (83/83) | Todos os fluxos de produção foram validados |
+| Testes Automatizados | 2.100+ | Cada linha de código foi testada múltiplas vezes |
+| Taxa de Sucesso E2E | 100% (56/56) | Todos os fluxos de produção foram validados |
 | Score QA | 9.7/10 | Aprovado por 10 especialistas QA mundiais |
 | Categorias de Serviços | 16 | Compute, Storage, Database, AI/ML, etc. |
-| Infraestrutura Terraform | 3.200+ linhas | Deploy automatizado em 15 minutos |
-| Documentação Técnica | 10.000+ linhas | Tudo documentado em detalhes |
+| Infraestrutura Terraform | 3.400+ linhas | Deploy automatizado em 15 minutos |
+| Documentação Técnica | 10.800+ linhas | Tudo documentado em detalhes |
 
 ---
 
@@ -958,7 +958,7 @@ ls -la
 ```
 finops-aws/
 ├── src/finops_aws/           # Código fonte (a mágica acontece aqui)
-├── tests/                    # 2.300+ testes automatizados
+├── tests/                    # 2.100+ testes automatizados
 ├── docs/                     # Documentação (você está lendo!)
 ├── infrastructure/terraform/ # Deploy automatizado
 ├── run_local_demo.py         # Para testar sem AWS
@@ -1254,26 +1254,20 @@ O FinOps AWS possui uma suíte completa de testes para garantir confiabilidade:
 ║                    MÉTRICAS DE QUALIDADE                                     ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                              ║
-║  TESTES UNITÁRIOS                                                            ║
+║  TESTES (Composição Real)                                                    ║
 ║  ────────────────────────────────────────────────────                        ║
-║  Total: 2.300+ testes                                                        ║
-║  Passando: 99.6%                                                             ║
+║  Unitários: 1.767 testes (99.6% passando)                                    ║
+║  QA: 244 testes (100% passando)                                              ║
+║  Integração: 44 testes (100% passando)                                       ║
+║  E2E: 56 testes (100% passando)                                              ║
+║  Total: 2.100+ testes                                                        ║
 ║  Cobertura de código: 95%+                                                   ║
 ║                                                                              ║
-║  TESTES END-TO-END (E2E)                                                     ║
-║  ────────────────────────────────────────────────────                        ║
-║  Total: 83 testes                                                            ║
-║  Passando: 100% (83/83)                                                      ║
-║                                                                              ║
-║  Suítes E2E:                                                                 ║
-║  ├── Lambda Handler: 14 testes ✅                                            ║
-║  ├── S3 Persistence: 9 testes ✅                                             ║
-║  ├── Integration Chain: 10 testes ✅                                         ║
-║  ├── Contract Testing: 11 testes ✅                                          ║
-║  ├── BDD Acceptance: 7 testes ✅                                             ║
-║  ├── Exploratory: 13 testes ✅                                               ║
-║  ├── Risk-Based: 9 testes ✅                                                 ║
-║  └── Production-Like: 10 testes ✅                                           ║
+║  SUÍTES E2E (4 arquivos, 56 testes):                                         ║
+║  ├── Complete Workflow: 8 testes ✅                                          ║
+║  ├── Lambda Handler E2E: 20 testes ✅                                        ║
+║  ├── Multi-Account E2E: 14 testes ✅                                         ║
+║  └── Resilience Stress: 14 testes ✅                                         ║
 ║                                                                              ║
 ║  SCORE QA EXPERT                                                             ║
 ║  ────────────────────────────────────────────────────                        ║

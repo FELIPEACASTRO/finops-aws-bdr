@@ -37,12 +37,12 @@ Uma solução **serverless enterprise-grade** em Python para análise inteligent
 ║  SCORE QA: 9.7/10 ⭐⭐⭐⭐⭐ (avaliado por 10 especialistas QA mundiais)    ║
 ║                                                                              ║
 ║  ┌────────────────────────────────────────────────────────────────────────┐  ║
-║  │ Testes E2E           │ 83/83   │ ████████████████████████████  100%   │  ║
-║  │ Testes Unitários     │ 2.300+  │ ████████████████████████████  99.6%  │  ║
+║  │ Testes E2E           │ 56      │ ████████████████████████████  100%   │  ║
+║  │ Testes Totais        │ 2.100+  │ ████████████████████████████  99.6%  │  ║
 ║  │ Cobertura de Código  │ 95%+    │ ████████████████████████████         │  ║
 ║  │ Serviços AWS         │ 253/253 │ ████████████████████████████  100%   │  ║
-║  │ Terraform LOC        │ 3.200+  │ Deploy automatizado em 15min         │  ║
-║  │ Documentação         │ 10.000+ │ Linhas de docs detalhados            │  ║
+║  │ Terraform LOC        │ 3.400+  │ Deploy automatizado em 15min         │  ║
+║  │ Documentação         │ 10.800+ │ Linhas de docs detalhados            │  ║
 ║  └────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                              ║
 ║  STATUS: ✅ ENTERPRISE-READY (Aprovado para produção)                        ║
@@ -323,10 +323,11 @@ pytest tests/ --cov=src --cov-report=html
 
 | Tipo | Quantidade | Status |
 |------|------------|--------|
-| Unitários | 2.100+ | 99.6% |
-| Integração | 150+ | 100% |
-| E2E | 83 | 100% |
-| **Total** | **2.300+** | **99.6%** |
+| Unitários | 1.767 | 99.6% |
+| QA | 244 | 100% |
+| Integração | 44 | 100% |
+| E2E | 56 | 100% |
+| **Total** | **2.100+** | **99.6%** |
 
 ---
 
@@ -359,6 +360,6 @@ MIT License - Veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-**FinOps AWS v2.1** | Score QA: 9.7/10 | 83/83 Testes E2E | 253 Serviços AWS
+**FinOps AWS v2.1** | Score QA: 9.7/10 | 2.100+ Testes (56 E2E) | 253 Serviços AWS
 
 Atualizado em Dezembro 2024

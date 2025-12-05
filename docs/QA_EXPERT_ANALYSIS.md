@@ -50,8 +50,8 @@
 
 | Métrica | Valor | O Que Significa |
 |---------|-------|-----------------|
-| **Total de Testes** | 2.300+ | Cada função foi testada |
-| **Testes E2E** | 83/83 (100%) | Todos os fluxos de produção validados |
+| **Total de Testes** | 2.100+ | Cada função foi testada |
+| **Testes E2E** | 56/56 (100%) | Todos os fluxos de produção validados |
 | **Arquivos de Código** | 295+ | Modularização adequada |
 | **Linhas de Código** | 65.000+ | Projeto de grande porte |
 | **Serviços AWS** | 253 | 100% do catálogo AWS |
@@ -84,7 +84,7 @@
 ║   PONTOS FORTES:                                                             ║
 ║   ✅ Cobertura de 253 serviços AWS é excepcional                            ║
 ║   ✅ Arquitetura Clean + DDD facilita testes                                ║
-║   ✅ 83 testes E2E cobrem todos os fluxos críticos                          ║
+║   ✅ 56 testes E2E cobrem todos os fluxos críticos                          ║
 ║   ✅ CircuitBreaker e Retry são padrões de produção                         ║
 ║                                                                              ║
 ║   OPORTUNIDADES:                                                             ║
@@ -163,7 +163,7 @@
 ║  "Faço a distinção entre 'checking' (automatizado) e 'testing' (humano):    ║
 ║                                                                              ║
 ║   CHECKING (Automatizado):                                                   ║
-║   ✅ 2.300+ checks automatizados - excelente base                           ║
+║   ✅ 2.100+ checks automatizados - excelente base                           ║
 ║   ✅ Cada serviço AWS tem 5 checks (health, resources, usage, metrics, recs)║
 ║   ✅ CircuitBreaker testado em todos os estados                              ║
 ║                                                                              ║
@@ -397,7 +397,7 @@
 ║   ✅ Mocks evitam dependência de rede                                        ║
 ║                                                                              ║
 ║   ROI DA AUTOMAÇÃO:                                                          ║
-║   • 2.300+ testes × 1 min manual = 38h/execução manual                      ║
+║   • 2.100+ testes × 1 min manual = 35h/execução manual                      ║
 ║   • Automatizado: 5 minutos                                                  ║
 ║   • ROI: 99.8% de economia de tempo                                          ║
 ║                                                                              ║
@@ -479,7 +479,7 @@
 ║   QUALIDADE DO PROCESSO DE TESTE:                                            ║
 ║   ✅ Cobertura adequada (95%+)                                               ║
 ║   ✅ Automação eficiente (5 min para suite completa)                         ║
-║   ✅ Documentação completa (10.000+ linhas)                                  ║
+║   ✅ Documentação completa (10.800+ linhas)                                  ║
 ║   ✅ Rastreabilidade (testes → requisitos)                                   ║
 ║                                                                              ║
 ║   VALOR ENTREGUE:                                                            ║

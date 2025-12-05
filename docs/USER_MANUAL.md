@@ -443,7 +443,7 @@ finops-aws/
 │   ├── models/               # Modelos de domínio
 │   ├── services/             # 253 serviços AWS
 │   └── utils/                # Utilitários
-├── tests/                    # Testes automatizados (2.300+)
+├── tests/                    # Testes automatizados (2.100+)
 ├── docs/                     # Documentação (você está aqui!)
 ├── infrastructure/terraform/ # Deploy automatizado
 ├── run_local_demo.py         # Script para testar localmente
@@ -473,7 +473,7 @@ pip install -r requirements.txt
 | Pacote | Versão | Para Que Serve |
 |--------|--------|----------------|
 | `boto3` | 1.28+ | SDK oficial da AWS para Python. Permite fazer chamadas para a API da AWS |
-| `pytest` | 7.0+ | Framework de testes. Usado para rodar os 2.300+ testes automatizados |
+| `pytest` | 7.0+ | Framework de testes. Usado para rodar os 2.100+ testes automatizados |
 | `moto` | 5.0+ | Simulador de AWS. Permite testar sem uma conta AWS real |
 | `tabulate` | 0.9+ | Formatação de tabelas. Deixa os relatórios mais bonitos no terminal |
 | `dataclasses` | built-in | Estruturação de dados. Modelos do domínio (já vem com Python 3.7+) |
@@ -1320,4 +1320,4 @@ Se você tiver problemas:
 
 ---
 
-**FinOps AWS v2.1** | Manual atualizado em Dezembro 2024 | Score QA: 9.7/10
+**FinOps AWS v2.1** | Manual atualizado em Dezembro 2024 | Score QA: 9.7/10 | 2.100+ testes
