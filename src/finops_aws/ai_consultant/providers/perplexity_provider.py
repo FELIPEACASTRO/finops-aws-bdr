@@ -34,10 +34,10 @@ class PerplexityProvider(BaseAIProvider):
     - Citacoes de fontes
     - Informacoes atualizadas de precos AWS
     
-    Modelos suportados:
-    - llama-3.1-sonar-large-128k-online (recomendado)
-    - llama-3.1-sonar-small-128k-online
-    - llama-3.1-sonar-huge-128k-online
+    Modelos suportados (2025):
+    - sonar (rapido e economico)
+    - sonar-pro (avancado, mais citacoes)
+    - sonar-reasoning (com raciocinio)
     
     Example:
         ```python
@@ -57,9 +57,9 @@ class PerplexityProvider(BaseAIProvider):
     @property
     def available_models(self) -> List[str]:
         return [
-            "llama-3.1-sonar-large-128k-online",
-            "llama-3.1-sonar-small-128k-online",
-            "llama-3.1-sonar-huge-128k-online"
+            "sonar",
+            "sonar-pro",
+            "sonar-reasoning"
         ]
     
     @property
@@ -109,14 +109,14 @@ class PerplexityProvider(BaseAIProvider):
         
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.1-sonar-small-128k-online",
+                model="sonar",
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=5
             )
             
             status["healthy"] = True
             status["details"] = {
-                "current_model": self.config.model or "llama-3.1-sonar-large-128k-online",
+                "current_model": self.config.model or "sonar-pro",
                 "online_search": True
             }
             
@@ -145,7 +145,7 @@ class PerplexityProvider(BaseAIProvider):
         Returns:
             AIResponse com resposta e citacoes
         """
-        model = self.config.model or "llama-3.1-sonar-large-128k-online"
+        model = self.config.model or "sonar-pro"
         
         messages = []
         
@@ -183,11 +183,18 @@ class PerplexityProvider(BaseAIProvider):
             sources = []
             if hasattr(response, 'citations') and response.citations:
                 for citation in response.citations:
-                    sources.append({
-                        "title": citation.get("title", ""),
-                        "url": citation.get("url", ""),
-                        "snippet": citation.get("snippet", "")
-                    })
+                    if isinstance(citation, str):
+                        sources.append({
+                            "title": "",
+                            "url": citation,
+                            "snippet": ""
+                        })
+                    elif isinstance(citation, dict):
+                        sources.append({
+                            "title": citation.get("title", ""),
+                            "url": citation.get("url", ""),
+                            "snippet": citation.get("snippet", "")
+                        })
             
             return AIResponse(
                 content=choice.message.content,

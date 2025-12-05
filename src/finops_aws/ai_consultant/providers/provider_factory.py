@@ -267,7 +267,7 @@ class AIProviderFactory:
                 "vendor": "Perplexity",
                 "requires_api_key": True,
                 "requires_aws_credentials": False,
-                "models": ["llama-3.1-sonar-large-128k-online", "llama-3.1-sonar-small-128k-online"],
+                "models": ["sonar", "sonar-pro", "sonar-reasoning"],
                 "features": ["Chat", "Web Search", "Citations"],
                 "pricing": "Por requisicao"
             }

@@ -85,7 +85,7 @@ class AIProviderConfig:
             
         elif provider_type == AIProviderType.PERPLEXITY:
             config.api_key = os.environ.get('PERPLEXITY_API_KEY')
-            config.model = os.environ.get('PERPLEXITY_MODEL', 'llama-3.1-sonar-large-128k-online')
+            config.model = os.environ.get('PERPLEXITY_MODEL', 'sonar-pro')
             
         return config
 
