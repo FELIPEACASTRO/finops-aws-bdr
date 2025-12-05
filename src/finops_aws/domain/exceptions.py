@@ -131,6 +131,15 @@ class AmazonQError(IntegrationError):
     code: str = "AMAZON_Q_ERROR"
 
 
+FinOpsBaseException = FinOpsError
+
+ResourceNotFoundError = AWSResourceNotFoundError
+
+ServiceUnavailableError = AWSServiceError
+
+RateLimitError = AWSThrottlingError
+
+
 def handle_boto3_error(error: Exception, service_name: str, region: str = "") -> AWSServiceError:
     """
     Converte exceção boto3 em exceção FinOps tipada.

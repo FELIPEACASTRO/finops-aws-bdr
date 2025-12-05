@@ -120,6 +120,18 @@ class AnalyzerFactory:
             return analyzer_class(self._client_factory)
         return None
     
+    def get_analyzer(self, analyzer_name: str) -> Optional[BaseAnalyzer]:
+        """
+        Alias para create() - obtém instância de analyzer.
+        
+        Args:
+            analyzer_name: Nome do analyzer
+            
+        Returns:
+            Instância do analyzer ou None
+        """
+        return self.create(analyzer_name)
+    
     def analyze(self, analyzer_name: str, region: str) -> AnalysisResult:
         """
         Executa um analyzer específico.
