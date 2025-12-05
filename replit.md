@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution now includes an Automated Financial Consultant powered by Amazon Q Business for intelligent report generation.
+FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution includes an Automated Financial Consultant powered by Amazon Q Business for intelligent report generation.
 
 ## User Preferences
 
@@ -15,160 +15,235 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 The system is built with Python 3.11, adhering to Clean Architecture and Domain-Driven Design (DDD) principles.
 
 **Core Architecture:**
-EventBridge → Step Functions → Lambda Workers (parallel) → S3
-                    ↓
-              Lambda Mapper → Lambda Aggregator → AI Consultant
-                    ↓                                  ↓
-                 SQS DLQ                        Amazon Q Business
-                                                       ↓
-                                              Email / Slack / Dashboard
+```
+Web Dashboard → API Layer → Analysis Facade
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+   Analyzers           Integrations            Cost Data
+   Factory               Module                  Module
+   (Strategy)              │                        │
+        │                  ▼                        │
+   6 Analyzers      AWS APIs:                       │
+        │        - Compute Optimizer               │
+        │        - Cost Explorer RI                │
+        │        - Trusted Advisor                 │
+        │        - Amazon Q Business               │
+        │                  │                        │
+        └──────────────────┼────────────────────────┘
+                           ▼
+                     boto3 Clients
+                           │
+                           ▼
+                      AWS Cloud
+```
 
 **Key Architectural Components:**
-- **Step Functions**: Orchestrates the execution flow, enabling parallel processing of AWS services.
-- **Lambda Functions**:
-    - `Lambda Mapper`: Divides the 246 AWS services into manageable batches.
-    - `Lambda Worker`: Processes individual service batches in parallel.
-    - `Lambda Aggregator`: Consolidates processed results and prepares reports.
-    - `Q Report Handler`: Serves as the Lambda handler for the AI Consultant module.
-- **AI Consultant**: Leverages Amazon Q Business to generate intelligent, personalized FinOps reports. It supports four personas (Executive, CTO, DevOps/SRE, FinOps Analyst) and delivers reports via email (SES), Slack, and a dashboard.
-- **S3StateManager**: Manages the storage of state information and generated reports, utilizing S3 instead of DynamoDB.
-- **ServiceFactory**: Manages the creation and caching of instances for the 246 AWS services.
-- **ResilientExecutor**: Implements a circuit breaker pattern for enhanced fault tolerance.
-- **RetryHandler**: Provides exponential backoff retry mechanisms.
-- **Terraform**: The entire infrastructure, including Amazon Q Business resources, is defined and deployed using Terraform.
+- **Analyzers (Strategy Pattern)**: 6 analyzers modulares (Compute, Storage, Database, Network, Security, Analytics)
+- **Factory + Registry**: Criação dinâmica de analyzers
+- **Template Method**: Estrutura comum de análise
+- **Facade**: API simplificada para o dashboard
+- **Exception Hierarchy**: 15 tipos de exceções tipadas
 
-**UI/UX Decisions:**
-- A modern web interface is provided via `dashboard.html`.
-- Reports can be delivered through multiple channels: Email, Slack, and the Dashboard.
+**AI Consultant (Amazon Q Business)**:
+- 4 personas: EXECUTIVE, CTO, DEVOPS, ANALYST
+- Prompts especializados para cada audiência
+- Respostas em Português do Brasil
+- Integração via `Q_BUSINESS_APPLICATION_ID`
 
-**Key Capabilities:**
-- **Financial Analysis**: Multi-period cost analysis and trend detection.
-- **Optimization**: Integration with AWS Compute Optimizer for right-sizing recommendations.
-- **Multi-Account Support**: Integrates with AWS Organizations and Control Tower.
-- **Security Analysis**: Integrates with Security Hub, Macie, and GuardDuty.
-- **Scalability**: Designed for 100 executions/day with high reliability.
-- **AI-Powered Reports**: Personalized executive reports generated by the AI Consultant using Amazon Q Business.
+## Amazon Q Business - Prompts e Respostas
+
+### Personas Disponíveis
+
+| Persona | Audiência | Foco | Formato da Resposta |
+|---------|-----------|------|---------------------|
+| **EXECUTIVE** | CEO/CFO | ROI, tendências, decisões | 2 páginas, bullet points |
+| **CTO** | CTO/VP Eng | Arquitetura, trade-offs | Roadmap, diagramas |
+| **DEVOPS** | DevOps/SRE | Scripts, AWS CLI | Comandos copy-paste |
+| **ANALYST** | FinOps | KPIs, métricas | Tabelas, benchmarks |
+
+### Estrutura do Prompt
+
+```markdown
+## Contexto do Sistema
+Você é um consultor senior de FinOps especializado em AWS...
+
+## Dados de Custo AWS
+**Custo Total (30 dias):** $X.XX
+**Top Serviços:** [lista com valores]
+
+## Recursos AWS Ativos
+- ec2_instances: X
+- s3_buckets: Y
+- rds_instances: Z
+
+## Instruções
+[Template específico da persona]
+```
+
+### Exemplo de Resposta (EXECUTIVE)
+
+```markdown
+# Relatório Executivo FinOps
+
+## Resumo Executivo
+O custo total foi de **$0.15**, distribuído entre RDS (95%) e S3 (3%).
+
+## Top 3 Oportunidades
+| # | Oportunidade | Economia/Mês |
+|---|--------------|--------------|
+| 1 | Versionamento S3 | $0 (governança) |
+| 2 | Lifecycle policies | $0-5 |
+| 3 | Dimensionamento RDS | TBD |
+
+## Próximos Passos
+1. Habilitar versionamento S3 (esta semana)
+2. Implementar lifecycle policies (2 semanas)
+3. Revisar utilização RDS (este mês)
+```
+
+### Exemplo de Resposta (CTO)
+
+```markdown
+# Relatório Técnico FinOps
+
+## Distribuição de Recursos
+| Categoria | Custo/Mês | % Total |
+|-----------|-----------|---------|
+| Database | $0.14 | 95% |
+| Storage | $0.004 | 3% |
+
+## Roadmap de Modernização
+**Fase 1 (0-30d)**: Lifecycle policies S3
+**Fase 2 (30-90d)**: Avaliar Aurora Serverless
+**Fase 3 (90-180d)**: FinOps as Code
+```
+
+### Exemplo de Resposta (DEVOPS)
+
+```markdown
+# Relatório Operacional
+
+## Ações Imediatas
+
+### 1. Habilitar Versionamento S3
+```bash
+aws s3api put-bucket-versioning \
+  --bucket meu-bucket \
+  --versioning-configuration Status=Enabled
+```
+
+### 2. Criar Lifecycle Policy
+```bash
+cat > lifecycle.json << 'EOF'
+{
+  "Rules": [{"ID": "TransitionToIA", "Status": "Enabled", ...}]
+}
+EOF
+
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket meu-bucket \
+  --lifecycle-configuration file://lifecycle.json
+```
+
+### Exemplo de Resposta (ANALYST)
+
+```markdown
+# Relatório Analítico FinOps
+
+## Dashboard de Métricas
+| KPI | Valor | Meta | Status |
+|-----|-------|------|--------|
+| Custo Total | $0.15 | $10 | 🟢 |
+| Cobertura RI/SP | 0% | 70% | 🔴 |
+| Waste Ratio | 0% | <5% | 🟢 |
+
+## Análise por Serviço
+| Serviço | Custo | % Total | Tendência |
+|---------|-------|---------|-----------|
+| RDS | $0.14 | 95% | ➡️ Estável |
+| S3 | $0.004 | 3% | ➡️ Estável |
+```
 
 ## Quality Metrics (Verified)
 
 | Metric | Value | Details |
 |--------|-------|---------|
-| **Unit Tests** | 1,800+ | 100% passing |
-| **QA Tests** | 244 | 100% passing |
-| **Integration Tests** | 44 | 100% passing |
-| **E2E Tests** | 56 | 100% passing (4 suites) |
-| **Total Tests** | 2,200 | 100% passing (6 skipped) |
-| **Documentation** | 11,077 lines | Comprehensive docs |
-| **AWS Services** | 246 | 60% boto3 coverage (high-impact focus) |
-| **Services with API Analysis** | 395+ | Direct boto3 integration |
-| **Resource Metrics** | 510+ | Unique metrics monitored |
-| **boto3 Coverage** | 60% | High-impact services (246/411) |
-| **QA Score** | 9.9/10 | Production-ready |
-
-## External Dependencies
-
-- **boto3**: AWS SDK for Python, used for interacting with AWS services.
-- **pytest**: Python testing framework.
-- **moto**: Library for mocking AWS services during testing.
-- **tabulate**: Utility for pretty-printing tabular data.
-- **Amazon Q Business**: Integrated for the AI Consultant module to generate intelligent reports.
-- **AWS SES**: Used for sending email reports.
-- **Slack webhooks**: Used for sending Slack notifications/reports.
+| **Unit Tests** | 1,865 | 100% passing |
+| **Integration Tests** | 44 | 42 passed, 2 skipped |
+| **QA Tests** | 240 | 100% passing |
+| **E2E Tests** | 55 | 100% passing |
+| **Total Tests** | 2,204 | 100% passing |
+| **AWS Services Suportados** | 246 | 60% boto3 coverage |
+| **Verificações de Otimização** | 23 | Serviços com regras específicas |
+| **Design Patterns** | 5 | Strategy, Factory, Template, Registry, Facade |
+| **Exception Types** | 15 | Hierarquia tipada |
 
 ## Key Documentation Files
 
 | File | Description |
 |------|-------------|
-| `docs/TECHNICAL_GUIDE.md` | Complete technical documentation (3,600+ lines) |
-| `docs/PROMPTS_AMAZON_Q.md` | Detailed Amazon Q Business prompts for cost reduction |
-| `docs/USER_MANUAL.md` | End-user manual |
-| `docs/HEAD_FIRST_FINOPS.md` | Executive guide to FinOps |
-| `docs/ROADMAP.md` | Gaps, erros e implementações pendentes |
+| `docs/TECHNICAL_GUIDE.md` | Guia técnico completo |
+| `docs/PROMPTS_AMAZON_Q.md` | Prompts detalhados do Amazon Q |
+| `docs/USER_MANUAL.md` | Manual do usuário |
+| `docs/HEAD_FIRST_FINOPS.md` | Guia executivo FinOps |
+| `docs/ARCHITECTURE_AND_PATTERNS.md` | Design Patterns aplicados |
+| `docs/ROADMAP.md` | Roadmap e gaps conhecidos |
 
 ## AWS Integrations (Implemented)
 
-O dashboard agora integra com múltiplos serviços AWS para gerar recomendações:
-
 | Integração | Função | Requisitos |
 |------------|--------|------------|
-| **AWS Compute Optimizer** | Right-sizing EC2 | Instâncias EC2 ativas |
-| **AWS Cost Explorer (RI/SP)** | Reserved Instances e Savings Plans | Uso suficiente para recomendações |
-| **AWS Trusted Advisor** | Verificações de custo e segurança | Business/Enterprise Support |
-| **Amazon Q Business** | Análise inteligente com IA | `Q_BUSINESS_APPLICATION_ID` configurado |
+| **Analyzers** | 6 analyzers modulares | Nenhum |
+| **AWS Compute Optimizer** | Right-sizing EC2 | Opt-in habilitado |
+| **AWS Cost Explorer** | RI e Savings Plans | Dados de uso |
+| **AWS Trusted Advisor** | Verificações de custo | Business/Enterprise |
+| **Amazon Q Business** | Análise com IA | Q_BUSINESS_APPLICATION_ID |
 
-### Serviços AWS Analisados (246 serviços - 60% boto3)
+## Verificações de Otimização (23 serviços)
 
-| Categoria | Serviços |
-|-----------|----------|
-| **Compute** | EC2, Lambda, ECS, EKS, Elastic Beanstalk, Batch, Lightsail, App Runner, Outposts |
-| **Storage** | S3, EBS, EFS, FSx, Storage Gateway, Snow Family, Backup, Data Lifecycle Manager |
-| **Database** | RDS, DynamoDB, ElastiCache, MemoryDB, Redshift, DocumentDB, Neptune, Keyspaces, QLDB, Timestream |
-| **Networking** | VPC, ELB/ALB/NLB, CloudFront, Route53, API Gateway, Global Accelerator, Direct Connect, App Mesh, Cloud Map, PrivateLink, Network Firewall |
-| **Analytics** | EMR, Kinesis, Glue, Athena, OpenSearch, QuickSight, Data Pipeline, Lake Formation, MSK, CloudSearch |
-| **ML/AI** | SageMaker, Bedrock, Comprehend, Rekognition, Textract, Translate, Polly, Transcribe, Lex, Personalize, Forecast, Kendra, Fraud Detector, Lookout |
-| **Integration** | SNS, SQS, EventBridge, Step Functions, MQ, AppSync, AppFlow |
-| **Security** | IAM, Cognito, SSO, Directory Service, KMS, Secrets Manager, ACM, WAF, Shield, Firewall Manager, GuardDuty, Inspector, Macie, Detective, Security Hub, Audit Manager, RAM |
-| **DevOps** | CodeCommit, CodeBuild, CodeDeploy, CodePipeline, CodeArtifact, CodeStar, ECR, Amplify, Cloud9, X-Ray |
-| **Management** | CloudWatch, CloudTrail, Config, Systems Manager, Organizations, Control Tower, Service Catalog, License Manager, Trusted Advisor, Health Dashboard, Budgets |
-| **Media** | MediaConvert, MediaLive, MediaPackage, MediaStore, MediaTailor, Elastic Transcoder, IVS |
-| **IoT** | IoT Core, IoT Analytics, IoT Events, IoT Greengrass, IoT SiteWise, IoT TwinMaker, IoT FleetWise |
-| **Mobile** | Pinpoint, Device Farm, Location Service |
-| **End User** | WorkSpaces, AppStream, WorkDocs, WorkMail |
-| **Game** | GameLift |
-| **Blockchain** | Managed Blockchain |
-| **Robotics** | RoboMaker |
-| **Satellite** | Ground Station |
-| **Quantum** | Braket |
-| **Migration** | Migration Hub, DMS, SMS, Transfer Family, DataSync, MGN |
-| **Other** | Connect, SES, Chime, Proton, AppConfig, CloudFormation, OpsWorks, and 30+ more |
-
-### Verificações de Otimização
-
+- **EC2**: Instâncias paradas, tipos antigos
 - **EBS**: Volumes órfãos não anexados
-- **EIP**: Elastic IPs não associados (custo $3.60/mês)
+- **EIP**: Elastic IPs não associados ($3.60/mês)
 - **NAT Gateway**: Alertas de custo (~$32/mês)
-- **CloudWatch**: Log groups sem retenção definida
+- **S3**: Versionamento, lifecycle, encryption
+- **RDS**: Multi-AZ em dev, dimensionamento
+- **DynamoDB**: Billing mode
 - **ELB/ALB**: Load balancers sem targets
-- **DynamoDB**: Billing mode (provisioned vs on-demand)
-- **ElastiCache**: Dimensionamento de clusters
+- **CloudWatch**: Log groups sem retenção
 - **ECR**: Imagens sem tag
 - **IAM**: Access keys inativas
-- **Redshift/EMR**: Clusters ativos para revisão
-- **SageMaker**: Notebooks e endpoints ativos
 
-### Configuração Amazon Q Business
+## Configuration
 
-Para habilitar a IA:
 ```bash
-export Q_BUSINESS_APPLICATION_ID=seu-app-id
+# Credenciais AWS (obrigatório)
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=us-east-1
+
+# Amazon Q Business (opcional)
+Q_BUSINESS_APPLICATION_ID=seu-app-id
 ```
 
 ## Recent Changes (December 2024)
 
-- **Refatoração Arquitetural com Design Patterns (Dec 5)**:
-  - Criado módulo `src/finops_aws/analyzers/` com Strategy Pattern
-  - 6 analyzers implementados: compute, storage, database, network, security, analytics
-  - Hierarquia de exceções tipadas em `domain/exceptions.py`
-  - Factory Pattern + Registry para criação de analyzers
-  - Template Method em BaseAnalyzer para estrutura comum
-  - Integração via Facade em `dashboard/analysis.py`
-  - Documentação completa em `docs/ARCHITECTURE_AND_PATTERNS.md`
-- **Integrações AWS Completas (Dec 5)**:
-  - Implementado AWS Compute Optimizer para right-sizing EC2
-  - Implementado Cost Explorer para Reserved Instances e Savings Plans
-  - Implementado Trusted Advisor para verificações de custo/segurança
-  - Implementado Amazon Q Business para análise com IA
-  - Adicionadas verificações locais: S3, EC2, RDS, Lambda
-- **Code Quality Fixes (Dec 5)**:
-  - Fixed 3 bare `except:` anti-patterns in `sqs_service.py` and `multi_account_handler.py`
-  - Updated asyncio test runner to use `asyncio.run()` for Python 3.11+ compatibility
-  - All 2,200 tests now passing (100% success rate)
-- Added `docs/PROMPTS_AMAZON_Q.md` with complete prompt templates for Amazon Q Business
-- Expanded Section 17.6 in TECHNICAL_GUIDE.md with prompt details
-- Documentation standardization with verified metrics
-- Corrected test counts across all documentation files
-- Ensured factual accuracy for enterprise presentation
-- **Documentation Update (Dec 5)**:
-  - Updated all documentation to reflect 246 AWS services (60% boto3 coverage)
-  - Clarified service counts: 246 in AWSServiceType enum, 253 documented, 411 available in boto3
-  - Verified consistency across TECHNICAL_GUIDE, USER_MANUAL, HEAD_FIRST_FINOPS, etc.
+- **Documentação Atualizada (Dec 5)**:
+  - TECHNICAL_GUIDE.md com arquitetura completa
+  - PROMPTS_AMAZON_Q.md com exemplos de resposta
+  - USER_MANUAL.md simplificado
+  - HEAD_FIRST_FINOPS.md para executivos
+  - ARCHITECTURE_AND_PATTERNS.md com Design Patterns
+  - ROADMAP.md com status atual
+
+- **Refatoração Arquitetural (Dec 5)**:
+  - Strategy Pattern para 6 analyzers
+  - Factory + Registry Pattern
+  - Template Method em BaseAnalyzer
+  - Hierarquia de exceções tipadas (15 tipos)
+
+- **Integrações AWS (Dec 5)**:
+  - Compute Optimizer
+  - Cost Explorer RI/SP
+  - Trusted Advisor
+  - Amazon Q Business
