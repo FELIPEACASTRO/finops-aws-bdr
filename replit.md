@@ -83,6 +83,7 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 | `docs/PROMPTS_AMAZON_Q.md` | Detailed Amazon Q Business prompts for cost reduction |
 | `docs/USER_MANUAL.md` | End-user manual |
 | `docs/HEAD_FIRST_FINOPS.md` | Executive guide to FinOps |
+| `docs/ROADMAP.md` | Gaps, erros e implementações pendentes |
 
 ## AWS Integrations (Implemented)
 
