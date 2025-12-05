@@ -55,12 +55,12 @@ Web Dashboard → API Layer → Analysis Facade
 
 ### Provedores de IA Suportados
 
-| Provedor | Modelo | API Key | Características |
-|----------|--------|---------|-----------------|
-| **Amazon Q Business** | Q Business | Não (IAM) | RAG nativo, segurança AWS |
-| **OpenAI ChatGPT** | gpt-4o, gpt-4o-mini | Sim | Alta precisão, grande contexto |
-| **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro | Sim | Contexto 2M, custo-benefício |
-| **Perplexity AI** | llama-3.1-sonar-large-128k-online | Sim | Busca online, citações |
+| Provedor | Modelo | API Key | Status | Características |
+|----------|--------|---------|--------|-----------------|
+| **Amazon Q Business** | Q Business | Não (IAM) | ⚠️ Não configurado | RAG nativo, segurança AWS |
+| **OpenAI ChatGPT** | gpt-4o, gpt-4o-mini | Sim | ⚠️ Sem créditos | Alta precisão, grande contexto |
+| **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro | Sim | ✅ Testado | Contexto 2M, custo-benefício |
+| **Perplexity AI** | sonar, sonar-pro | Sim | ✅ Testado | Busca online, citações |
 
 ### Uso Programático
 
@@ -181,6 +181,18 @@ src/finops_aws/ai_consultant/
 ```
 
 ## Recent Changes (December 2024)
+
+- **Testes Multi-IA Validados (Dec 5)**:
+  - Perplexity: ✅ Testado com sonar-pro (1.797 tokens, 25s, 10 fontes citadas)
+  - Gemini: ✅ Testado com gemini-2.5-flash (3.865 tokens, 21s)
+  - OpenAI: ⚠️ Requer créditos em platform.openai.com/account/billing
+  - Amazon Q: ⚠️ Requer Q_BUSINESS_APPLICATION_ID
+
+- **Correções de Provedores (Dec 5)**:
+  - Perplexity: Migrado para modelos sonar/sonar-pro (llama-3.1-sonar-* descontinuados)
+  - Gemini: Configurações de segurança ajustadas (BLOCK_NONE)
+  - Gemini: Suporte dual para GEMINI_API_KEY e GOOGLE_API_KEY
+  - Gemini: Tratamento robusto de respostas bloqueadas
 
 - **Suporte Multi-IA (Dec 5)**:
   - Implementado Strategy Pattern para AI providers

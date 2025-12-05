@@ -126,28 +126,30 @@ GEMINI_MODEL=gemini-2.5-flash  # opcional
 
 **Características:**
 - Busca online em tempo real
-- Citações de fontes
-- Informações atualizadas
+- Citações de fontes com URLs
+- Informações atualizadas da web
 - Ideal para preços AWS atuais
 
 **Modelos Disponíveis:**
 | Modelo | Características |
 |--------|-----------------|
-| llama-3.1-sonar-large-128k-online | Alta qualidade + busca |
-| llama-3.1-sonar-small-128k-online | Rápido + busca |
-| llama-3.1-sonar-huge-128k-online | Máxima qualidade |
+| sonar | Rápido + busca online |
+| sonar-pro | Alta qualidade + busca online |
+
+> ⚠️ **Importante**: Os modelos antigos `llama-3.1-sonar-*` foram descontinuados em fevereiro/2025. Use `sonar` ou `sonar-pro`.
 
 **Configuração:**
 ```bash
 # Variáveis de ambiente
 PERPLEXITY_API_KEY=pplx-...
-PERPLEXITY_MODEL=llama-3.1-sonar-large-128k-online  # opcional
+PERPLEXITY_MODEL=sonar-pro  # opcional, default: sonar
 ```
 
 **Caso de Uso Ideal:**
 - Preços AWS atualizados em tempo real
 - Comparativo com mercado
 - Best practices recentes
+- Relatórios com fontes citadas
 
 ---
 
@@ -360,7 +362,59 @@ except ValueError as e:
 
 ---
 
+## Resultados de Testes (Dezembro 2024)
+
+Testes realizados com dados reais de custo AWS ($0.15 total, 95% RDS):
+
+| Provedor | Status | Modelo | Tokens | Latência | Observações |
+|----------|--------|--------|--------|----------|-------------|
+| **Perplexity AI** | ✅ Funcionando | sonar-pro | 1,797 | 25s | 10 fontes citadas com URLs |
+| **Google Gemini** | ✅ Funcionando | gemini-2.5-flash | 3,865 | 21s | Resposta muito detalhada |
+| **OpenAI ChatGPT** | ⚠️ Sem créditos | gpt-4o | - | - | Requer créditos em platform.openai.com |
+| **Amazon Q Business** | ⚠️ Não configurado | Q Business | - | - | Requer Q_BUSINESS_APPLICATION_ID |
+
+### Comparativo de Qualidade
+
+| Aspecto | Perplexity AI | Google Gemini |
+|---------|---------------|---------------|
+| **Diferencial** | Busca online + fontes citadas | Respostas estruturadas |
+| **Formato** | Markdown com links | Markdown detalhado |
+| **Recomendações** | Baseadas em dados atuais | Baseadas em conhecimento |
+| **Custo** | ~$0.01/consulta | Tier gratuito generoso |
+
+### Exemplo de Saída - Perplexity
+
+```markdown
+## Análise FinOps - Custos AWS
+O custo total de $0.15 reflete uso mínimo, dominado pelo RDS (95%)...
+
+### Fontes Consultadas:
+1. https://aws.amazon.com/rds/pricing/
+2. https://docs.aws.amazon.com/cost-management/
+...
+```
+
+### Exemplo de Saída - Gemini
+
+```markdown
+## Relatório Executivo FinOps
+Este relatório FinOps apresenta uma análise dos custos AWS...
+
+### Top 3 Oportunidades de Otimização
+1. **Otimização da Instância Amazon RDS** - Economia até $0.14
+...
+```
+
+---
+
 ## Changelog
+
+- **v2.1.0** (Dezembro 2024): Testes e correções
+  - Perplexity: Atualizado para novos modelos sonar/sonar-pro
+  - Gemini: Configurações de segurança ajustadas (BLOCK_NONE)
+  - Gemini: Suporte dual GEMINI_API_KEY/GOOGLE_API_KEY
+  - Tratamento robusto de respostas bloqueadas
+  - Documentação de resultados de testes
 
 - **v2.0.0** (Dezembro 2024): Adicionado suporte multi-IA
   - OpenAI ChatGPT (GPT-4o)
