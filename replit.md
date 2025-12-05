@@ -92,12 +92,35 @@ O dashboard agora integra com múltiplos serviços AWS para gerar recomendaçõe
 | **AWS Trusted Advisor** | Verificações de custo e segurança | Business/Enterprise Support |
 | **Amazon Q Business** | Análise inteligente com IA | `Q_BUSINESS_APPLICATION_ID` configurado |
 
-### Verificações Locais (Sempre Ativas)
+### Serviços AWS Analisados (40+ serviços)
 
-- **S3**: Versionamento, Criptografia, Bloqueio de Acesso Público
-- **EC2**: Instâncias paradas, Volumes EBS órfãos
-- **RDS**: Criptografia, Retenção de backup
-- **Lambda**: Otimização de memória
+| Categoria | Serviços |
+|-----------|----------|
+| **Compute** | EC2, Lambda, ECS, EKS, Elastic Beanstalk |
+| **Storage** | S3, EBS, EFS, Glacier |
+| **Database** | RDS, DynamoDB, ElastiCache, Redshift, DocumentDB, Neptune |
+| **Networking** | VPC, ELB/ALB, CloudFront, Route53, NAT Gateway, EIP |
+| **Analytics** | EMR, Kinesis, Glue, Athena, OpenSearch |
+| **ML/AI** | SageMaker (notebooks, endpoints) |
+| **Integration** | SNS, SQS, EventBridge, Step Functions, API Gateway, AppSync |
+| **Security** | IAM, KMS, Secrets Manager, ACM, WAF |
+| **DevOps** | CodeBuild, CodePipeline, ECR |
+| **Messaging** | Amazon MQ, MSK (Kafka) |
+| **Other** | CloudWatch Logs, Backup, Transfer Family |
+
+### Verificações de Otimização
+
+- **EBS**: Volumes órfãos não anexados
+- **EIP**: Elastic IPs não associados (custo $3.60/mês)
+- **NAT Gateway**: Alertas de custo (~$32/mês)
+- **CloudWatch**: Log groups sem retenção definida
+- **ELB/ALB**: Load balancers sem targets
+- **DynamoDB**: Billing mode (provisioned vs on-demand)
+- **ElastiCache**: Dimensionamento de clusters
+- **ECR**: Imagens sem tag
+- **IAM**: Access keys inativas
+- **Redshift/EMR**: Clusters ativos para revisão
+- **SageMaker**: Notebooks e endpoints ativos
 
 ### Configuração Amazon Q Business
 

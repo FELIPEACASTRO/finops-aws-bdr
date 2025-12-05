@@ -20,6 +20,489 @@ def add_header(response):
     response.headers['Expires'] = '0'
     return response
 
+def get_all_services_analysis(region):
+    """Analisa todos os principais serviços AWS para FinOps."""
+    import boto3
+    recommendations = []
+    resources = {}
+    
+    try:
+        ebs = boto3.client('ec2', region_name=region)
+        volumes = ebs.describe_volumes()
+        resources['ebs_volumes'] = len(volumes.get('Volumes', []))
+        
+        for vol in volumes.get('Volumes', []):
+            vol_id = vol.get('VolumeId', '')
+            state = vol.get('State', '')
+            attachments = vol.get('Attachments', [])
+            size = vol.get('Size', 0)
+            
+            if state == 'available' and not attachments:
+                monthly_cost = size * 0.10
+                recommendations.append({
+                    'type': 'EBS_ORPHAN',
+                    'resource': vol_id,
+                    'description': f'Volume EBS órfão {vol_id} ({size}GB) - não está anexado',
+                    'impact': 'high',
+                    'savings': round(monthly_cost, 2),
+                    'source': 'EBS Analysis'
+                })
+    except Exception:
+        pass
+    
+    try:
+        ec2 = boto3.client('ec2', region_name=region)
+        eips = ec2.describe_addresses()
+        resources['elastic_ips'] = len(eips.get('Addresses', []))
+        
+        for eip in eips.get('Addresses', []):
+            allocation_id = eip.get('AllocationId', eip.get('PublicIp', ''))
+            instance_id = eip.get('InstanceId')
+            
+            if not instance_id:
+                recommendations.append({
+                    'type': 'EIP_UNUSED',
+                    'resource': allocation_id,
+                    'description': f'Elastic IP {eip.get("PublicIp", allocation_id)} não está associado',
+                    'impact': 'medium',
+                    'savings': 3.60,
+                    'source': 'EIP Analysis'
+                })
+    except Exception:
+        pass
+    
+    try:
+        ec2 = boto3.client('ec2', region_name=region)
+        nat_gws = ec2.describe_nat_gateways(Filter=[{'Name': 'state', 'Values': ['available']}])
+        resources['nat_gateways'] = len(nat_gws.get('NatGateways', []))
+        
+        for nat in nat_gws.get('NatGateways', []):
+            nat_id = nat.get('NatGatewayId', '')
+            recommendations.append({
+                'type': 'NAT_GATEWAY_COST',
+                'resource': nat_id,
+                'description': f'NAT Gateway {nat_id} ativo - custo ~$32/mês + transferência',
+                'impact': 'low',
+                'savings': 0,
+                'source': 'NAT Analysis'
+            })
+    except Exception:
+        pass
+    
+    try:
+        logs = boto3.client('logs', region_name=region)
+        log_groups = logs.describe_log_groups()
+        resources['log_groups'] = len(log_groups.get('logGroups', []))
+        
+        for lg in log_groups.get('logGroups', []):
+            name = lg.get('logGroupName', '')
+            retention = lg.get('retentionInDays')
+            stored_bytes = lg.get('storedBytes', 0)
+            stored_gb = stored_bytes / (1024**3)
+            
+            if retention is None and stored_gb > 1:
+                recommendations.append({
+                    'type': 'CLOUDWATCH_RETENTION',
+                    'resource': name,
+                    'description': f'Log group {name} sem retenção definida ({stored_gb:.1f}GB)',
+                    'impact': 'medium',
+                    'savings': round(stored_gb * 0.03, 2),
+                    'source': 'CloudWatch Analysis'
+                })
+    except Exception:
+        pass
+    
+    try:
+        elb = boto3.client('elbv2', region_name=region)
+        lbs = elb.describe_load_balancers()
+        resources['load_balancers'] = len(lbs.get('LoadBalancers', []))
+        
+        for lb in lbs.get('LoadBalancers', []):
+            lb_arn = lb.get('LoadBalancerArn', '')
+            lb_name = lb.get('LoadBalancerName', '')
+            lb_type = lb.get('Type', 'application')
+            
+            try:
+                tgs = elb.describe_target_groups(LoadBalancerArn=lb_arn)
+                has_targets = False
+                for tg in tgs.get('TargetGroups', []):
+                    health = elb.describe_target_health(TargetGroupArn=tg['TargetGroupArn'])
+                    if health.get('TargetHealthDescriptions'):
+                        has_targets = True
+                        break
+                
+                if not has_targets:
+                    cost = 16.20 if lb_type == 'application' else 22.50
+                    recommendations.append({
+                        'type': 'ELB_NO_TARGETS',
+                        'resource': lb_name,
+                        'description': f'Load Balancer {lb_name} sem targets registrados',
+                        'impact': 'high',
+                        'savings': cost,
+                        'source': 'ELB Analysis'
+                    })
+            except Exception:
+                pass
+    except Exception:
+        pass
+    
+    try:
+        dynamo = boto3.client('dynamodb', region_name=region)
+        tables = dynamo.list_tables()
+        resources['dynamodb_tables'] = len(tables.get('TableNames', []))
+        
+        for table_name in tables.get('TableNames', []):
+            try:
+                table = dynamo.describe_table(TableName=table_name)
+                billing = table.get('Table', {}).get('BillingModeSummary', {}).get('BillingMode', 'PROVISIONED')
+                
+                if billing == 'PROVISIONED':
+                    recommendations.append({
+                        'type': 'DYNAMODB_BILLING',
+                        'resource': table_name,
+                        'description': f'DynamoDB {table_name} usa capacidade provisionada - considere on-demand',
+                        'impact': 'low',
+                        'savings': 0,
+                        'source': 'DynamoDB Analysis'
+                    })
+            except Exception:
+                pass
+    except Exception:
+        pass
+    
+    try:
+        elasticache = boto3.client('elasticache', region_name=region)
+        clusters = elasticache.describe_cache_clusters()
+        resources['elasticache_clusters'] = len(clusters.get('CacheClusters', []))
+        
+        for cluster in clusters.get('CacheClusters', []):
+            cluster_id = cluster.get('CacheClusterId', '')
+            node_type = cluster.get('CacheNodeType', '')
+            engine = cluster.get('Engine', '')
+            
+            if 'large' in node_type or 'xlarge' in node_type:
+                recommendations.append({
+                    'type': 'ELASTICACHE_SIZE',
+                    'resource': cluster_id,
+                    'description': f'ElastiCache {cluster_id} ({node_type}) - verificar dimensionamento',
+                    'impact': 'medium',
+                    'savings': 0,
+                    'source': 'ElastiCache Analysis'
+                })
+    except Exception:
+        pass
+    
+    try:
+        sns = boto3.client('sns', region_name=region)
+        topics = sns.list_topics()
+        resources['sns_topics'] = len(topics.get('Topics', []))
+    except Exception:
+        pass
+    
+    try:
+        sqs = boto3.client('sqs', region_name=region)
+        queues = sqs.list_queues()
+        resources['sqs_queues'] = len(queues.get('QueueUrls', []))
+    except Exception:
+        pass
+    
+    try:
+        apigw = boto3.client('apigateway', region_name=region)
+        apis = apigw.get_rest_apis()
+        resources['api_gateways'] = len(apis.get('items', []))
+    except Exception:
+        pass
+    
+    try:
+        cf = boto3.client('cloudfront')
+        distributions = cf.list_distributions()
+        dist_list = distributions.get('DistributionList', {})
+        resources['cloudfront_distributions'] = dist_list.get('Quantity', 0)
+    except Exception:
+        pass
+    
+    try:
+        r53 = boto3.client('route53')
+        zones = r53.list_hosted_zones()
+        resources['route53_zones'] = len(zones.get('HostedZones', []))
+    except Exception:
+        pass
+    
+    try:
+        sm = boto3.client('secretsmanager', region_name=region)
+        secrets = sm.list_secrets()
+        resources['secrets'] = len(secrets.get('SecretList', []))
+    except Exception:
+        pass
+    
+    try:
+        kms = boto3.client('kms', region_name=region)
+        keys = kms.list_keys()
+        resources['kms_keys'] = len(keys.get('Keys', []))
+    except Exception:
+        pass
+    
+    try:
+        iam = boto3.client('iam')
+        users = iam.list_users()
+        resources['iam_users'] = len(users.get('Users', []))
+        
+        for user in users.get('Users', []):
+            username = user.get('UserName', '')
+            try:
+                keys = iam.list_access_keys(UserName=username)
+                for key in keys.get('AccessKeyMetadata', []):
+                    if key.get('Status') == 'Inactive':
+                        recommendations.append({
+                            'type': 'IAM_INACTIVE_KEY',
+                            'resource': username,
+                            'description': f'Access key inativa para usuário {username}',
+                            'impact': 'medium',
+                            'savings': 0,
+                            'source': 'IAM Security'
+                        })
+            except Exception:
+                pass
+    except Exception:
+        pass
+    
+    try:
+        ecs = boto3.client('ecs', region_name=region)
+        clusters = ecs.list_clusters()
+        resources['ecs_clusters'] = len(clusters.get('clusterArns', []))
+    except Exception:
+        pass
+    
+    try:
+        eks = boto3.client('eks', region_name=region)
+        clusters = eks.list_clusters()
+        resources['eks_clusters'] = len(clusters.get('clusters', []))
+    except Exception:
+        pass
+    
+    try:
+        ecr = boto3.client('ecr', region_name=region)
+        repos = ecr.describe_repositories()
+        resources['ecr_repositories'] = len(repos.get('repositories', []))
+        
+        for repo in repos.get('repositories', []):
+            repo_name = repo.get('repositoryName', '')
+            try:
+                images = ecr.describe_images(repositoryName=repo_name)
+                untagged = [img for img in images.get('imageDetails', []) if not img.get('imageTags')]
+                if len(untagged) > 10:
+                    recommendations.append({
+                        'type': 'ECR_UNTAGGED',
+                        'resource': repo_name,
+                        'description': f'ECR {repo_name} tem {len(untagged)} imagens sem tag',
+                        'impact': 'low',
+                        'savings': 0,
+                        'source': 'ECR Analysis'
+                    })
+            except Exception:
+                pass
+    except Exception:
+        pass
+    
+    try:
+        sfn = boto3.client('stepfunctions', region_name=region)
+        machines = sfn.list_state_machines()
+        resources['step_functions'] = len(machines.get('stateMachines', []))
+    except Exception:
+        pass
+    
+    try:
+        events = boto3.client('events', region_name=region)
+        rules = events.list_rules()
+        resources['eventbridge_rules'] = len(rules.get('Rules', []))
+    except Exception:
+        pass
+    
+    try:
+        glue = boto3.client('glue', region_name=region)
+        jobs = glue.list_jobs()
+        resources['glue_jobs'] = len(jobs.get('JobNames', []))
+    except Exception:
+        pass
+    
+    try:
+        kinesis = boto3.client('kinesis', region_name=region)
+        streams = kinesis.list_streams()
+        resources['kinesis_streams'] = len(streams.get('StreamNames', []))
+    except Exception:
+        pass
+    
+    try:
+        redshift = boto3.client('redshift', region_name=region)
+        clusters = redshift.describe_clusters()
+        resources['redshift_clusters'] = len(clusters.get('Clusters', []))
+        
+        for cluster in clusters.get('Clusters', []):
+            cluster_id = cluster.get('ClusterIdentifier', '')
+            node_type = cluster.get('NodeType', '')
+            nodes = cluster.get('NumberOfNodes', 1)
+            
+            recommendations.append({
+                'type': 'REDSHIFT_REVIEW',
+                'resource': cluster_id,
+                'description': f'Redshift {cluster_id} ({nodes}x {node_type}) - verificar utilização',
+                'impact': 'high',
+                'savings': 0,
+                'source': 'Redshift Analysis'
+            })
+    except Exception:
+        pass
+    
+    try:
+        emr = boto3.client('emr', region_name=region)
+        clusters = emr.list_clusters(ClusterStates=['RUNNING', 'WAITING'])
+        resources['emr_clusters'] = len(clusters.get('Clusters', []))
+        
+        for cluster in clusters.get('Clusters', []):
+            cluster_id = cluster.get('Id', '')
+            name = cluster.get('Name', '')
+            
+            recommendations.append({
+                'type': 'EMR_RUNNING',
+                'resource': cluster_id,
+                'description': f'EMR cluster {name} ativo - verificar se necessário',
+                'impact': 'high',
+                'savings': 0,
+                'source': 'EMR Analysis'
+            })
+    except Exception:
+        pass
+    
+    try:
+        sm = boto3.client('sagemaker', region_name=region)
+        notebooks = sm.list_notebook_instances()
+        resources['sagemaker_notebooks'] = len(notebooks.get('NotebookInstances', []))
+        
+        for nb in notebooks.get('NotebookInstances', []):
+            nb_name = nb.get('NotebookInstanceName', '')
+            status = nb.get('NotebookInstanceStatus', '')
+            instance_type = nb.get('InstanceType', '')
+            
+            if status == 'InService':
+                recommendations.append({
+                    'type': 'SAGEMAKER_NOTEBOOK',
+                    'resource': nb_name,
+                    'description': f'SageMaker notebook {nb_name} ({instance_type}) ativo',
+                    'impact': 'medium',
+                    'savings': 0,
+                    'source': 'SageMaker Analysis'
+                })
+        
+        endpoints = sm.list_endpoints()
+        resources['sagemaker_endpoints'] = len(endpoints.get('Endpoints', []))
+        
+        for ep in endpoints.get('Endpoints', []):
+            ep_name = ep.get('EndpointName', '')
+            recommendations.append({
+                'type': 'SAGEMAKER_ENDPOINT',
+                'resource': ep_name,
+                'description': f'SageMaker endpoint {ep_name} ativo - verificar uso',
+                'impact': 'high',
+                'savings': 0,
+                'source': 'SageMaker Analysis'
+            })
+    except Exception:
+        pass
+    
+    try:
+        opensearch = boto3.client('opensearch', region_name=region)
+        domains = opensearch.list_domain_names()
+        resources['opensearch_domains'] = len(domains.get('DomainNames', []))
+    except Exception:
+        pass
+    
+    try:
+        docdb = boto3.client('docdb', region_name=region)
+        clusters = docdb.describe_db_clusters()
+        resources['documentdb_clusters'] = len(clusters.get('DBClusters', []))
+    except Exception:
+        pass
+    
+    try:
+        neptune = boto3.client('neptune', region_name=region)
+        clusters = neptune.describe_db_clusters()
+        resources['neptune_clusters'] = len(clusters.get('DBClusters', []))
+    except Exception:
+        pass
+    
+    try:
+        codebuild = boto3.client('codebuild', region_name=region)
+        projects = codebuild.list_projects()
+        resources['codebuild_projects'] = len(projects.get('projects', []))
+    except Exception:
+        pass
+    
+    try:
+        codepipeline = boto3.client('codepipeline', region_name=region)
+        pipelines = codepipeline.list_pipelines()
+        resources['codepipeline_pipelines'] = len(pipelines.get('pipelines', []))
+    except Exception:
+        pass
+    
+    try:
+        backup = boto3.client('backup', region_name=region)
+        vaults = backup.list_backup_vaults()
+        resources['backup_vaults'] = len(vaults.get('BackupVaultList', []))
+    except Exception:
+        pass
+    
+    try:
+        transfer = boto3.client('transfer', region_name=region)
+        servers = transfer.list_servers()
+        resources['transfer_servers'] = len(servers.get('Servers', []))
+    except Exception:
+        pass
+    
+    try:
+        mq = boto3.client('mq', region_name=region)
+        brokers = mq.list_brokers()
+        resources['mq_brokers'] = len(brokers.get('BrokerSummaries', []))
+    except Exception:
+        pass
+    
+    try:
+        msk = boto3.client('kafka', region_name=region)
+        clusters = msk.list_clusters()
+        resources['msk_clusters'] = len(clusters.get('ClusterInfoList', []))
+    except Exception:
+        pass
+    
+    try:
+        appsync = boto3.client('appsync', region_name=region)
+        apis = appsync.list_graphql_apis()
+        resources['appsync_apis'] = len(apis.get('graphqlApis', []))
+    except Exception:
+        pass
+    
+    try:
+        acm = boto3.client('acm', region_name=region)
+        certs = acm.list_certificates()
+        resources['acm_certificates'] = len(certs.get('CertificateSummaryList', []))
+    except Exception:
+        pass
+    
+    try:
+        waf = boto3.client('wafv2', region_name=region)
+        acls = waf.list_web_acls(Scope='REGIONAL')
+        resources['waf_acls'] = len(acls.get('WebACLs', []))
+    except Exception:
+        pass
+    
+    try:
+        athena = boto3.client('athena', region_name=region)
+        workgroups = athena.list_work_groups()
+        resources['athena_workgroups'] = len(workgroups.get('WorkGroups', []))
+    except Exception:
+        pass
+    
+    return recommendations, resources
+
+
 def get_compute_optimizer_recommendations(region):
     """Obtém recomendações do AWS Compute Optimizer para EC2."""
     import boto3
@@ -470,6 +953,13 @@ def get_aws_analysis():
                 
     except Exception as e:
         result['resources'] = {'error': str(e)}
+    
+    all_services_recs, all_services_resources = get_all_services_analysis(region)
+    if all_services_recs:
+        result['recommendations'].extend(all_services_recs)
+    if all_services_resources:
+        result['resources'].update(all_services_resources)
+        result['integrations']['all_services'] = True
     
     co_recs = get_compute_optimizer_recommendations(region)
     if co_recs:
