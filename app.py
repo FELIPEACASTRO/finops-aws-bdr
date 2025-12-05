@@ -6271,6 +6271,55 @@ def export_report(format):
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@app.route('/api/v1/ai-report', methods=['POST'])
+def generate_ai_report():
+    """Gera relatório FinOps usando IA (Gemini, Perplexity ou OpenAI)."""
+    try:
+        data = request.get_json() or {}
+        provider_name = data.get('provider', 'gemini')
+        persona_name = data.get('persona', 'EXECUTIVE')
+        
+        from finops_aws.ai_consultant.providers import AIProviderFactory
+        from finops_aws.ai_consultant.providers.base_provider import PersonaType
+        
+        persona_map = {
+            'EXECUTIVE': PersonaType.EXECUTIVE,
+            'CTO': PersonaType.CTO,
+            'DEVOPS': PersonaType.DEVOPS,
+            'ANALYST': PersonaType.ANALYST
+        }
+        persona = persona_map.get(persona_name, PersonaType.EXECUTIVE)
+        
+        provider = AIProviderFactory.create(provider_name)
+        
+        health = provider.health_check()
+        if not health.get('healthy'):
+            return jsonify({
+                'status': 'error',
+                'message': f'Provedor {provider_name} indisponível: {health.get("details", {}).get("error", "Erro desconhecido")}'
+            }), 400
+        
+        analysis = get_aws_analysis()
+        costs = analysis.get('costs', {})
+        resources = analysis.get('resources', {})
+        
+        response = provider.generate_report(costs, resources, persona)
+        
+        return jsonify({
+            'status': 'success',
+            'report': {
+                'provider': provider_name,
+                'model': response.model,
+                'content': response.content,
+                'tokens_used': response.tokens_used,
+                'latency_ms': response.latency_ms,
+                'metadata': response.metadata
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @app.route('/api/v1/multi-region')
 def multi_region_analysis():
     """Analisa todas as regiões AWS."""
