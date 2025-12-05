@@ -441,9 +441,9 @@ finops-aws/
 ├── src/finops_aws/           # Código fonte principal
 │   ├── core/                 # Núcleo da aplicação
 │   ├── models/               # Modelos de domínio
-│   ├── services/             # 253 serviços AWS
+│   ├── services/             # 246 serviços AWS (60% boto3)
 │   └── utils/                # Utilitários
-├── tests/                    # Testes automatizados (2.100+)
+├── tests/                    # Testes automatizados (2.200+)
 ├── docs/                     # Documentação (você está aqui!)
 ├── infrastructure/terraform/ # Deploy automatizado
 ├── run_local_demo.py         # Script para testar localmente
@@ -473,7 +473,7 @@ pip install -r requirements.txt
 | Pacote | Versão | Para Que Serve |
 |--------|--------|----------------|
 | `boto3` | 1.28+ | SDK oficial da AWS para Python. Permite fazer chamadas para a API da AWS |
-| `pytest` | 7.0+ | Framework de testes. Usado para rodar os 2.100+ testes automatizados |
+| `pytest` | 7.0+ | Framework de testes. Usado para rodar os 2.200+ testes automatizados |
 | `moto` | 5.0+ | Simulador de AWS. Permite testar sem uma conta AWS real |
 | `tabulate` | 0.9+ | Formatação de tabelas. Deixa os relatórios mais bonitos no terminal |
 | `dataclasses` | built-in | Estruturação de dados. Modelos do domínio (já vem com Python 3.7+) |
@@ -732,19 +732,19 @@ Running Lambda Handler Demo...
 ================================================================================
 
 Initializing FinOps Analysis...
-  ✓ ServiceFactory initialized with 253 services
+  ✓ ServiceFactory initialized with 246 services
   ✓ StateManager initialized (S3)
   ✓ ResilientExecutor initialized (CircuitBreaker)
   ✓ RetryHandler initialized (ExponentialBackoff)
 
 Processing Services...
   [████████████████████████████████████████] 100%
-  253/253 services analyzed successfully
+  246/246 services analyzed successfully
 
 EXECUTION SUMMARY:
   ─────────────────────────────────────────
   Duration: 12.34 seconds
-  Services Analyzed: 253
+  Services Analyzed: 246
   Resources Found: 1,234
   Recommendations Generated: 95
 
@@ -821,7 +821,7 @@ python run_with_aws.py
 ### O Que Este Comando Faz
 
 1. Conecta à sua conta AWS real usando as credenciais configuradas
-2. Analisa todos os 253 serviços em busca de recursos
+2. Analisa todos os 246 serviços (60% boto3) em busca de recursos
 3. Coleta métricas de uso de cada recurso
 4. Gera recomendações de otimização com valores reais
 5. Produz um relatório completo
@@ -843,7 +843,7 @@ Initializing Analysis...
 
 Analyzing Services...
   [████████████████████████████████████████] 100%
-  253/253 services analyzed
+  246/246 services analyzed
 
 COST ANALYSIS (Real Data):
   ═══════════════════════════════════════════════════════════════════════════
@@ -1320,4 +1320,4 @@ Se você tiver problemas:
 
 ---
 
-**FinOps AWS v2.1** | Manual atualizado em Dezembro 2024 | Score QA: 9.7/10 | 2.100+ testes
+**FinOps AWS v2.1** | Manual atualizado em Dezembro 2024 | Score QA: 9.9/10 | 2.200+ testes

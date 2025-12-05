@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 253 AWS services. It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution now includes an Automated Financial Consultant powered by Amazon Q Business for intelligent report generation.
+FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution now includes an Automated Financial Consultant powered by Amazon Q Business for intelligent report generation.
 
 ## User Preferences
 
@@ -26,13 +26,13 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 **Key Architectural Components:**
 - **Step Functions**: Orchestrates the execution flow, enabling parallel processing of AWS services.
 - **Lambda Functions**:
-    - `Lambda Mapper`: Divides the 253 AWS services into manageable batches.
+    - `Lambda Mapper`: Divides the 246 AWS services into manageable batches.
     - `Lambda Worker`: Processes individual service batches in parallel.
     - `Lambda Aggregator`: Consolidates processed results and prepares reports.
     - `Q Report Handler`: Serves as the Lambda handler for the AI Consultant module.
 - **AI Consultant**: Leverages Amazon Q Business to generate intelligent, personalized FinOps reports. It supports four personas (Executive, CTO, DevOps/SRE, FinOps Analyst) and delivers reports via email (SES), Slack, and a dashboard.
 - **S3StateManager**: Manages the storage of state information and generated reports, utilizing S3 instead of DynamoDB.
-- **ServiceFactory**: Manages the creation and caching of instances for the 253 AWS services.
+- **ServiceFactory**: Manages the creation and caching of instances for the 246 AWS services.
 - **ResilientExecutor**: Implements a circuit breaker pattern for enhanced fault tolerance.
 - **RetryHandler**: Provides exponential backoff retry mechanisms.
 - **Terraform**: The entire infrastructure, including Amazon Q Business resources, is defined and deployed using Terraform.
@@ -59,10 +59,10 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 | **E2E Tests** | 56 | 100% passing (4 suites) |
 | **Total Tests** | 2,200 | 100% passing (6 skipped) |
 | **Documentation** | 11,077 lines | Comprehensive docs |
-| **AWS Services** | 411 | Complete boto3 coverage |
+| **AWS Services** | 246 | 60% boto3 coverage (high-impact focus) |
 | **Services with API Analysis** | 395+ | Direct boto3 integration |
 | **Resource Metrics** | 510+ | Unique metrics monitored |
-| **boto3 Coverage** | 100% | Complete AWS coverage (411/411) |
+| **boto3 Coverage** | 60% | High-impact services (246/411) |
 | **QA Score** | 9.9/10 | Production-ready |
 
 ## External Dependencies
@@ -95,7 +95,7 @@ O dashboard agora integra com múltiplos serviços AWS para gerar recomendaçõe
 | **AWS Trusted Advisor** | Verificações de custo e segurança | Business/Enterprise Support |
 | **Amazon Q Business** | Análise inteligente com IA | `Q_BUSINESS_APPLICATION_ID` configurado |
 
-### Serviços AWS Analisados (200+ serviços)
+### Serviços AWS Analisados (246 serviços - 60% boto3)
 
 | Categoria | Serviços |
 |-----------|----------|
@@ -159,3 +159,7 @@ export Q_BUSINESS_APPLICATION_ID=seu-app-id
 - Documentation standardization with verified metrics
 - Corrected test counts across all documentation files
 - Ensured factual accuracy for enterprise presentation
+- **Documentation Update (Dec 5)**:
+  - Updated all documentation to reflect 246 AWS services (60% boto3 coverage)
+  - Clarified service counts: 246 in AWSServiceType enum, 253 documented, 411 available in boto3
+  - Verified consistency across TECHNICAL_GUIDE, USER_MANUAL, HEAD_FIRST_FINOPS, etc.

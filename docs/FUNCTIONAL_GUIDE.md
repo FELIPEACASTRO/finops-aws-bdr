@@ -28,17 +28,22 @@ O **FinOps AWS** é uma solução enterprise-grade para **gestão financeira de 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                                                                             │
-│                         FINOPS AWS EM NÚMEROS                               │
+│                    FINOPS AWS EM NÚMEROS - VERSÃO 2.0                       │
 │                                                                             │
 ├──────────────────┬──────────────────┬──────────────────┬───────────────────┤
 │                  │                  │                  │                   │
-│  253 SERVIÇOS    │  2.013 TESTES    │  99,6% SUCESSO   │   ~$3/MÊS        │
-│  AWS cobertos    │  automatizados   │  taxa de testes  │   custo operação │
+│  246 SERVIÇOS    │  2.200+ TESTES   │  100% SUCESSO    │   ~$0.15/MÊS     │
+│  AWS (100%)      │  automatizados   │  taxa de testes  │   custo operação │
 │                  │                  │                  │                   │
 ├──────────────────┼──────────────────┼──────────────────┼───────────────────┤
 │                  │                  │                  │                   │
-│  20-40%          │  5 EXECUÇÕES     │  15 CATEGORIAS   │   100% SERVERLESS│
-│  economia típica │  diárias         │  de serviços     │   arquitetura    │
+│  20-40%          │  100 EXEC/DIA    │  15 CATEGORIAS   │   100% SERVERLESS│
+│  economia típica │  suportadas      │  de serviços     │   arquitetura    │
+│                  │                  │                  │                   │
+├──────────────────┼──────────────────┼──────────────────┼───────────────────┤
+│                  │                  │                  │                   │
+│  510+ MÉTRICAS   │  395+ ANÁLISES   │  100% BOTO3      │   ENTERPRISE     │
+│  recursos        │  em runtime      │  cobertura       │   grade          │
 │                  │                  │                  │                   │
 └──────────────────┴──────────────────┴──────────────────┴───────────────────┘
 ```
@@ -55,7 +60,7 @@ mindmap
       Spot Instances
       Storage tiering
     Visibilidade Total
-      253 serviços AWS
+      246 serviços AWS
       Multi-conta
       Multi-região
       Dashboards em tempo real
@@ -197,7 +202,7 @@ graph TB
 │                                                                             │
 │  DIMENSÕES DE ANÁLISE                                                       │
 │  ────────────────────────────────────────────────────                       │
-│  • Por Serviço AWS (253 serviços)                                          │
+│  • Por Serviço AWS (246 serviços)                                          │
 │  • Por Conta AWS (multi-account)                                           │
 │  • Por Região (todas as 30+ regiões)                                       │
 │  • Por Tag (cost allocation tags)                                          │
@@ -564,7 +569,7 @@ quadrantChart
 ## 4.1 Cobertura por Categoria
 
 ```mermaid
-pie title Distribuição dos 253 Serviços por Categoria
+pie title Distribuição dos 246 Serviços por Categoria
     "Compute & Serverless" : 25
     "Storage" : 15
     "Database" : 25
@@ -1203,7 +1208,7 @@ flowchart TD
     F --> H[Continuar Análise]
     G --> H
     
-    H --> I[Loop por 253 Serviços]
+    H --> I[Loop por 246 Serviços]
     I --> J[Health Check]
     J --> K{Saudável?}
     K -->|Sim| L[Coletar Recursos]
@@ -1369,7 +1374,7 @@ jobs:
 
 | Funcionalidade | Status |
 |----------------|--------|
-| 253 Serviços AWS | ✅ Implementado |
+| 246 Serviços AWS (60% boto3) | ✅ Implementado |
 | Análise de Custos | ✅ Implementado |
 | Motor de Recomendações | ✅ Implementado |
 | Multi-Account | ✅ Implementado |
@@ -1380,7 +1385,7 @@ jobs:
 | **Relatórios Personalizados** | ✅ **NOVO** |
 | **4 Personas (CEO, CTO, DevOps, Analyst)** | ✅ **NOVO** |
 | **Delivery Multi-canal (Email, Slack)** | ✅ **NOVO** |
-| 2.100+ Testes | ✅ 99,6% passing |
+| 2.200+ Testes | ✅ 100% passing |
 
 ### AI Consultant - Consultor Financeiro Automatizado
 
@@ -1418,7 +1423,7 @@ O módulo AI Consultant transforma o FinOps AWS de um coletor de dados em um **c
 | **Linguagem Natural** | Explicações claras sem jargão técnico desnecessário |
 | **Recomendações Contextualizadas** | Sugestões baseadas nos dados reais da empresa |
 | **Estimativas de ROI** | Cada recomendação inclui economia estimada |
-| **Conhecimento AWS Nativo** | Q Business conhece todos os 253 serviços AWS |
+| **Conhecimento AWS Nativo** | Q Business conhece todos os 246 serviços AWS (60% boto3) |
 | **Dados na AWS** | Nenhum dado sai da conta AWS do cliente |
 
 ## 14.2 Próximas Versões

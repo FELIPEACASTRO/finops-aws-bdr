@@ -107,7 +107,7 @@
 
 | Tipo | Status | Implementação | Analogia |
 |------|--------|---------------|----------|
-| **Unit Testing** | ✅ | 2.100+ testes unitários | Testar cada tijolo |
+| **Unit Testing** | ✅ | 2.200+ testes unitários | Testar cada tijolo |
 | **Integration Testing** | ✅ | 44 testes de integração | Testar paredes juntas |
 | **System Testing** | ✅ | 56 testes E2E | Testar a casa toda |
 | **Acceptance Testing** | ✅ | 7 testes BDD | Cliente aprova a entrega |
@@ -162,7 +162,7 @@
 |------|--------|---------------|------------|
 | **Load Testing** | ⚠️ | Básico | Requer Locust/k6 para produção |
 | **Stress Testing** | ⚠️ | Simulado | Requer ambiente dedicado |
-| **Volume Testing** | ✅ | 253 serviços | Testamos alto volume |
+| **Volume Testing** | ✅ | 246 serviços | Testamos alto volume |
 | **Endurance Testing** | ⚠️ | Não implementado | Testes de 24h+ |
 | **Spike Testing** | ⚠️ | Não implementado | Picos súbitos |
 | **Scalability Testing** | ✅ | Step Functions | Escala automática |
@@ -218,7 +218,7 @@
 | **Data Consistency** | ✅ | Estado consistente |
 | **NULL Handling** | ✅ | Valores nulos tratados |
 | **Unicode Support** | ✅ | Caracteres especiais OK |
-| **Large Data Sets** | ✅ | 253 serviços processados |
+| **Large Data Sets** | ✅ | 246 serviços processados |
 | **Data Format** | ✅ | JSON, CSV suportados |
 | **Date/Time** | ✅ | Timezones corretos |
 

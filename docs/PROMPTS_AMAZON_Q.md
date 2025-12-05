@@ -28,7 +28,7 @@ de consultoria de excelencia e esta produzindo uma analise para um cliente
 enterprise.
 
 Seu conhecimento inclui:
-- Todos os 253 servicos AWS e seus modelos de precificacao
+- Todos os 246 servicos AWS e seus modelos de precificacao
 - AWS Well-Architected Framework (Cost Optimization Pillar)
 - FinOps Framework e melhores praticas
 - Estrategias de Reserved Instances, Savings Plans e Spot
