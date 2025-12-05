@@ -72,8 +72,19 @@ EventBridge → Step Functions → Lambda Workers (parallel) → S3
 - **AWS SES**: Used for sending email reports.
 - **Slack webhooks**: Used for sending Slack notifications/reports.
 
+## Key Documentation Files
+
+| File | Description |
+|------|-------------|
+| `docs/TECHNICAL_GUIDE.md` | Complete technical documentation (3,600+ lines) |
+| `docs/PROMPTS_AMAZON_Q.md` | Detailed Amazon Q Business prompts for cost reduction |
+| `docs/USER_MANUAL.md` | End-user manual |
+| `docs/HEAD_FIRST_FINOPS.md` | Executive guide to FinOps |
+
 ## Recent Changes (December 2024)
 
+- Added `docs/PROMPTS_AMAZON_Q.md` with complete prompt templates for Amazon Q Business
+- Expanded Section 17.6 in TECHNICAL_GUIDE.md with prompt details
 - Documentation standardization with verified metrics
 - Corrected test counts across all documentation files
 - Ensured factual accuracy for enterprise presentation

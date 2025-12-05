@@ -3427,6 +3427,130 @@ Recursos criados:
 - Q Business Data Source (S3)
 - Lambda para geração de relatórios
 
+## 17.6 Templates de Prompts para Reducao de Custos
+
+O sistema utiliza prompts estruturados e otimizados para gerar recomendacoes de reducao de custos. Cada prompt e composto por:
+
+1. **Contexto do Sistema** - Define o papel do AI como consultor FinOps senior
+2. **Dados de Custo** - JSON com custos consolidados do periodo
+3. **Template da Persona** - Instrucoes especificas para a audiencia
+4. **Secoes Solicitadas** - Lista de analises a incluir
+
+### Contexto do Sistema (Comum a Todos)
+
+```markdown
+Voce e um consultor senior de FinOps especializado em AWS, com mais de 15 anos 
+de experiencia em otimizacao de custos cloud. Voce trabalha para uma empresa 
+de consultoria de excelencia e esta produzindo uma analise para um cliente 
+enterprise.
+
+Seu conhecimento inclui:
+- Todos os 253 servicos AWS e seus modelos de precificacao
+- AWS Well-Architected Framework (Cost Optimization Pillar)
+- FinOps Framework e melhores praticas
+- Estrategias de Reserved Instances, Savings Plans e Spot
+- Rightsizing, automacao e governanca de custos
+```
+
+### Template EXECUTIVE (CEO/CFO)
+
+Foco em ROI e decisoes estrategicas:
+
+```markdown
+### Estrutura do Relatorio
+
+#### 1. RESUMO EXECUTIVO (3 paragrafos)
+- Gasto total do periodo em USD
+- Variacao percentual vs periodo anterior
+- Uma acao prioritaria com maior ROI
+
+#### 2. TOP 5 OPORTUNIDADES DE ECONOMIA
+| Oportunidade | Economia/Mes | Economia/Ano | Esforco | Prazo |
+
+#### 3. TENDENCIAS E PROJECOES
+- Projecao para proximos 3 meses
+- Comparativo YoY
+
+#### 4. RISCOS E ALERTAS
+| Risco | Probabilidade | Impacto | Acao Preventiva |
+
+#### 5. CONCLUSAO E PROXIMOS PASSOS
+- 3 acoes prioritarias para o proximo mes
+- Economia total capturavel
+```
+
+### Template OPERATIONAL (DevOps/SRE)
+
+Foco em comandos AWS CLI e scripts prontos:
+
+```markdown
+#### 2. RECURSOS PARA ACAO IMEDIATA
+
+RECURSO: i-0abc123def456
+SERVICO: EC2
+CUSTO ATUAL: $450/mes
+UTILIZACAO: 8%
+ACAO: Rightsizing para t3.medium
+ECONOMIA: $320/mes
+
+COMANDOS:
+```bash
+aws ec2 stop-instances --instance-ids i-0abc123def456
+aws ec2 modify-instance-attribute --instance-id i-0abc123def456 \
+  --instance-type '{"Value": "t3.medium"}'
+aws ec2 start-instances --instance-ids i-0abc123def456
+```
+
+#### 7. SCRIPTS DE AUTOMACAO
+
+```python
+#!/usr/bin/env python3
+def get_low_cpu_instances(threshold=10):
+    # Script completo para identificar recursos subutilizados
+```
+```
+
+### Template ANALYST (FinOps Analyst)
+
+Foco em metricas, KPIs e benchmarks:
+
+```markdown
+#### 1. DASHBOARD DE METRICAS
+
+| KPI | Valor Atual | Anterior | Delta% | Meta | Status |
+|-----|-------------|----------|--------|------|--------|
+| Custo Total | $47,523 | $42,100 | +12.9% | $45,000 | Vermelho |
+| Cobertura RI/SP | 45% | 42% | +3% | 70% | Amarelo |
+| Waste Ratio | 8.2% | 9.1% | -0.9% | <5% | Amarelo |
+
+#### 4. ANALISE DE WASTE
+
+| Categoria | Quantidade | Custo/Mes | % do Servico |
+|-----------|------------|-----------|--------------|
+| EC2 subutilizados | 12 | $1,840 | 9.9% |
+| EBS nao anexados | 28 | $420 | 15.2% |
+
+#### 10. RECOMENDACOES PRIORIZADAS
+
+| # | Recomendacao | Economia/Mes | Esforco | Score | Prazo |
+|---|--------------|--------------|---------|-------|-------|
+| 1 | Rightsizing EC2 | $2,100 | Baixo | 10 | 7d |
+| 2 | Deletar EBS orfaos | $420 | Baixo | 9 | 3d |
+```
+
+### Arquivos de Origem
+
+| Arquivo | Descricao |
+|---------|-----------|
+| `prompts/templates/executive.py` | Template para CEO/CFO |
+| `prompts/templates/technical.py` | Template para CTO |
+| `prompts/templates/operational.py` | Template para DevOps/SRE |
+| `prompts/templates/analyst.py` | Template para FinOps Analyst |
+| `prompts/builder.py` | Construtor principal de prompts |
+| `prompts/personas.py` | Configuracao de personas |
+
+> **Documentacao Completa**: Consulte `docs/PROMPTS_AMAZON_Q.md` para os templates completos de cada persona.
+
 ---
 
 # 18. Performance e Otimizações
