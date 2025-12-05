@@ -210,6 +210,81 @@ def get_trusted_advisor_recommendations() -> List[Dict[str, Any]]:
     return recommendations
 
 
+def get_ai_insights(
+    costs: Dict[str, Any], 
+    resources: Dict[str, Any],
+    persona: str = 'EXECUTIVE',
+    provider: str = 'auto'
+) -> List[Dict[str, Any]]:
+    """
+    Obtém insights de IA para análise FinOps usando múltiplos provedores.
+    
+    Provedores suportados:
+    - amazon_q: Amazon Q Business (AWS nativo)
+    - openai: ChatGPT (GPT-4o)
+    - gemini: Google Gemini
+    - perplexity: Perplexity AI (com busca online)
+    - auto: Seleciona automaticamente o primeiro disponível
+    
+    Args:
+        costs: Dados de custos consolidados
+        resources: Dados de recursos AWS
+        persona: Persona para o relatório (EXECUTIVE, CTO, DEVOPS, ANALYST)
+        provider: Provedor de IA a usar (ou 'auto')
+        
+    Returns:
+        Lista de insights gerados pela IA
+    """
+    from ..ai_consultant.providers import AIProviderFactory, PersonaType
+    
+    insights = []
+    
+    persona_map = {
+        'EXECUTIVE': PersonaType.EXECUTIVE,
+        'CTO': PersonaType.CTO,
+        'DEVOPS': PersonaType.DEVOPS,
+        'ANALYST': PersonaType.ANALYST
+    }
+    persona_type = persona_map.get(persona.upper(), PersonaType.EXECUTIVE)
+    
+    ai_provider = None
+    
+    if provider == 'auto':
+        available = AIProviderFactory.create_all_available()
+        if available:
+            provider_name = list(available.keys())[0]
+            ai_provider = available[provider_name]
+    else:
+        ai_provider = AIProviderFactory.create(provider)
+    
+    if not ai_provider:
+        return insights
+    
+    try:
+        response = ai_provider.generate_report(costs, resources, persona_type)
+        
+        if response and response.content:
+            insights.append({
+                'type': f'{response.provider.value.upper()}_INSIGHT',
+                'resource_id': 'AI Analysis',
+                'title': f'Análise Inteligente FinOps ({response.provider.value})',
+                'description': response.content,
+                'priority': 'HIGH',
+                'savings': 0,
+                'service': response.provider.value.replace('_', ' ').title(),
+                'full_response': response.content,
+                'model': response.model,
+                'tokens_used': response.tokens_used,
+                'latency_ms': response.latency_ms,
+                'sources': response.sources
+            })
+            
+    except Exception as e:
+        logger.error(f"Erro ao obter insights de IA ({provider}): {e}")
+    
+    return insights
+
+
 def get_amazon_q_insights(
     costs: Dict[str, Any], 
     resources: Dict[str, Any],
@@ -217,6 +292,8 @@ def get_amazon_q_insights(
 ) -> List[Dict[str, Any]]:
     """
     Obtém insights do Amazon Q Business para análise FinOps.
+    
+    DEPRECATED: Use get_ai_insights() com provider='amazon_q'
     
     Args:
         costs: Dados de custos consolidados
@@ -226,47 +303,44 @@ def get_amazon_q_insights(
     Returns:
         Lista de insights gerados pela IA
     """
-    insights = []
+    return get_ai_insights(costs, resources, persona, provider='amazon_q')
+
+
+def list_available_ai_providers() -> Dict[str, Any]:
+    """
+    Lista provedores de IA disponíveis e configurados.
     
-    q_app_id = os.environ.get('Q_BUSINESS_APPLICATION_ID')
-    if not q_app_id:
-        return insights
+    Returns:
+        Dict com provedores e status
+    """
+    from ..ai_consultant.providers import AIProviderFactory
     
-    try:
-        q = boto3.client('qbusiness')
-        
-        total_cost = costs.get('total', 0)
-        top_services = list(costs.get('by_service', {}).items())[:5]
-        
-        prompt = _build_finops_prompt(costs, resources, persona)
-        
-        response = q.chat_sync(
-            applicationId=q_app_id,
-            userMessage=prompt
-        )
-        
-        ai_response = response.get('systemMessage', '')
-        
-        if ai_response:
-            insights.append({
-                'type': 'AMAZON_Q_INSIGHT',
-                'resource_id': 'AI Analysis',
-                'title': 'Análise Inteligente FinOps',
-                'description': ai_response,
-                'priority': 'HIGH',
-                'savings': 0,
-                'service': 'Amazon Q Business',
-                'full_response': ai_response,
-                'conversation_id': response.get('conversationId')
-            })
-            
-    except ClientError as e:
-        error_code = e.response.get('Error', {}).get('Code', '')
-        logger.error(f"Erro ao acessar Amazon Q: {error_code} - {e}")
-    except Exception as e:
-        logger.error(f"Erro inesperado no Amazon Q: {e}")
+    result = {
+        'available': [],
+        'configured': [],
+        'providers': {}
+    }
     
-    return insights
+    for name in ['amazon_q', 'openai', 'gemini', 'perplexity']:
+        info = AIProviderFactory.get_provider_info(name)
+        result['providers'][name] = info
+        result['available'].append(name)
+        
+        try:
+            provider = AIProviderFactory.create(name)
+            if provider:
+                health = provider.health_check()
+                if health.get('healthy'):
+                    result['configured'].append(name)
+                    result['providers'][name]['status'] = 'configured'
+                else:
+                    result['providers'][name]['status'] = 'not_configured'
+                    result['providers'][name]['error'] = health.get('details', {}).get('error')
+        except Exception as e:
+            result['providers'][name]['status'] = 'error'
+            result['providers'][name]['error'] = str(e)
+    
+    return result
 
 
 def _build_finops_prompt(
