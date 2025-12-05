@@ -151,14 +151,24 @@ class GeminiProvider(BaseAIProvider):
         start_time = time.time()
         
         try:
-            generation_config = {
-                "temperature": self.config.temperature,
-                "max_output_tokens": self.config.max_tokens
-            }
+            import google.generativeai as genai
+            
+            generation_config = genai.GenerationConfig(
+                temperature=self.config.temperature,
+                max_output_tokens=self.config.max_tokens
+            )
+            
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
             
             response = self.client.generate_content(
                 full_prompt,
-                generation_config=generation_config
+                generation_config=generation_config,
+                safety_settings=safety_settings
             )
             
             latency = int((time.time() - start_time) * 1000)
@@ -168,14 +178,30 @@ class GeminiProvider(BaseAIProvider):
                 usage = response.usage_metadata
                 tokens_used = getattr(usage, 'total_token_count', 0)
             
+            content = ""
+            finish_reason = "UNKNOWN"
+            
+            if response.candidates and len(response.candidates) > 0:
+                candidate = response.candidates[0]
+                finish_reason = candidate.finish_reason.name if hasattr(candidate.finish_reason, 'name') else str(candidate.finish_reason)
+                
+                if candidate.content and candidate.content.parts:
+                    content = candidate.content.parts[0].text
+                elif finish_reason == "SAFETY":
+                    content = "[Resposta bloqueada por filtros de seguranca do Gemini. Tente reformular a pergunta.]"
+                else:
+                    content = f"[Resposta vazia. Finish reason: {finish_reason}]"
+            else:
+                content = "[Nenhuma resposta gerada pelo Gemini]"
+            
             return AIResponse(
-                content=response.text,
+                content=content,
                 provider=self.provider_type,
                 model=self.config.model or "gemini-2.5-flash",
                 tokens_used=tokens_used,
                 latency_ms=latency,
                 metadata={
-                    "finish_reason": response.candidates[0].finish_reason.name if response.candidates else "UNKNOWN"
+                    "finish_reason": finish_reason
                 }
             )
             
