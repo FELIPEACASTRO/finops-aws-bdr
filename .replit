@@ -64,10 +64,13 @@ externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind=0.0.0.0:5000", "--workers=2", "--reuse-port"]
-build = ["bash", "-c", "cd frontend && npm install && npm run build"]
+run = ["gunicorn", "--bind=0.0.0.0:5000", "--workers=2", "--reuse-port", "--timeout=120", "app:app"]
+build = ["bash", "-c", "cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt || true"]
 
 [userenv]
 
 [userenv.development]
 PORT = "8000"
+
+[userenv.shared]
+REPLIT_KEEP_PACKAGE_DEV_DEPENDENCIES = "true"

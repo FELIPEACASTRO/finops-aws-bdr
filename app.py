@@ -8,11 +8,14 @@ import os
 import sys
 import json
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, send_file, render_template_string, request
+from flask import Flask, jsonify, send_file, render_template_string, request, send_from_directory
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-app = Flask(__name__)
+# Serve React frontend static files from frontend/dist
+frontend_dist = os.path.join(os.path.dirname(__file__), 'frontend', 'dist')
+
+app = Flask(__name__, static_folder=frontend_dist, static_url_path='')
 
 # Cache simples para evitar re-análise a cada requisição
 _analysis_cache = {
@@ -7081,6 +7084,24 @@ def get_costs_data():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# Serve index.html for React Router SPA
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_react(path):
+    """Serve React app or API routes."""
+    # API routes - handle them normally
+    if path.startswith('api/'):
+        return jsonify({'error': 'API route not found'}), 404
+    
+    # For all other routes, serve index.html (React Router handles routing)
+    index_path = os.path.join(frontend_dist, 'index.html')
+    if os.path.exists(index_path):
+        return send_from_directory(frontend_dist, 'index.html')
+    
+    # Fallback if dist doesn't exist (development mode)
+    return jsonify({'error': 'Frontend not built. Run: cd frontend && npm install && npm run build'}), 503
 
 
 if __name__ == '__main__':
