@@ -55,6 +55,14 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 
 ## Recent Changes (December 2025)
 
+### Localização Português Brasil - Níveis de Maturidade (December 8, 2025)
+Termos de maturidade FinOps traduzidos para Português do Brasil intuitivo:
+- **Níveis renomeados**: CRAWL→"Nível 1", WALK→"Nível 2", RUN→"Nível 3", FLY→"Nível 4"
+- **Títulos descritivos**: "Visibilidade de Custos", "Alocação e Controle", "Otimização Ativa", "Excelência Operacional"
+- **Badge localizado**: CRAWL→"Iniciante", WALK→"Intermediário", RUN→"Avançado", FLY→"Excelência"
+- **Descrições detalhadas**: Cada nível com explicação clara do que significa na prática
+- **Backend atualizado**: API retorna `level_name` e `levels_info` com metadados localizados
+
 ### Mock Data Elimination (December 8, 2025)
 All pages now use exclusively real API data with zero mock/hardcoded data:
 - **Costs.tsx**: Removed Math.random, using real trends from API
