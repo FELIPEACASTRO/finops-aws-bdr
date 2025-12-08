@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Globe,
   MapPin,
@@ -55,24 +55,47 @@ export function MultiRegion() {
   const [totalCost, setTotalCost] = useState(0);
   const [activeRegions, setActiveRegions] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const fetchingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (!dataLoaded) {
+    mountedRef.current = true;
+    if (!fetchingRef.current) {
       fetchMultiRegion();
     }
-  }, [dataLoaded]);
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const fetchMultiRegion = async () => {
-    console.log('Buscando dados multi-region...');
+    if (fetchingRef.current) {
+      console.log('Já buscando multi-region, ignorando chamada duplicada');
+      return;
+    }
+    fetchingRef.current = true;
+    console.log('Buscando dados multi-region via fetch direto...');
     setLoading(true);
     try {
-      const response = await get<any>('/api/v1/multi-region');
-      console.log('Multi-region response:', response);
+      const fetchResponse = await fetch('/api/v1/multi-region');
+      const response = await fetchResponse.json();
+      console.log('Multi-region response:', response?.status, 'data keys:', response?.data ? Object.keys(response.data) : 'null');
+      
+      if (!mountedRef.current) {
+        console.log('Componente desmontado, ignorando resposta');
+        return;
+      }
+      
+      if (!response) {
+        console.log('Response é null/undefined');
+        setLoading(false);
+        return;
+      }
       
       const rawData = response?.data || response;
-      const regionsSource = rawData?.regions || rawData;
+      const regionsSource = rawData?.regions;
       const costsByRegion = rawData?.costs_by_region || {};
+      console.log('Regiões encontradas:', regionsSource ? Object.keys(regionsSource).length : 0);
       
       let regionsData: RegionData[] = [];
       
@@ -124,21 +147,24 @@ export function MultiRegion() {
       } else {
         console.log('Nenhuma região encontrada na resposta:', rawData);
         setLoading(false);
-        setDataLoaded(true);
+        fetchingRef.current = false;
         return;
       }
 
       const sorted = regionsData.sort((a, b) => b.cost - a.cost);
-      setRegions(sorted);
-      setTotalCost(sorted.reduce((acc, r) => acc + r.cost, 0));
-      setActiveRegions(sorted.filter((r) => r.status === 'active').length);
-      setDataLoaded(true);
-      console.log(`Multi-region carregado: ${sorted.length} regiões, total: $${sorted.reduce((acc, r) => acc + r.cost, 0).toFixed(2)}`);
+      if (mountedRef.current) {
+        setRegions(sorted);
+        setTotalCost(sorted.reduce((acc, r) => acc + r.cost, 0));
+        setActiveRegions(sorted.filter((r) => r.status === 'active').length);
+        console.log(`Multi-region carregado: ${sorted.length} regiões, total: $${sorted.reduce((acc, r) => acc + r.cost, 0).toFixed(2)}`);
+      }
     } catch (err) {
       console.error('Erro ao buscar multi-region:', err);
-      setDataLoaded(true);
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+      fetchingRef.current = false;
     }
   };
 
