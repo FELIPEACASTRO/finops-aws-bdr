@@ -123,6 +123,85 @@ print(response.content)
 | **AWS Cost Explorer** | RI e Savings Plans | Dados de uso |
 | **AWS Trusted Advisor** | Verificações de custo | Business/Enterprise |
 | **Amazon Q Business** | Análise com IA | Q_BUSINESS_APPLICATION_ID |
+| **AWS Budgets** | Monitoramento de orçamentos | Budgets configurados |
+| **Cost Anomaly Detection** | Detecção de anomalias | Monitors configurados |
+| **Savings Plans Service** | Análise de SP (utilização/cobertura) | Savings Plans ativos |
+| **Reserved Instances Service** | Análise de RI multi-serviço (EC2/RDS/ElastiCache) | RIs ativos |
+| **Tag Governance Service** | Validação de tags, cobertura, compliance | Resource Groups API |
+| **KPI Calculator** | 12+ KPIs FinOps oficiais | Cost Explorer |
+
+## FinOps Services (New - December 2024)
+
+### Commitment Management (RI + SP)
+```python
+from finops_aws.dashboard.integrations import (
+    get_savings_plans_analysis,
+    get_reserved_instances_analysis,
+    get_commitments_summary
+)
+
+# Análise de Savings Plans
+sp = get_savings_plans_analysis()
+print(f"SP Utilization: {sp['utilization']['utilization_percentage']}%")
+print(f"SP Coverage: {sp['coverage']['coverage_percentage']}%")
+
+# Análise de Reserved Instances
+ri = get_reserved_instances_analysis()
+print(f"RI Utilization: {ri['utilization']['utilization_percentage']}%")
+
+# Resumo consolidado
+summary = get_commitments_summary()
+print(f"Avg Utilization: {summary['summary']['avg_utilization']}%")
+```
+
+### Budget & Anomaly Monitoring
+```python
+from finops_aws.dashboard.integrations import (
+    get_budgets_analysis,
+    get_anomaly_detection_analysis
+)
+
+# Análise de Budgets
+budgets = get_budgets_analysis()
+for b in budgets['budgets']:
+    print(f"Budget: {b['name']} - Status: {b['status']}")
+
+# Detecção de Anomalias
+anomalies = get_anomaly_detection_analysis(days_back=90)
+for a in anomalies['anomalies']:
+    print(f"Anomaly: {a['service']} - Impact: ${a['actual_cost']}")
+```
+
+### Tag Governance & KPIs
+```python
+from finops_aws.dashboard.integrations import (
+    get_tag_governance_analysis,
+    get_finops_kpis
+)
+
+# Governança de Tags
+tags = get_tag_governance_analysis(required_tags=['Environment', 'Owner', 'CostCenter'])
+print(f"Tag Coverage: {tags['coverage']['coverage_percent']}%")
+print(f"Compliance: {tags['coverage']['compliance_percent']}%")
+
+# KPIs FinOps
+kpis = get_finops_kpis(idle_cost=1000, shadow_cost=500)
+print(f"Total Spend: ${kpis['total_spend']}")
+print(f"Waste %: {kpis['waste_percent']}%")
+print(f"Economic Health Index: {kpis['economic_health_index']}/100")
+```
+
+### Data Models (Expanded)
+| Model | Purpose |
+|-------|---------|
+| **FinOpsKPIs** | 20+ KPIs oficiais FinOps |
+| **Commitment** | RI, SP, EDP tracking |
+| **Anomaly** | Anomalias de custo |
+| **Budget** | Orçamentos e alertas |
+| **TagPolicy** | Políticas de tags |
+| **TagCoverage** | Cobertura de tagging |
+| **BusinessDimension** | Unit Economics |
+| **BillingExtra** | Support, Tax, Credits |
 | **OpenAI ChatGPT** | Análise com IA | OPENAI_API_KEY |
 | **Google Gemini** | Análise com IA | GEMINI_API_KEY |
 | **Perplexity AI** | Análise com IA + busca | PERPLEXITY_API_KEY |

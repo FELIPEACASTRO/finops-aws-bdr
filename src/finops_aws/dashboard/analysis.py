@@ -25,6 +25,13 @@ from .integrations import (
     get_cost_explorer_ri_recommendations,
     get_trusted_advisor_recommendations,
     get_amazon_q_insights,
+    get_budgets_analysis,
+    get_anomaly_detection_analysis,
+    get_savings_plans_analysis,
+    get_reserved_instances_analysis,
+    get_tag_governance_analysis,
+    get_finops_kpis,
+    get_commitments_summary,
 )
 
 logger = logging.getLogger(__name__)
@@ -105,7 +112,22 @@ def get_dashboard_analysis(
             'cost_explorer_ri': False,
             'trusted_advisor': False,
             'amazon_q': False,
-            'multi_region': False
+            'multi_region': False,
+            'budgets': False,
+            'anomalies': False,
+            'savings_plans': False,
+            'reserved_instances': False,
+            'tag_governance': False,
+            'kpis': False
+        },
+        'finops': {
+            'budgets': {},
+            'anomalies': {},
+            'savings_plans': {},
+            'reserved_instances': {},
+            'commitments': {},
+            'tag_governance': {},
+            'kpis': {}
         },
         'account_id': 'Unknown',
         'region': region,
@@ -181,6 +203,82 @@ def get_dashboard_analysis(
                 result['recommendations'].append(rec)
         except Exception as e:
             logger.error(f"Erro na análise multi-region: {e}")
+    
+    try:
+        budgets_data = get_budgets_analysis()
+        if budgets_data and 'error' not in budgets_data:
+            result['finops']['budgets'] = budgets_data
+            result['integrations']['budgets'] = True
+            for rec in budgets_data.get('recommendations', []):
+                result['recommendations'].append(rec)
+    except Exception as e:
+        logger.error(f"Erro na análise de Budgets: {e}")
+    
+    try:
+        anomalies_data = get_anomaly_detection_analysis(days_back=90)
+        if anomalies_data and 'error' not in anomalies_data:
+            result['finops']['anomalies'] = anomalies_data
+            result['integrations']['anomalies'] = True
+            for rec in anomalies_data.get('recommendations', []):
+                result['recommendations'].append(rec)
+    except Exception as e:
+        logger.error(f"Erro na análise de Anomalias: {e}")
+    
+    try:
+        sp_data = get_savings_plans_analysis()
+        if sp_data and 'error' not in sp_data:
+            result['finops']['savings_plans'] = sp_data
+            result['integrations']['savings_plans'] = True
+            for rec in sp_data.get('recommendations', []):
+                result['recommendations'].append(rec)
+    except Exception as e:
+        logger.error(f"Erro na análise de Savings Plans: {e}")
+    
+    try:
+        ri_data = get_reserved_instances_analysis()
+        if ri_data and 'error' not in ri_data:
+            result['finops']['reserved_instances'] = ri_data
+            result['integrations']['reserved_instances'] = True
+            for rec in ri_data.get('recommendations', []):
+                result['recommendations'].append(rec)
+    except Exception as e:
+        logger.error(f"Erro na análise de Reserved Instances: {e}")
+    
+    try:
+        commitments_data = get_commitments_summary()
+        if commitments_data:
+            result['finops']['commitments'] = commitments_data.get('summary', {})
+    except Exception as e:
+        logger.error(f"Erro no resumo de Commitments: {e}")
+    
+    try:
+        tag_data = get_tag_governance_analysis()
+        if tag_data and 'error' not in tag_data:
+            result['finops']['tag_governance'] = tag_data
+            result['integrations']['tag_governance'] = True
+            for rec in tag_data.get('recommendations', []):
+                result['recommendations'].append(rec)
+    except Exception as e:
+        logger.error(f"Erro na análise de Tag Governance: {e}")
+    
+    try:
+        idle_cost = sum(
+            r.get('savings', 0) for r in result['recommendations'] 
+            if 'idle' in r.get('type', '').lower() or 'unused' in r.get('type', '').lower()
+        )
+        shadow_cost = tag_data.get('costs', {}).get('total_cost', 0) if 'tag_data' in dir() else 0
+        savings_potential = sum(r.get('savings', 0) for r in result['recommendations'])
+        
+        kpis_data = get_finops_kpis(
+            idle_cost=idle_cost,
+            shadow_cost=shadow_cost,
+            savings_potential=savings_potential
+        )
+        if kpis_data and 'error' not in kpis_data:
+            result['finops']['kpis'] = kpis_data
+            result['integrations']['kpis'] = True
+    except Exception as e:
+        logger.error(f"Erro no cálculo de KPIs: {e}")
     
     result['recommendations'] = _deduplicate_recommendations(result['recommendations'])
     result['recommendations'].sort(key=lambda x: x.get('savings', 0), reverse=True)

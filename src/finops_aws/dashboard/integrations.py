@@ -6,6 +6,16 @@ Integração com serviços AWS para recomendações de otimização:
 - Cost Explorer (Reserved Instances e Savings Plans)
 - AWS Trusted Advisor
 - Amazon Q Business
+- AWS Budgets
+- Cost Anomaly Detection
+- Savings Plans Analysis
+- Reserved Instances Analysis
+- Tag Governance
+- KPIs Calculator
+
+Design Patterns:
+- Facade: Simplifica acesso às integrações
+- Strategy: Provedores de IA intercambiáveis
 """
 
 import os
@@ -440,3 +450,256 @@ Tom: Analítico e detalhado, foco em dados."""
 """
     
     return prompt
+
+
+def get_budgets_analysis() -> Dict[str, Any]:
+    """
+    Obtém análise completa de AWS Budgets.
+    
+    Returns:
+        Dict com budgets, métricas e recomendações
+    """
+    try:
+        from ..services.budgets_service import BudgetsService
+        
+        service = BudgetsService()
+        if not service.health_check():
+            return {'error': 'Budgets service not available', 'budgets': [], 'recommendations': []}
+        
+        budgets = service.get_resources()
+        metrics = service.get_metrics()
+        recommendations = service.get_recommendations()
+        
+        return {
+            'budgets': budgets,
+            'metrics': metrics.to_dict(),
+            'recommendations': [r.to_dict() for r in recommendations],
+            'costs': service.get_costs().to_dict()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter análise de Budgets: {e}")
+        return {'error': str(e), 'budgets': [], 'recommendations': []}
+
+
+def get_anomaly_detection_analysis(days_back: int = 90) -> Dict[str, Any]:
+    """
+    Obtém análise de anomalias de custo.
+    
+    Args:
+        days_back: Dias para análise histórica
+        
+    Returns:
+        Dict com anomalias, métricas e recomendações
+    """
+    try:
+        from ..services.costanomalydetection_service import CostAnomalyDetectionService
+        
+        service = CostAnomalyDetectionService()
+        if not service.health_check():
+            return {'error': 'Cost Anomaly Detection not available', 'anomalies': [], 'recommendations': []}
+        
+        anomalies = service.get_anomalies(days_back=days_back)
+        monitors = service.get_anomaly_monitors()
+        metrics = service.get_metrics()
+        recommendations = service.get_recommendations()
+        
+        return {
+            'anomalies': [a.to_dict() for a in anomalies],
+            'monitors': [m.to_dict() for m in monitors],
+            'metrics': metrics.to_dict(),
+            'recommendations': [r.to_dict() for r in recommendations],
+            'costs': service.get_costs().to_dict()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter análise de anomalias: {e}")
+        return {'error': str(e), 'anomalies': [], 'recommendations': []}
+
+
+def get_savings_plans_analysis() -> Dict[str, Any]:
+    """
+    Obtém análise completa de Savings Plans.
+    
+    Returns:
+        Dict com SP, utilização, cobertura e recomendações
+    """
+    try:
+        from ..services.savingsplans_service import SavingsPlansService
+        
+        service = SavingsPlansService()
+        if not service.health_check():
+            return {'error': 'Savings Plans service not available', 'savings_plans': [], 'recommendations': []}
+        
+        savings_plans = service.get_savings_plans(states=['active'])
+        utilization = service.get_utilization()
+        coverage = service.get_coverage()
+        metrics = service.get_metrics()
+        recommendations = service.get_recommendations()
+        purchase_recs = service.get_purchase_recommendations()
+        
+        return {
+            'savings_plans': [sp.to_dict() for sp in savings_plans],
+            'utilization': utilization.to_dict(),
+            'coverage': coverage.to_dict(),
+            'metrics': metrics.to_dict(),
+            'recommendations': [r.to_dict() for r in recommendations],
+            'purchase_recommendations': purchase_recs,
+            'costs': service.get_costs().to_dict()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter análise de Savings Plans: {e}")
+        return {'error': str(e), 'savings_plans': [], 'recommendations': []}
+
+
+def get_reserved_instances_analysis() -> Dict[str, Any]:
+    """
+    Obtém análise completa de Reserved Instances.
+    
+    Returns:
+        Dict com RIs, utilização, cobertura e recomendações
+    """
+    try:
+        from ..services.reservedinstances_service import ReservedInstancesService
+        
+        service = ReservedInstancesService()
+        if not service.health_check():
+            return {'error': 'Reserved Instances service not available', 'reserved_instances': [], 'recommendations': []}
+        
+        ris = service.get_all_reserved_instances()
+        utilization = service.get_utilization()
+        coverage = service.get_coverage()
+        metrics = service.get_metrics()
+        recommendations = service.get_recommendations()
+        purchase_recs = service.get_purchase_recommendations()
+        
+        return {
+            'reserved_instances': [ri.to_dict() for ri in ris],
+            'utilization': utilization.to_dict(),
+            'coverage': coverage.to_dict(),
+            'metrics': metrics.to_dict(),
+            'recommendations': [r.to_dict() for r in recommendations],
+            'purchase_recommendations': purchase_recs,
+            'costs': service.get_costs().to_dict()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter análise de Reserved Instances: {e}")
+        return {'error': str(e), 'reserved_instances': [], 'recommendations': []}
+
+
+def get_tag_governance_analysis(required_tags: Optional[List[str]] = None) -> Dict[str, Any]:
+    """
+    Obtém análise de governança de tags.
+    
+    Args:
+        required_tags: Lista de tags obrigatórias (opcional)
+        
+    Returns:
+        Dict com cobertura, compliance e recomendações
+    """
+    try:
+        from ..services.tag_governance_service import TagGovernanceService
+        
+        service = TagGovernanceService(required_tags=required_tags)
+        if not service.health_check():
+            return {'error': 'Tag Governance service not available', 'coverage': {}, 'recommendations': []}
+        
+        coverage = service.analyze_tag_coverage()
+        tags_in_use = service.get_all_tags_in_use()
+        metrics = service.get_metrics()
+        recommendations = service.get_recommendations()
+        
+        return {
+            'coverage': coverage.to_dict(),
+            'tags_in_use': tags_in_use,
+            'metrics': metrics.to_dict(),
+            'recommendations': [r.to_dict() for r in recommendations],
+            'policy': service.get_tag_policy().to_dict(),
+            'costs': service.get_costs().to_dict()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter análise de Tag Governance: {e}")
+        return {'error': str(e), 'coverage': {}, 'recommendations': []}
+
+
+def get_finops_kpis(
+    idle_cost: float = 0.0,
+    shadow_cost: float = 0.0,
+    savings_potential: float = 0.0,
+    savings_captured: float = 0.0,
+    transactions_count: int = 0,
+    customers_count: int = 0,
+    revenue: float = 0.0
+) -> Dict[str, Any]:
+    """
+    Calcula todos os KPIs FinOps.
+    
+    Args:
+        idle_cost: Custo de recursos ociosos
+        shadow_cost: Custo de recursos sem tags
+        savings_potential: Economia potencial identificada
+        savings_captured: Economia já capturada
+        transactions_count: Número de transações (para unit economics)
+        customers_count: Número de clientes (para unit economics)
+        revenue: Receita do período (para margem)
+        
+    Returns:
+        Dict com todos os KPIs calculados
+    """
+    try:
+        from ..services.kpi_calculator import KPICalculator
+        
+        calculator = KPICalculator()
+        result = calculator.calculate_all_kpis(
+            idle_cost=idle_cost,
+            shadow_cost=shadow_cost,
+            savings_potential=savings_potential,
+            savings_captured=savings_captured,
+            transactions_count=transactions_count,
+            customers_count=customers_count,
+            revenue=revenue
+        )
+        
+        return result.to_dict()
+        
+    except Exception as e:
+        logger.error(f"Erro ao calcular KPIs: {e}")
+        return {'error': str(e), 'kpis': {}}
+
+
+def get_commitments_summary() -> Dict[str, Any]:
+    """
+    Obtém resumo consolidado de commitments (RI + SP).
+    
+    Returns:
+        Dict com resumo de todos os commitments
+    """
+    sp_analysis = get_savings_plans_analysis()
+    ri_analysis = get_reserved_instances_analysis()
+    
+    total_sp = len(sp_analysis.get('savings_plans', []))
+    total_ri = len(ri_analysis.get('reserved_instances', []))
+    
+    sp_utilization = sp_analysis.get('utilization', {}).get('utilization_percentage', 0)
+    ri_utilization = ri_analysis.get('utilization', {}).get('utilization_percentage', 0)
+    
+    sp_coverage = sp_analysis.get('coverage', {}).get('coverage_percentage', 0)
+    ri_coverage = ri_analysis.get('coverage', {}).get('coverage_percentage', 0)
+    
+    all_recommendations = []
+    all_recommendations.extend(sp_analysis.get('recommendations', []))
+    all_recommendations.extend(ri_analysis.get('recommendations', []))
+    
+    return {
+        'summary': {
+            'total_savings_plans': total_sp,
+            'total_reserved_instances': total_ri,
+            'sp_utilization_percent': sp_utilization,
+            'ri_utilization_percent': ri_utilization,
+            'sp_coverage_percent': sp_coverage,
+            'ri_coverage_percent': ri_coverage,
+            'avg_utilization': (sp_utilization + ri_utilization) / 2 if (sp_utilization + ri_utilization) > 0 else 0,
+            'avg_coverage': (sp_coverage + ri_coverage) / 2 if (sp_coverage + ri_coverage) > 0 else 0
+        },
+        'savings_plans': sp_analysis,
+        'reserved_instances': ri_analysis,
+        'recommendations': all_recommendations
+    }
