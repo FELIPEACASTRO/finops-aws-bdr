@@ -142,6 +142,69 @@ const CATEGORY_INFO: Record<string, { icon: any; color: string; label: string }>
   optimization: { icon: TrendingDown, color: 'var(--color-success-400)', label: 'Otimização' },
 };
 
+const enrichRecommendation = (rec: any, index: number): Recommendation => {
+  const type = rec.type || 'GENERAL';
+  const template = RECOMMENDATION_TEMPLATES[type] || {};
+  const estimatedSavings = rec.savings || rec.estimated_savings || Math.round(Math.random() * 100);
+  
+  const categoryMap: Record<string, string> = {
+    'EC2_STOPPED': 'compute',
+    'EBS_ORPHAN': 'storage',
+    'EBS_OLD_SNAPSHOTS': 'storage',
+    'EIP_UNUSED': 'network',
+    'NAT_GATEWAY_COST': 'network',
+    'LAMBDA_HIGH_MEMORY': 'compute',
+    'S3_VERSIONING': 'storage',
+    'S3_LIFECYCLE': 'storage',
+  };
+
+  return {
+    id: `rec-${index}`,
+    title: template.title || rec.title || rec.description?.substring(0, 50) || 'Recomendação',
+    description: rec.description || rec.recommendation || 'Sem descrição',
+    category: categoryMap[type] || rec.category || 'optimization',
+    priority: rec.priority || rec.impact === 'high' ? 'high' : rec.impact === 'medium' ? 'medium' : 'low',
+    estimatedSavings,
+    effort: rec.effort || (['low', 'medium', 'high'][index % 3] as 'low' | 'medium' | 'high'),
+    status: 'pending' as const,
+    service: rec.service || 'AWS',
+    impact: rec.impact || 'Redução de custos e melhoria de performance',
+    type,
+    resource: rec.resource || 'N/A',
+    whyItMatters: template.whyItMatters || 'Esta recomendação pode ajudar a reduzir custos e melhorar a eficiência da sua infraestrutura AWS.',
+    riskLevel: template.riskLevel || 'Baixo',
+    timeToImplement: template.timeToImplement || '15-30 minutos',
+    affectedResources: rec.resource ? [rec.resource] : ['Recursos identificados na análise'],
+    technicalDetails: template.technicalDetails || 'Consulte a documentação AWS para mais detalhes técnicos.',
+    businessImpact: template.businessImpact || 'Potencial redução de custos operacionais sem impacto na disponibilidade.',
+    prerequisites: template.prerequisites || ['Revisar o recurso afetado', 'Planejar a implementação', 'Testar em ambiente de desenvolvimento'],
+    documentationLink: template.documentationLink || 'https://docs.aws.amazon.com/',
+    savingsBreakdown: {
+      monthly: estimatedSavings,
+      yearly: estimatedSavings * 12,
+      threeYear: estimatedSavings * 36,
+    },
+    steps: rec.steps || template.prerequisites || [
+      'Analisar o recurso identificado',
+      'Criar backup se necessário',
+      'Executar a ação recomendada',
+      'Validar que a mudança foi aplicada',
+      'Monitorar o impacto nos custos',
+    ],
+  };
+};
+
+const getDemoRecommendations = (): Recommendation[] => {
+  const demoData = [
+    { type: 'EBS_ORPHAN', resource: 'vol-0abc123def456', description: 'Volume EBS vol-0abc123def456 (100GB gp3) não está anexado a nenhuma instância EC2', savings: 10.00, impact: 'high' },
+    { type: 'EC2_STOPPED', resource: 'i-0def789ghi012', description: 'Instância EC2 i-0def789ghi012 (t3.large) está parada há mais de 30 dias', savings: 8.50, impact: 'medium' },
+    { type: 'EIP_UNUSED', resource: 'eipalloc-0jkl345mno678', description: 'Elastic IP 54.123.45.67 não está associado a nenhuma instância', savings: 3.60, impact: 'medium' },
+    { type: 'EBS_OLD_SNAPSHOTS', resource: 'Multiple (15 snapshots)', description: '15 snapshots EBS com mais de 1 ano de idade', savings: 7.50, impact: 'low' },
+    { type: 'LAMBDA_HIGH_MEMORY', resource: 'my-data-processor', description: 'Lambda my-data-processor com 2048MB de memória - uso médio é 400MB', savings: 5.20, impact: 'low' },
+  ];
+  return demoData.map(enrichRecommendation);
+};
+
 export function Recommendations() {
   const { get, loading } = useFetch();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -151,70 +214,21 @@ export function Recommendations() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    fetchRecommendations();
-  }, []);
-
-  const enrichRecommendation = (rec: any, index: number): Recommendation => {
-    const type = rec.type || 'GENERAL';
-    const template = RECOMMENDATION_TEMPLATES[type] || {};
-    const estimatedSavings = rec.savings || rec.estimated_savings || Math.round(Math.random() * 100);
-    
-    const categoryMap: Record<string, string> = {
-      'EC2_STOPPED': 'compute',
-      'EBS_ORPHAN': 'storage',
-      'EBS_OLD_SNAPSHOTS': 'storage',
-      'EIP_UNUSED': 'network',
-      'NAT_GATEWAY_COST': 'network',
-      'LAMBDA_HIGH_MEMORY': 'compute',
-      'S3_VERSIONING': 'storage',
+    const loadData = async () => {
+      try {
+        const response = await get<any>('/api/v1/reports/latest');
+        if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
+          const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
+          setRecommendations(recs);
+        } else {
+          setRecommendations(getDemoRecommendations());
+        }
+      } catch {
+        setRecommendations(getDemoRecommendations());
+      }
     };
-
-    return {
-      id: `rec-${index}`,
-      title: template.title || rec.title || rec.description?.substring(0, 50) || 'Recomendação',
-      description: rec.description || rec.recommendation || 'Sem descrição',
-      category: categoryMap[type] || rec.category || 'optimization',
-      priority: rec.priority || rec.impact === 'high' ? 'high' : rec.impact === 'medium' ? 'medium' : 'low',
-      estimatedSavings,
-      effort: rec.effort || (['low', 'medium', 'high'][index % 3] as 'low' | 'medium' | 'high'),
-      status: 'pending' as const,
-      service: rec.service || 'AWS',
-      impact: rec.impact || 'Redução de custos e melhoria de performance',
-      type,
-      resource: rec.resource || 'N/A',
-      whyItMatters: template.whyItMatters || 'Esta recomendação pode ajudar a reduzir custos e melhorar a eficiência da sua infraestrutura AWS.',
-      riskLevel: template.riskLevel || 'Baixo',
-      timeToImplement: template.timeToImplement || '15-30 minutos',
-      affectedResources: rec.resource ? [rec.resource] : ['Recursos identificados na análise'],
-      technicalDetails: template.technicalDetails || 'Consulte a documentação AWS para mais detalhes técnicos.',
-      businessImpact: template.businessImpact || 'Potencial redução de custos operacionais sem impacto na disponibilidade.',
-      prerequisites: template.prerequisites || ['Revisar o recurso afetado', 'Planejar a implementação', 'Testar em ambiente de desenvolvimento'],
-      documentationLink: template.documentationLink || 'https://docs.aws.amazon.com/',
-      savingsBreakdown: {
-        monthly: estimatedSavings,
-        yearly: estimatedSavings * 12,
-        threeYear: estimatedSavings * 36,
-      },
-      steps: rec.steps || template.prerequisites || [
-        'Analisar o recurso identificado',
-        'Criar backup se necessário',
-        'Executar a ação recomendada',
-        'Validar que a mudança foi aplicada',
-        'Monitorar o impacto nos custos',
-      ],
-    };
-  };
-
-  const getDemoRecommendations = (): Recommendation[] => {
-    const demoData = [
-      { type: 'EBS_ORPHAN', resource: 'vol-0abc123def456', description: 'Volume EBS vol-0abc123def456 (100GB gp3) não está anexado a nenhuma instância EC2', savings: 10.00, impact: 'high' },
-      { type: 'EC2_STOPPED', resource: 'i-0def789ghi012', description: 'Instância EC2 i-0def789ghi012 (t3.large) está parada há mais de 30 dias', savings: 8.50, impact: 'medium' },
-      { type: 'EIP_UNUSED', resource: 'eipalloc-0jkl345mno678', description: 'Elastic IP 54.123.45.67 não está associado a nenhuma instância', savings: 3.60, impact: 'medium' },
-      { type: 'EBS_OLD_SNAPSHOTS', resource: 'Multiple (15 snapshots)', description: '15 snapshots EBS com mais de 1 ano de idade', savings: 7.50, impact: 'low' },
-      { type: 'LAMBDA_HIGH_MEMORY', resource: 'my-data-processor', description: 'Lambda my-data-processor com 2048MB de memória - uso médio é 400MB', savings: 5.20, impact: 'low' },
-    ];
-    return demoData.map(enrichRecommendation);
-  };
+    loadData();
+  }, [get]);
 
   const fetchRecommendations = async () => {
     const response = await get<any>('/api/v1/reports/latest');
