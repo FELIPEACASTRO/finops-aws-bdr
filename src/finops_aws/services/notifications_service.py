@@ -119,7 +119,15 @@ class NotificationsService:
         notifications = []
         
         try:
-            client = self._get_ce_client()
+            from botocore.config import Config
+            
+            config = Config(
+                connect_timeout=5,
+                read_timeout=10,
+                retries={'max_attempts': 1}
+            )
+            
+            client = boto3.client('ce', region_name='us-east-1', config=config)
             
             end_date = datetime.utcnow().strftime('%Y-%m-%d')
             start_date = (datetime.utcnow() - timedelta(days=days_back)).strftime('%Y-%m-%d')
@@ -193,7 +201,15 @@ class NotificationsService:
         notifications = []
         
         try:
-            client = self._get_budgets_client()
+            from botocore.config import Config
+            
+            config = Config(
+                connect_timeout=5,
+                read_timeout=10,
+                retries={'max_attempts': 1}
+            )
+            
+            client = boto3.client('budgets', config=config)
             account_id = self._get_account_id()
             
             response = client.describe_budgets(

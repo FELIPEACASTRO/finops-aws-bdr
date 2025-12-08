@@ -83,10 +83,69 @@
 
 .empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-2xl, 24px);
   color: var(--color-text-secondary, #94a3b8);
+  gap: var(--spacing-sm, 8px);
+  text-align: center;
+}
+
+.emptyHint {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-tertiary, #64748b);
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+.retryButton {
+  margin-top: var(--spacing-sm, 8px);
+  padding: var(--spacing-xs, 4px) var(--spacing-md, 12px);
+  background: var(--primary-500, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  font-size: var(--font-size-sm, 14px);
+  transition: background var(--transition-fast, 0.15s);
+}
+
+.retryButton:hover {
+  background: var(--primary-600, #2563eb);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  color: var(--text-tertiary, #64748b);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s);
+}
+
+.refreshButton:hover {
+  background: var(--bg-tertiary, #334155);
+  color: var(--primary-500, #3b82f6);
+}
+
+.refreshButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .list {
@@ -155,9 +214,24 @@
   margin: 0 0 var(--spacing-xs) 0;
 }
 
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  flex-wrap: wrap;
+}
+
 .timestamp {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-tertiary, #64748b);
+}
+
+.source {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-tertiary, #64748b);
+  padding: 2px 6px;
+  background: var(--bg-tertiary, #334155);
+  border-radius: var(--radius-xs, 2px);
 }
 
 .actionIcon {

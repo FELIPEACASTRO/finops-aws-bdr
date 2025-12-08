@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Bell, Download, Menu } from 'lucide-react';
 import { Button } from '../ui';
 import { NotificationPanel } from './NotificationPanel';
@@ -31,6 +31,29 @@ export function Header({
   showMobileMenu = false,
 }: HeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  
+  const fetchNotificationCount = useCallback(async () => {
+    try {
+      const response = await fetch('/api/v1/notifications');
+      const data = await response.json();
+      
+      if (data.status === 'success' && Array.isArray(data.notifications)) {
+        const readIds = JSON.parse(localStorage.getItem('finops_read_notifications') || '[]');
+        const readSet = new Set(readIds);
+        const unreadCount = data.notifications.filter((n: { id: string }) => !readSet.has(n.id)).length;
+        setNotificationCount(unreadCount);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar notificações:', err);
+    }
+  }, []);
+  
+  useEffect(() => {
+    fetchNotificationCount();
+    const interval = setInterval(fetchNotificationCount, 60000);
+    return () => clearInterval(interval);
+  }, [fetchNotificationCount]);
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -105,16 +128,26 @@ export function Header({
           <button
             className={styles.notificationButton}
             aria-label="Notificações"
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            onClick={() => {
+              setNotificationsOpen(!notificationsOpen);
+              if (!notificationsOpen) {
+                fetchNotificationCount();
+              }
+            }}
           >
             <Bell size={20} />
-            <span className={styles.notificationBadge} aria-label="3 notificações">
-              3
-            </span>
+            {notificationCount > 0 && (
+              <span className={styles.notificationBadge} aria-label={`${notificationCount} notificações`}>
+                {notificationCount > 9 ? '9+' : notificationCount}
+              </span>
+            )}
           </button>
           <NotificationPanel 
             isOpen={notificationsOpen}
-            onClose={() => setNotificationsOpen(false)}
+            onClose={() => {
+              setNotificationsOpen(false);
+              setTimeout(fetchNotificationCount, 100);
+            }}
           />
         </div>
       </div>

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, AlertTriangle, Lightbulb, TrendingUp, FileText, Check, ExternalLink } from 'lucide-react';
+import { X, AlertTriangle, Lightbulb, TrendingUp, FileText, Check, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
 import styles from './NotificationPanel.module.css';
 
 interface Notification {
@@ -11,6 +11,8 @@ interface Notification {
   timestamp: string;
   read: boolean;
   link: string;
+  severity?: string;
+  source?: string;
 }
 
 interface NotificationPanelProps {
@@ -32,38 +34,56 @@ const NOTIFICATION_COLORS = {
   report: '#10b981',
 };
 
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: '#dc2626',
+  high: '#ef4444',
+  medium: '#f59e0b',
+  low: '#3b82f6',
+  info: '#10b981',
+};
+
 export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'anomaly',
-      title: 'Anomalia de Custo Detectada',
-      message: 'Aumento de 45% nos custos de EC2 na região us-east-1 nas últimas 24h.',
-      timestamp: '2 min atrás',
-      read: false,
-      link: '/costs',
-    },
-    {
-      id: '2',
-      type: 'recommendation',
-      title: 'Nova Recomendação Disponível',
-      message: '3 instâncias EC2 identificadas para rightsizing. Economia potencial: $847/mês.',
-      timestamp: '15 min atrás',
-      read: false,
-      link: '/recommendations',
-    },
-    {
-      id: '3',
-      type: 'budget',
-      title: 'Alerta de Orçamento',
-      message: 'Orçamento mensal atingiu 85% do limite. Projeção: ultrapassar em 5 dias.',
-      timestamp: '1 hora atrás',
-      read: false,
-      link: '/analytics',
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [readIds, setReadIds] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('finops_read_notifications');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/v1/notifications');
+      const data = await response.json();
+      
+      if (data.status === 'success' && Array.isArray(data.notifications)) {
+        const notificationsWithReadState = data.notifications.map((n: Notification) => ({
+          ...n,
+          read: readIds.has(n.id)
+        }));
+        setNotifications(notificationsWithReadState);
+      } else {
+        setNotifications([]);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar notificações:', err);
+      setError('Erro ao carregar notificações');
+      setNotifications([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [readIds]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen, fetchNotifications]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -101,6 +121,11 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   }, [isOpen, onClose]);
 
   const handleNotificationClick = (notification: Notification) => {
+    const newReadIds = new Set(readIds);
+    newReadIds.add(notification.id);
+    setReadIds(newReadIds);
+    localStorage.setItem('finops_read_notifications', JSON.stringify([...newReadIds]));
+    
     setNotifications(notifications.map(n => 
       n.id === notification.id ? { ...n, read: true } : n
     ));
@@ -109,7 +134,18 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   };
 
   const markAllAsRead = () => {
+    const allIds = new Set(notifications.map(n => n.id));
+    const newReadIds = new Set([...readIds, ...allIds]);
+    setReadIds(newReadIds);
+    localStorage.setItem('finops_read_notifications', JSON.stringify([...newReadIds]));
     setNotifications(notifications.map(n => ({ ...n, read: true })));
+  };
+
+  const getNotificationColor = (notification: Notification): string => {
+    if (notification.severity) {
+      return SEVERITY_COLORS[notification.severity] || NOTIFICATION_COLORS[notification.type];
+    }
+    return NOTIFICATION_COLORS[notification.type] || '#6b7280';
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -121,6 +157,14 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
       <div className={styles.header}>
         <h3 className={styles.title}>Notificações</h3>
         <div className={styles.headerActions}>
+          <button
+            className={styles.refreshButton}
+            onClick={fetchNotifications}
+            disabled={loading}
+            title="Atualizar notificações"
+          >
+            {loading ? <Loader2 size={14} className={styles.spinning} /> : <RefreshCw size={14} />}
+          </button>
           {unreadCount > 0 && (
             <button 
               className={styles.markAllRead}
@@ -142,9 +186,24 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
       </div>
 
       <div className={styles.content}>
-        {notifications.length === 0 ? (
+        {loading && notifications.length === 0 ? (
+          <div className={styles.empty}>
+            <Loader2 size={24} className={styles.spinning} />
+            <p>Carregando...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.empty}>
+            <p>{error}</p>
+            <button onClick={fetchNotifications} className={styles.retryButton}>
+              Tentar novamente
+            </button>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className={styles.empty}>
             <p>Nenhuma notificação</p>
+            <span className={styles.emptyHint}>
+              As notificações aparecem quando há anomalias de custo, alertas de orçamento ou novas recomendações.
+            </span>
           </div>
         ) : (
           <ul className={styles.list}>
@@ -159,14 +218,22 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
               >
                 <div 
                   className={styles.icon}
-                  style={{ backgroundColor: `${NOTIFICATION_COLORS[notification.type]}20`, color: NOTIFICATION_COLORS[notification.type] }}
+                  style={{ 
+                    backgroundColor: `${getNotificationColor(notification)}20`, 
+                    color: getNotificationColor(notification) 
+                  }}
                 >
                   {NOTIFICATION_ICONS[notification.type]}
                 </div>
                 <div className={styles.details}>
                   <span className={styles.itemTitle}>{notification.title}</span>
                   <p className={styles.message}>{notification.message}</p>
-                  <span className={styles.timestamp}>{notification.timestamp}</span>
+                  <div className={styles.meta}>
+                    <span className={styles.timestamp}>{notification.timestamp}</span>
+                    {notification.source && (
+                      <span className={styles.source}>{notification.source}</span>
+                    )}
+                  </div>
                 </div>
                 <div className={styles.actionIcon}>
                   <ExternalLink size={14} />
