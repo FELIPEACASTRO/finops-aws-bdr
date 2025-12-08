@@ -1,5 +1,7 @@
 # FinOps AWS - Guia Funcional Completo
 
+**Status Dezembro 2025**: Dashboard React Profissional + Sistema de Notificações + 5 Provedores de IA
+
 ## Índice Detalhado
 
 1. [Introdução](#1-introdução)

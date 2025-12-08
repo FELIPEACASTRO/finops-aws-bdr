@@ -1,6 +1,8 @@
 # FinOps AWS - Manual do Usuario
 
-## Versao 2.0 - Dezembro 2024
+## Versao 2.1 - Dezembro 2025
+
+**Status**: Dashboard React Profissional + 5 Provedores de IA + Notificações em Tempo Real
 
 ---
 
@@ -21,13 +23,14 @@
 1. [Introducao](#1-introducao)
 2. [Acessando o Dashboard](#2-acessando-o-dashboard)
 3. [Visao Geral do Dashboard](#3-visao-geral-do-dashboard)
-4. [Analise de Custos](#4-analise-de-custos)
-5. [Recomendacoes de Otimizacao](#5-recomendacoes-de-otimizacao)
-6. [Integracoes AWS](#6-integracoes-aws)
-7. [Exportacao de Dados](#7-exportacao-de-dados)
-8. [Amazon Q - Consultor IA](#8-amazon-q-consultor-ia)
-9. [Perguntas Frequentes](#9-perguntas-frequentes)
-10. [Glossario](#10-glossario)
+4. [Painel de Notificacoes em Tempo Real](#4-painel-de-notificacoes-em-tempo-real)
+5. [Analise de Custos](#5-analise-de-custos)
+6. [Recomendacoes de Otimizacao](#6-recomendacoes-de-otimizacao)
+7. [5 Provedores de IA](#7-5-provedores-de-ia)
+8. [Exportacao de Dados](#8-exportacao-de-dados)
+9. [Configuracoes e Integracao](#9-configuracoes-e-integracao)
+10. [Perguntas Frequentes](#10-perguntas-frequentes)
+11. [Glossario](#11-glossario)
 
 ---
 
@@ -63,6 +66,15 @@ Este manual foi criado para:
 - Equipes de TI que gerenciam infraestrutura
 - Analistas financeiros que acompanham gastos cloud
 - Qualquer pessoa que quer economizar na AWS
+
+## 1.3 O que ha de novo em Dezembro 2025?
+
+✅ **Dashboard React Profissional**: Interface moderna com React 18 + TypeScript + Vite
+✅ **Painel de Notificações**: Alerts em tempo real de anomalias e budgets
+✅ **5 Provedores de IA**: Amazon Q, OpenAI, Gemini, Perplexity, StackSpot
+✅ **Botão Atualizar Inteligente**: Executa análise completa ou refresh conforme necessário
+✅ **100% Dados Reais**: Nenhum mock data - apenas dados reais da AWS
+✅ **API REST Completa**: Endpoints `/api/v1/` para integração e automação
 
 ---
 

@@ -1,6 +1,8 @@
 # Arquitetura e Design Patterns - FinOps AWS
 
-## Versao 2.0 - Dezembro 2024
+## Versao 2.1 - Dezembro 2025
+
+**Status**: Clean Architecture + React Frontend + Backend Flask + 5 IA Providers
 
 ---
 

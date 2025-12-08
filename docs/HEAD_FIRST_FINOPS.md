@@ -1,6 +1,8 @@
 # Head First FinOps AWS
 
-## Guia Visual Completo - Metodologia "Use a Cabeca"
+## Guia Visual Completo - Metodologia "Use a Cabeca" (Dezembro 2025)
+
+**Atualizado para**: Dashboard React + 5 Provedores de IA + Notificações em Tempo Real
 
 ---
 

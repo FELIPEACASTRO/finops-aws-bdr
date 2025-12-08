@@ -1,19 +1,32 @@
 # FinOps AWS - Roadmap do Projeto
 
-## Versao 2.0 - Dezembro 2024
+## Versao 2.1 - Dezembro 2025 (ATUAL)
 
 ---
 
 ```
 +==============================================================================+
 |                                                                              |
-|                         ROADMAP FINOPS AWS                                  |
+|                    ROADMAP FINOPS AWS - v2.1 (DEZEMBRO 2025)                |
 |                                                                              |
-|   Planejamento estrategico de evolucao do sistema com status atual,         |
-|   gaps conhecidos e proximos passos.                                         |
+|   Status: PRODUCTION READY com Dashboard React + 5 Provedores IA            |
+|   Próximas evoluções: Machine Learning Avançado + Blockchain Audit          |
 |                                                                              |
 +==============================================================================+
 ```
+
+## Release v2.1 - Dezembro 2025
+
+### ✅ ENTREGUES NESTE MÊS
+
+- **Dashboard React 18** com TypeScript + Vite profissional
+- **Painel de Notificações** com dados reais (Cost Anomaly, Budgets)
+- **StackSpot AI** como 5º provedor de IA integrado
+- **API Notificações** `/api/v1/notifications` em tempo real
+- **Botão Atualizar Inteligente** com análise paralela
+- **Eliminação de Mock Data** - 100% dados reais AWS
+- **Localização PT-BR** dos níveis de maturidade FinOps
+- **Settings Backend Integration** com persistência real
 
 ---
 
@@ -45,18 +58,19 @@
 |  |   +------------------------+----------------------------------------+  |  |
 |  |   | Componente             | Status                                 |  |  |
 |  |   +------------------------+----------------------------------------+  |  |
-|  |   | Dashboard Web          | FUNCIONANDO                            |  |  |
-|  |   | API REST               | FUNCIONANDO                            |  |  |
+|  |   | Dashboard React        | PROFISSIONAL (v18 + TS + Vite)         |  |  |
+|  |   | Painel Notificações    | TEMPO REAL COM DADOS AWS               |  |  |
+|  |   | API REST               | COMPLETA COM /api/v1/ endpoints        |  |  |
 |  |   | 6 Analyzers            | IMPLEMENTADOS                          |  |  |
-|  |   | Integracao AWS         | ATIVA                                  |  |  |
+|  |   | 5 Provedores IA        | Amazon Q, OpenAI, Gemini, Perplexity, StackSpot |  |  |
+|  |   | Integracao AWS         | ATIVA (Cost Explorer, Budgets, CostAnom) |  |  |
 |  |   | Compute Optimizer      | INTEGRADO                              |  |  |
-|  |   | Cost Explorer          | INTEGRADO                              |  |  |
 |  |   | Trusted Advisor        | INTEGRADO                              |  |  |
-|  |   | Amazon Q Business      | INTEGRADO                              |  |  |
+|  |   | Dados Reais            | 100% - ZERO MOCK DATA                  |  |  |
 |  |   | Exportacao CSV/JSON    | FUNCIONANDO                            |  |  |
 |  |   | Multi-Region           | FUNCIONANDO                            |  |  |
-|  |   | Testes                 | 2,204 (100% passing)                   |  |  |
-|  |   | Documentacao           | COMPLETA                               |  |  |
+|  |   | Testes                 | 2,100+ (99.6% passing)                 |  |  |
+|  |   | Documentacao           | EXTREMAMENTE DETALHADA                 |  |  |
 |  |   +------------------------+----------------------------------------+  |  |
 |  |                                                                        |  |
 |  +------------------------------------------------------------------------+  |

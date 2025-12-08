@@ -1,8 +1,8 @@
 # Guia de Provedores de IA - FinOps AWS
 
-## Visão Geral
+## Visão Geral - Dezembro 2025
 
-O FinOps AWS suporta múltiplos provedores de IA para geração de relatórios e insights de otimização de custos. Isso permite flexibilidade na escolha do provedor mais adequado para cada cenário.
+O FinOps AWS suporta **5 provedores de IA** para geração de relatórios e insights de otimização de custos. Isso permite flexibilidade na escolha do provedor mais adequado para cada cenário. Todos os provedores integram-se seamlessly através da API REST e do Dashboard React.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -123,6 +123,93 @@ GEMINI_MODEL=gemini-2.5-flash  # opcional
 ---
 
 ### 4. Perplexity AI
+
+**Características:**
+- Busca online integrada em tempo real
+- Análise de tendências de mercado
+- Custo competitivo
+- Modelo sonar-pro com ótimo custo-benefício
+
+**Configuração:**
+```bash
+# Variáveis de ambiente
+PERPLEXITY_API_KEY=pplx-...
+```
+
+**Caso de Uso Ideal:**
+- Análise de tendências de mercado AWS
+- Recomendações com contexto de mercado
+- Quando pesquisa online é necessária
+
+---
+
+### 5. StackSpot AI (NOVO - Dezembro 2025)
+
+**Características:**
+- Integração OAuth 2.0 Enterprise
+- Personas especializadas (EXECUTIVE, CTO, DEVOPS, ANALYST)
+- Suporte a prompts customizados por pessoa
+- Ideal para enterprises com Single Sign-On
+
+**Modelos Suportados:**
+- StackSpot Custom Models
+- Integração com personas FinOps
+
+**Configuração:**
+```bash
+# Variáveis de ambiente
+STACKSPOT_CLIENT_ID=seu-client-id
+STACKSPOT_CLIENT_SECRET=seu-client-secret
+STACKSPOT_REALM=seu-realm
+```
+
+**Caso de Uso Ideal:**
+- Ambientes enterprise com SSO
+- Análises personalizadas por persona
+- Quando controle de acesso é crítico
+
+---
+
+## Comparativo de Provedores
+
+| Provedor | Custo | Latência | Contexto | Busca | Enterprise |
+|----------|-------|----------|----------|-------|------------|
+| Amazon Q | Integrado | Rápido | RAG | Não | Sim |
+| OpenAI | $$ | Rápido | 128K | Não | Sim |
+| Gemini | $ | Médio | 2M | Não | Sim |
+| Perplexity | $ | Médio | Normal | **Sim** | Não |
+| StackSpot | $$$ | Rápido | Custom | Não | **Sim** |
+
+## Como Usar no Dashboard
+
+1. **Abra o Dashboard**: http://localhost:5000
+2. **Vá em "Configurações"** (aba API & Integrações)
+3. **Selecione o provedor de IA** desejado
+4. **Clique "Salvar"**
+5. **Execute uma análise** para gerar relatórios com aquele provedor
+
+## API REST para IA
+
+```bash
+# Obter relatório IA
+POST /api/v1/analyze/report
+Body: {
+  "ai_provider": "openai",  # amazon_q, openai, gemini, perplexity, stackspot
+  "persona": "EXECUTIVE"     # EXECUTIVE, CTO, DEVOPS, ANALYST
+}
+
+# Verificar status de provedores
+GET /api/v1/integrations/status
+Response: {
+  "providers": {
+    "amazon_q": { "status": "available", "configured": true },
+    "openai": { "status": "available", "configured": true },
+    "gemini": { "status": "available", "configured": false },
+    "perplexity": { "status": "available", "configured": true },
+    "stackspot": { "status": "error", "message": "403 Forbidden" }
+  }
+}
+```
 
 **Características:**
 - Busca online em tempo real

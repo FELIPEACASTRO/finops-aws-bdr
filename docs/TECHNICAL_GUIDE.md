@@ -1,6 +1,8 @@
 # FinOps AWS - Guia Tecnico Completo
 
-## Versao 2.0 - Dezembro 2024
+## Versao 2.1 - Dezembro 2025
+
+**Status**: Clean Architecture + React 18 Frontend + 5 AI Providers + 100% Real Data
 
 ---
 
