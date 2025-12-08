@@ -417,12 +417,10 @@ class BudgetsService(BaseAWSService):
                 'total_budgets': len(budgets),
                 'at_risk_budgets': len(at_risk_budgets),
                 'healthy_budgets': len(healthy_budgets),
-                'avg_utilization': metrics.get('metrics', {}).get('avg_utilization_percent', 0)
+                'avg_utilization': metrics.metrics.get('avg_utilization_percent', 0)
             },
             'at_risk_budgets': at_risk_budgets,
             'healthy_budgets': healthy_budgets,
             'recommendations_count': len(recommendations),
-            'optimization_opportunities': [
-                r.get('title') for r in recommendations
-            ]
+            'optimization_opportunities': [r.title for r in recommendations]
         }

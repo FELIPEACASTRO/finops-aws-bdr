@@ -633,5 +633,5 @@ class SavingsPlansService(BaseAWSService):
             'by_type': by_type,
             'expiring_within_90d': expiring_soon,
             'recommendations_count': len(recommendations),
-            'optimization_opportunities': [r.get('title') for r in recommendations[:5]]
+            'optimization_opportunities': [r.title for r in recommendations[:5]]
         }

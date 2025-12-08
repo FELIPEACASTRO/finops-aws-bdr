@@ -201,7 +201,9 @@ class ReservedInstancesService(BaseAWSService):
         """Verifica saúde do serviço"""
         try:
             client = self._get_ec2_client()
-            client.describe_reserved_instances(MaxResults=5)
+            client.describe_reserved_instances(
+                Filters=[{'Name': 'state', 'Values': ['active']}]
+            )
             return True
         except ClientError as e:
             error_code = e.response.get('Error', {}).get('Code', '')
@@ -804,5 +806,5 @@ class ReservedInstancesService(BaseAWSService):
             'by_service': by_service,
             'expiring_within_90d': expiring_soon,
             'recommendations_count': len(recommendations),
-            'optimization_opportunities': [r.get('title') for r in recommendations[:5]]
+            'optimization_opportunities': [r.title for r in recommendations[:5]]
         }

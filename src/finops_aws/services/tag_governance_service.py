@@ -445,5 +445,5 @@ class TagGovernanceService(BaseAWSService):
             'tags_in_use_count': len(tags_in_use),
             'coverage_by_tag': coverage.tag_statistics,
             'recommendations_count': len(recommendations),
-            'optimization_opportunities': [r.get('title') for r in recommendations]
+            'optimization_opportunities': [r.title for r in recommendations]
         }

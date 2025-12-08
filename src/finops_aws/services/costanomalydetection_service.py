@@ -491,12 +491,12 @@ class CostAnomalyDetectionService(BaseAWSService):
             'summary': {
                 'monitor_count': len(monitors),
                 'anomaly_count_90d': len(anomalies),
-                'total_impact_30d': costs.get('total_anomaly_impact', 0),
-                'critical_count': costs.get('critical_anomalies', 0),
-                'high_count': costs.get('high_anomalies', 0)
+                'total_impact_30d': costs.cost_by_resource.get('total_anomaly_impact', 0),
+                'critical_count': costs.cost_by_resource.get('critical_anomalies', 0),
+                'high_count': costs.cost_by_resource.get('high_anomalies', 0)
             },
             'anomalies_by_service': dict(sorted(by_service.items(), key=lambda x: -x[1])[:10]),
             'anomalies_by_region': dict(sorted(by_region.items(), key=lambda x: -x[1])[:10]),
             'recommendations_count': len(recommendations),
-            'optimization_opportunities': [r.get('title') for r in recommendations[:5]]
+            'optimization_opportunities': [r.title for r in recommendations[:5]]
         }
