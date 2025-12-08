@@ -306,6 +306,7 @@ export function Settings() {
                     { value: 'openai', label: 'OpenAI ChatGPT' },
                     { value: 'gemini', label: 'Google Gemini' },
                     { value: 'amazon_q', label: 'Amazon Q Business' },
+                    { value: 'stackspot', label: 'StackSpot AI' },
                   ]}
                 />
               </div>

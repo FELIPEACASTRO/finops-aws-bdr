@@ -6813,6 +6813,65 @@ def get_integrations_status():
             'detail': gemini_detail
         })
         
+        stackspot_status = 'error'
+        stackspot_detail = 'Não Configurado'
+        stackspot_client_id = os.environ.get('STACKSPOT_CLIENT_ID')
+        stackspot_client_secret = os.environ.get('STACKSPOT_CLIENT_SECRET')
+        stackspot_realm = os.environ.get('STACKSPOT_REALM')
+        
+        if stackspot_client_id and stackspot_client_secret and stackspot_realm:
+            try:
+                import requests as req
+                token_url = f"https://idm.stackspot.com/{stackspot_realm}/oidc/oauth/token"
+                token_response = req.post(
+                    token_url,
+                    headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                    data={
+                        'grant_type': 'client_credentials',
+                        'client_id': stackspot_client_id,
+                        'client_secret': stackspot_client_secret
+                    },
+                    timeout=10
+                )
+                if token_response.status_code == 200:
+                    token_json = token_response.json()
+                    if token_json.get('access_token'):
+                        stackspot_status = 'ok'
+                        stackspot_detail = 'Conectado'
+                    else:
+                        stackspot_status = 'warning'
+                        stackspot_detail = 'Token vazio'
+                elif token_response.status_code == 401:
+                    stackspot_status = 'error'
+                    stackspot_detail = 'Credenciais inválidas'
+                elif token_response.status_code == 403:
+                    resp_text = token_response.text[:100] if token_response.text else ''
+                    if 'Authorization header' in resp_text:
+                        stackspot_status = 'warning'
+                        stackspot_detail = 'Verificar credenciais'
+                    else:
+                        stackspot_status = 'warning'
+                        stackspot_detail = 'Acesso negado'
+                else:
+                    stackspot_status = 'warning'
+                    stackspot_detail = f'Erro HTTP {token_response.status_code}'
+            except req.exceptions.Timeout:
+                stackspot_status = 'error'
+                stackspot_detail = 'Timeout na conexão'
+            except req.exceptions.ConnectionError:
+                stackspot_status = 'error'
+                stackspot_detail = 'Erro de conexão'
+            except Exception as e:
+                stackspot_status = 'warning'
+                stackspot_detail = str(e)[:50]
+        
+        integrations.append({
+            'provider': 'StackSpot AI',
+            'id': 'stackspot',
+            'status': stackspot_status,
+            'detail': stackspot_detail
+        })
+        
         return jsonify({
             'status': 'success',
             'integrations': integrations
