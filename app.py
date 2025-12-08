@@ -7086,22 +7086,35 @@ def get_costs_data():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-# Serve index.html for React Router SPA
+# Serve static files from frontend/dist
+@app.route('/<path:filename>', methods=['GET'])
+def serve_static(filename):
+    """Serve static files from frontend/dist."""
+    file_path = os.path.join(frontend_dist, filename)
+    if os.path.isfile(file_path):
+        return send_from_directory(frontend_dist, filename)
+    return None  # Let Flask handle 404
+
+
+# Catch-all: serve index.html for React Router SPA
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def serve_react(path):
-    """Serve React app or API routes."""
-    # API routes - handle them normally
+def serve_react_app(path):
+    """Serve index.html for React Router SPA - only for non-API routes."""
+    # Don't intercept API routes
     if path.startswith('api/'):
         return jsonify({'error': 'API route not found'}), 404
     
-    # For all other routes, serve index.html (React Router handles routing)
+    # Serve index.html for all other routes (React Router handles them)
     index_path = os.path.join(frontend_dist, 'index.html')
-    if os.path.exists(index_path):
+    if os.path.isfile(index_path):
         return send_from_directory(frontend_dist, 'index.html')
     
     # Fallback if dist doesn't exist (development mode)
-    return jsonify({'error': 'Frontend not built. Run: cd frontend && npm install && npm run build'}), 503
+    return jsonify({
+        'error': 'Frontend not built',
+        'message': 'Run: cd frontend && npm install && npm run build'
+    }), 503
 
 
 if __name__ == '__main__':
