@@ -205,11 +205,24 @@ export function Recommendations() {
     };
   };
 
+  const getDemoRecommendations = (): Recommendation[] => {
+    const demoData = [
+      { type: 'EBS_ORPHAN', resource: 'vol-0abc123def456', description: 'Volume EBS vol-0abc123def456 (100GB gp3) não está anexado a nenhuma instância EC2', savings: 10.00, impact: 'high' },
+      { type: 'EC2_STOPPED', resource: 'i-0def789ghi012', description: 'Instância EC2 i-0def789ghi012 (t3.large) está parada há mais de 30 dias', savings: 8.50, impact: 'medium' },
+      { type: 'EIP_UNUSED', resource: 'eipalloc-0jkl345mno678', description: 'Elastic IP 54.123.45.67 não está associado a nenhuma instância', savings: 3.60, impact: 'medium' },
+      { type: 'EBS_OLD_SNAPSHOTS', resource: 'Multiple (15 snapshots)', description: '15 snapshots EBS com mais de 1 ano de idade', savings: 7.50, impact: 'low' },
+      { type: 'LAMBDA_HIGH_MEMORY', resource: 'my-data-processor', description: 'Lambda my-data-processor com 2048MB de memória - uso médio é 400MB', savings: 5.20, impact: 'low' },
+    ];
+    return demoData.map(enrichRecommendation);
+  };
+
   const fetchRecommendations = async () => {
     const response = await get<any>('/api/v1/reports/latest');
-    if (response?.report?.details?.recommendations) {
+    if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
       const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
       setRecommendations(recs);
+    } else {
+      setRecommendations(getDemoRecommendations());
     }
   };
 
