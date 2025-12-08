@@ -6592,12 +6592,16 @@ def get_analytics():
         
         if overall_score >= 80:
             maturity_level = 'FLY'
+            maturity_level_name = 'Excelência'
         elif overall_score >= 60:
             maturity_level = 'RUN'
+            maturity_level_name = 'Avançado'
         elif overall_score >= 40:
             maturity_level = 'WALK'
+            maturity_level_name = 'Intermediário'
         else:
             maturity_level = 'CRAWL'
+            maturity_level_name = 'Iniciante'
         
         avg_cost_per_service = total_cost / max(services_count, 1)
         cost_optimization_rate = (total_savings / max(total_cost, 1)) * 100 if total_cost > 0 else 0
@@ -6608,10 +6612,17 @@ def get_analytics():
                 'maturity': {
                     'overall_score': round(overall_score, 1),
                     'level': maturity_level,
+                    'level_name': maturity_level_name,
                     'crawl': round(crawl_score, 1),
                     'walk': round(walk_score, 1),
                     'run': round(run_score, 1),
-                    'fly': round(fly_score, 1)
+                    'fly': round(fly_score, 1),
+                    'levels_info': {
+                        'crawl': {'name': 'Nível 1', 'title': 'Visibilidade de Custos', 'description': 'Primeiros passos: construindo visibilidade dos custos na nuvem'},
+                        'walk': {'name': 'Nível 2', 'title': 'Alocação e Controle', 'description': 'Controle financeiro: alocação de custos por equipe/projeto'},
+                        'run': {'name': 'Nível 3', 'title': 'Otimização Ativa', 'description': 'Otimização ativa: redução contínua de custos'},
+                        'fly': {'name': 'Nível 4', 'title': 'Excelência Operacional', 'description': 'Excelência: automação completa e cultura FinOps'}
+                    }
                 },
                 'kpis': {
                     'avg_cost_per_service': round(avg_cost_per_service, 2),

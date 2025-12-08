@@ -191,29 +191,29 @@ export function Analytics() {
 
       setMaturityLevels([
         { 
-          level: 'CRAWL', 
-          name: 'Visibilidade', 
+          level: 'Nível 1', 
+          name: 'Visibilidade de Custos', 
           score: maturity.crawl || 0, 
           maxScore: 100, 
           status: getMaturityStatus(maturity.crawl || 0)
         },
         { 
-          level: 'WALK', 
-          name: 'Alocação', 
+          level: 'Nível 2', 
+          name: 'Alocação e Controle', 
           score: maturity.walk || 0, 
           maxScore: 100, 
           status: getMaturityStatus(maturity.walk || 0)
         },
         { 
-          level: 'RUN', 
-          name: 'Otimização', 
+          level: 'Nível 3', 
+          name: 'Otimização Ativa', 
           score: maturity.run || 0, 
           maxScore: 100, 
           status: getMaturityStatus(maturity.run || 0)
         },
         { 
-          level: 'FLY', 
-          name: 'Operações', 
+          level: 'Nível 4', 
+          name: 'Excelência Operacional', 
           score: maturity.fly || 0, 
           maxScore: 100, 
           status: getMaturityStatus(maturity.fly || 0)
@@ -245,16 +245,29 @@ export function Analytics() {
     }
   };
 
+  const getMaturityLevelName = () => {
+    switch (maturityLevel) {
+      case 'FLY':
+        return 'Excelência';
+      case 'RUN':
+        return 'Avançado';
+      case 'WALK':
+        return 'Intermediário';
+      default:
+        return 'Iniciante';
+    }
+  };
+
   const getMaturityDescription = () => {
     switch (maturityLevel) {
       case 'FLY':
-        return 'Sua organização está no nível máximo de maturidade FinOps';
+        return 'Excelência operacional: automação completa, decisões estratégicas baseadas em dados e cultura FinOps estabelecida';
       case 'RUN':
-        return 'Sua organização está otimizando custos ativamente';
+        return 'Otimização ativa: processos automatizados, redução contínua de custos e práticas FinOps consolidadas';
       case 'WALK':
-        return 'Sua organização está desenvolvendo práticas de alocação';
+        return 'Controle financeiro: alocação de custos por equipe/projeto, alertas de orçamento e relatórios estruturados';
       default:
-        return 'Sua organização está construindo visibilidade de custos';
+        return 'Primeiros passos: construindo visibilidade dos custos na nuvem e identificando oportunidades de economia';
     }
   };
 
@@ -305,7 +318,7 @@ export function Analytics() {
                   size="sm" 
                   icon={<Award size={14} />}
                 >
-                  Nível {maturityLevel}
+                  {getMaturityLevelName()}
                 </Badge>
               </div>
             </div>
