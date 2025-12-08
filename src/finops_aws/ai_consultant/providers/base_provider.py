@@ -21,6 +21,7 @@ class AIProviderType(Enum):
     OPENAI = "openai"
     GEMINI = "gemini"
     PERPLEXITY = "perplexity"
+    STACKSPOT = "stackspot"
 
 
 class PersonaType(Enum):
@@ -86,6 +87,14 @@ class AIProviderConfig:
         elif provider_type == AIProviderType.PERPLEXITY:
             config.api_key = os.environ.get('PERPLEXITY_API_KEY')
             config.model = os.environ.get('PERPLEXITY_MODEL', 'sonar')
+            
+        elif provider_type == AIProviderType.STACKSPOT:
+            config.extra_config = {
+                'client_id': os.environ.get('STACKSPOT_CLIENT_ID'),
+                'client_secret': os.environ.get('STACKSPOT_CLIENT_SECRET'),
+                'realm': os.environ.get('STACKSPOT_REALM'),
+            }
+            config.model = 'stackspot-ai'
             
         return config
 

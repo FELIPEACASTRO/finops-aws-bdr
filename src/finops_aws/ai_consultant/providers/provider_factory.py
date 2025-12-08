@@ -121,6 +121,7 @@ class AIProviderFactory:
         from .openai_provider import OpenAIProvider
         from .gemini_provider import GeminiProvider
         from .perplexity_provider import PerplexityProvider
+        from .stackspot_provider import StackSpotProvider
         
         cls._registry.register("amazon_q", AmazonQProvider)
         cls._registry.register("amazonq", AmazonQProvider)
@@ -134,6 +135,8 @@ class AIProviderFactory:
         cls._registry.register("google", GeminiProvider)
         
         cls._registry.register("perplexity", PerplexityProvider)
+        
+        cls._registry.register("stackspot", StackSpotProvider)
         
         cls._initialized = True
     
@@ -198,7 +201,7 @@ class AIProviderFactory:
         
         available = {}
         
-        for name in ["amazon_q", "openai", "gemini", "perplexity"]:
+        for name in ["amazon_q", "openai", "gemini", "perplexity", "stackspot"]:
             try:
                 provider = cls.create(name)
                 if provider:
@@ -270,6 +273,16 @@ class AIProviderFactory:
                 "models": ["sonar", "sonar-pro", "sonar-reasoning"],
                 "features": ["Chat", "Web Search", "Citations"],
                 "pricing": "Por requisicao"
+            },
+            "stackspot": {
+                "name": "StackSpot AI",
+                "vendor": "StackSpot",
+                "requires_api_key": False,
+                "requires_oauth": True,
+                "requires_aws_credentials": False,
+                "models": ["stackspot-ai", "stackspot-agent"],
+                "features": ["Chat", "Knowledge Sources", "Custom Agents"],
+                "pricing": "Enterprise"
             }
         }
         
@@ -287,6 +300,7 @@ class AIProviderFactory:
             "gpt": AIProviderType.OPENAI,
             "gemini": AIProviderType.GEMINI,
             "google": AIProviderType.GEMINI,
-            "perplexity": AIProviderType.PERPLEXITY
+            "perplexity": AIProviderType.PERPLEXITY,
+            "stackspot": AIProviderType.STACKSPOT
         }
         return mapping.get(name.lower(), AIProviderType.OPENAI)
