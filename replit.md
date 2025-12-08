@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution designed for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services. It operates as an AWS Lambda application, delivering comprehensive financial analysis, operational monitoring, and optimization insights. A key feature is the **Automated Financial Consultant, powered by multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity), which generates intelligent reports to aid in decision-making and cost reduction. The project aims to provide a robust FinOps solution with deep analytical capabilities and actionable recommendations.
+FinOps AWS is an enterprise-grade serverless solution designed for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services. It operates as an AWS Lambda application, delivering comprehensive financial analysis, operational monitoring, and optimization insights. A key feature is the **Automated Financial Consultant, powered by multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity, **StackSpot AI**), which generates intelligent reports to aid in decision-making and cost reduction. The project aims to provide a robust FinOps solution with deep analytical capabilities and actionable recommendations.
 
 ## User Preferences
 
@@ -19,7 +19,7 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 
 **Key Architectural Components:**
 - **Analyzers (Strategy Pattern)**: Six modular analyzers (Compute, Storage, Database, Network, Security, Analytics) for different AWS cost aspects.
-- **AI Providers (Strategy Pattern)**: Four interchangeable AI providers for report generation and insights.
+- **AI Providers (Strategy Pattern)**: Five interchangeable AI providers for report generation and insights (Perplexity, OpenAI, Gemini, Amazon Q, StackSpot).
 - **Factory + Registry**: Dynamic creation and management of analyzers and AI providers.
 - **Template Method**: Provides a common analysis structure for consistency.
 - **Facade**: Simplifies the API interface for the dashboard.
@@ -54,6 +54,15 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 - **AI Consultant Service**: Consultor financeiro automatizado com múltiplos provedores
 
 ## Recent Changes (December 2025)
+
+### StackSpot AI Integration (December 8, 2025)
+Integração do StackSpot AI como 5º provedor de IA no Consultor Financeiro:
+- **StackSpotProvider**: Implementado seguindo padrão Strategy (BaseAIProvider)
+- **OAuth 2.0 Flow**: Client Credentials com token endpoint e refresh automático
+- **Health Check**: Endpoint `/api/v1/integrations/status` expandido para StackSpot
+- **Frontend Settings**: StackSpot AI visível na aba API & Integrações
+- **Secrets configurados**: STACKSPOT_CLIENT_ID, STACKSPOT_CLIENT_SECRET, STACKSPOT_REALM
+- **Nota**: Contas Enterprise podem requerer VPN/IP whitelist para autenticação
 
 ### Settings Full Backend Integration (December 8, 2025)
 Página de Configurações com integração completa backend-to-backend, sem mocks:

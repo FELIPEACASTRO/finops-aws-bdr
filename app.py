@@ -6848,7 +6848,7 @@ def get_integrations_status():
                     resp_text = token_response.text[:100] if token_response.text else ''
                     if 'Authorization header' in resp_text:
                         stackspot_status = 'warning'
-                        stackspot_detail = 'Verificar credenciais'
+                        stackspot_detail = 'Verificar rede/credenciais'
                     else:
                         stackspot_status = 'warning'
                         stackspot_detail = 'Acesso negado'
