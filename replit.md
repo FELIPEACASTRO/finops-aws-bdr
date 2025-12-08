@@ -2,7 +2,7 @@
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services (60% boto3 coverage - focused on high-impact services). It functions as an AWS Lambda application, providing comprehensive financial analysis, operational monitoring, and optimization insights. The solution includes an **Automated Financial Consultant powered by Multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity) for intelligent report generation.
+FinOps AWS is an enterprise-grade serverless solution designed for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services. It operates as an AWS Lambda application, delivering comprehensive financial analysis, operational monitoring, and optimization insights. A key feature is the **Automated Financial Consultant, powered by multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity), which generates intelligent reports to aid in decision-making and cost reduction. The project aims to provide a robust FinOps solution with deep analytical capabilities and actionable recommendations.
 
 ## User Preferences
 
@@ -12,300 +12,47 @@ FinOps AWS is an enterprise-grade serverless solution for intelligent AWS cost a
 
 ## System Architecture
 
-The system is built with Python 3.11, adhering to Clean Architecture and Domain-Driven Design (DDD) principles.
+The system is built with Python 3.11, adhering to Clean Architecture and Domain-Driven Design (DDD) principles. It leverages a modular and extensible design with a strong emphasis on architectural patterns.
 
 **Core Architecture:**
-```
-Web Dashboard → API Layer → Analysis Facade
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-   Analyzers           Integrations            Cost Data
-   Factory               Module                  Module
-   (Strategy)              │                        │
-        │                  ▼                        │
-   6 Analyzers      AWS APIs + AI Providers         │
-        │        ┌──────────────────────┐          │
-        │        │ - Compute Optimizer  │          │
-        │        │ - Cost Explorer RI   │          │
-        │        │ - Trusted Advisor    │          │
-        │        │ - AI Providers:      │          │
-        │        │   * Amazon Q Business│          │
-        │        │   * OpenAI ChatGPT   │          │
-        │        │   * Google Gemini    │          │
-        │        │   * Perplexity AI    │          │
-        │        └──────────────────────┘          │
-        └──────────────────┼────────────────────────┘
-                           ▼
-                 boto3 + AI SDK Clients
-                           │
-                           ▼
-                  AWS Cloud + AI APIs
-```
+The system comprises a Web Dashboard interacting with an API Layer, which in turn communicates with an Analysis Facade. This facade orchestrates operations between various Analyzers (implemented using a Strategy pattern), Integration Modules (for AWS APIs and AI Providers), and a Cost Data Module. The Analyzers Factory dynamically creates specialized analyzers (Compute, Storage, Database, Network, Security, Analytics). AI Providers are also managed via a Factory and Registry, allowing for interchangeable AI models (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity AI).
 
 **Key Architectural Components:**
-- **Analyzers (Strategy Pattern)**: 6 analyzers modulares (Compute, Storage, Database, Network, Security, Analytics)
-- **AI Providers (Strategy Pattern)**: 4 provedores de IA intercambiáveis
-- **Factory + Registry**: Criação dinâmica de analyzers e AI providers
-- **Template Method**: Estrutura comum de análise
-- **Facade**: API simplificada para o dashboard
-- **Exception Hierarchy**: 15 tipos de exceções tipadas
+- **Analyzers (Strategy Pattern)**: Six modular analyzers (Compute, Storage, Database, Network, Security, Analytics) for different AWS cost aspects.
+- **AI Providers (Strategy Pattern)**: Four interchangeable AI providers for report generation and insights.
+- **Factory + Registry**: Dynamic creation and management of analyzers and AI providers.
+- **Template Method**: Provides a common analysis structure for consistency.
+- **Facade**: Simplifies the API interface for the dashboard.
+- **Exception Hierarchy**: A robust hierarchy of 15 typed exceptions for error handling.
+- **AI Consultant Personas**: Supports various output personas (EXECUTIVE, CTO, DEVOPS, ANALYST) for tailored report generation.
+- **UI/UX**: The solution integrates with a web dashboard for visualization and interaction.
 
-## AI Consultant - Multi-Provider Architecture
+## External Dependencies
 
-### Provedores de IA Suportados
-
-| Provedor | Modelo | API Key | Status | Características |
-|----------|--------|---------|--------|-----------------|
-| **Amazon Q Business** | Q Business | Não (IAM) | ⚠️ Não configurado | RAG nativo, segurança AWS |
-| **OpenAI ChatGPT** | gpt-4o, gpt-4o-mini | Sim | ⚠️ Sem créditos | Alta precisão, grande contexto |
-| **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro | Sim | ✅ Testado | Contexto 2M, custo-benefício |
-| **Perplexity AI** | sonar, sonar-pro | Sim | ✅ Testado | Busca online, citações |
-
-### Uso Programático
-
-```python
-from finops_aws.ai_consultant.providers import AIProviderFactory, PersonaType
-
-# Criar provedor específico
-provider = AIProviderFactory.create("openai")
-
-# Ou seleção automática
-available = AIProviderFactory.create_all_available()
-
-# Gerar relatório
-response = provider.generate_report(costs, resources, PersonaType.EXECUTIVE)
-print(response.content)
+- **AWS Services**:
+    - AWS Lambda
+    - AWS Compute Optimizer
+    - AWS Cost Explorer
+    - AWS Trusted Advisor
+    - Amazon Q Business
+    - AWS Budgets
+    - AWS Cost Anomaly Detection
+    - AWS Savings Plans
+    - AWS Reserved Instances
+    - AWS Resource Groups (for Tag Governance)
+    - boto3 (AWS SDK for Python)
+- **AI Providers**:
+    - OpenAI ChatGPT (via API)
+    - Google Gemini (via API)
+    - Perplexity AI (via API)
+- **Python Libraries**:
+    - Python 3.11
+- **Configuration**:
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_REGION
+    - Q_BUSINESS_APPLICATION_ID (for Amazon Q Business)
+    - OPENAI_API_KEY (for OpenAI ChatGPT)
+    - GEMINI_API_KEY (for Google Gemini)
+    - PERPLEXITY_API_KEY (for Perplexity AI)
 ```
-
-### Personas Disponíveis
-
-| Persona | Audiência | Foco | Formato da Resposta |
-|---------|-----------|------|---------------------|
-| **EXECUTIVE** | CEO/CFO | ROI, tendências, decisões | 2 páginas, bullet points |
-| **CTO** | CTO/VP Eng | Arquitetura, trade-offs | Roadmap, diagramas |
-| **DEVOPS** | DevOps/SRE | Scripts, AWS CLI | Comandos copy-paste |
-| **ANALYST** | FinOps | KPIs, métricas | Tabelas, benchmarks |
-
-## Quality Metrics (Verified)
-
-| Metric | Value | Details |
-|--------|-------|---------|
-| **Unit Tests** | 1,865 | 100% passing |
-| **Integration Tests** | 44 | 42 passed, 2 skipped |
-| **QA Tests** | 240 | 100% passing |
-| **E2E Tests** | 55 | 100% passing |
-| **Total Tests** | 2,204 | 100% passing |
-| **AWS Services Suportados** | 246 | 60% boto3 coverage |
-| **Verificações de Otimização** | 23 | Serviços com regras específicas |
-| **Design Patterns** | 6 | Strategy, Factory, Template, Registry, Facade, Singleton |
-| **Exception Types** | 15 | Hierarquia tipada |
-| **AI Providers** | 4 | Amazon Q, OpenAI, Gemini, Perplexity |
-
-## Key Documentation Files
-
-| File | Description |
-|------|-------------|
-| `docs/TECHNICAL_GUIDE.md` | Guia técnico completo |
-| `docs/AI_PROVIDERS_GUIDE.md` | Guia de provedores de IA |
-| `docs/PROMPTS_AMAZON_Q.md` | Prompts detalhados do Amazon Q |
-| `docs/USER_MANUAL.md` | Manual do usuário |
-| `docs/HEAD_FIRST_FINOPS.md` | Guia executivo FinOps |
-| `docs/ARCHITECTURE_AND_PATTERNS.md` | Design Patterns aplicados |
-| `docs/ROADMAP.md` | Roadmap e gaps conhecidos |
-
-## AWS Integrations (Implemented)
-
-| Integração | Função | Requisitos |
-|------------|--------|------------|
-| **Analyzers** | 6 analyzers modulares | Nenhum |
-| **AWS Compute Optimizer** | Right-sizing EC2 | Opt-in habilitado |
-| **AWS Cost Explorer** | RI e Savings Plans | Dados de uso |
-| **AWS Trusted Advisor** | Verificações de custo | Business/Enterprise |
-| **Amazon Q Business** | Análise com IA | Q_BUSINESS_APPLICATION_ID |
-| **AWS Budgets** | Monitoramento de orçamentos | Budgets configurados |
-| **Cost Anomaly Detection** | Detecção de anomalias | Monitors configurados |
-| **Savings Plans Service** | Análise de SP (utilização/cobertura) | Savings Plans ativos |
-| **Reserved Instances Service** | Análise de RI multi-serviço (EC2/RDS/ElastiCache) | RIs ativos |
-| **Tag Governance Service** | Validação de tags, cobertura, compliance | Resource Groups API |
-| **KPI Calculator** | 12+ KPIs FinOps oficiais | Cost Explorer |
-
-## FinOps Services (New - December 2024)
-
-### Commitment Management (RI + SP)
-```python
-from finops_aws.dashboard.integrations import (
-    get_savings_plans_analysis,
-    get_reserved_instances_analysis,
-    get_commitments_summary
-)
-
-# Análise de Savings Plans
-sp = get_savings_plans_analysis()
-print(f"SP Utilization: {sp['utilization']['utilization_percentage']}%")
-print(f"SP Coverage: {sp['coverage']['coverage_percentage']}%")
-
-# Análise de Reserved Instances
-ri = get_reserved_instances_analysis()
-print(f"RI Utilization: {ri['utilization']['utilization_percentage']}%")
-
-# Resumo consolidado
-summary = get_commitments_summary()
-print(f"Avg Utilization: {summary['summary']['avg_utilization']}%")
-```
-
-### Budget & Anomaly Monitoring
-```python
-from finops_aws.dashboard.integrations import (
-    get_budgets_analysis,
-    get_anomaly_detection_analysis
-)
-
-# Análise de Budgets
-budgets = get_budgets_analysis()
-for b in budgets['budgets']:
-    print(f"Budget: {b['name']} - Status: {b['status']}")
-
-# Detecção de Anomalias
-anomalies = get_anomaly_detection_analysis(days_back=90)
-for a in anomalies['anomalies']:
-    print(f"Anomaly: {a['service']} - Impact: ${a['actual_cost']}")
-```
-
-### Tag Governance & KPIs
-```python
-from finops_aws.dashboard.integrations import (
-    get_tag_governance_analysis,
-    get_finops_kpis
-)
-
-# Governança de Tags
-tags = get_tag_governance_analysis(required_tags=['Environment', 'Owner', 'CostCenter'])
-print(f"Tag Coverage: {tags['coverage']['coverage_percent']}%")
-print(f"Compliance: {tags['coverage']['compliance_percent']}%")
-
-# KPIs FinOps
-kpis = get_finops_kpis(idle_cost=1000, shadow_cost=500)
-print(f"Total Spend: ${kpis['total_spend']}")
-print(f"Waste %: {kpis['waste_percent']}%")
-print(f"Economic Health Index: {kpis['economic_health_index']}/100")
-```
-
-### Data Models (Expanded)
-| Model | Purpose |
-|-------|---------|
-| **FinOpsKPIs** | 20+ KPIs oficiais FinOps |
-| **Commitment** | RI, SP, EDP tracking |
-| **Anomaly** | Anomalias de custo |
-| **Budget** | Orçamentos e alertas |
-| **TagPolicy** | Políticas de tags |
-| **TagCoverage** | Cobertura de tagging |
-| **BusinessDimension** | Unit Economics |
-| **BillingExtra** | Support, Tax, Credits |
-| **OpenAI ChatGPT** | Análise com IA | OPENAI_API_KEY |
-| **Google Gemini** | Análise com IA | GEMINI_API_KEY |
-| **Perplexity AI** | Análise com IA + busca | PERPLEXITY_API_KEY |
-
-## Verificações de Otimização (23 serviços)
-
-- **EC2**: Instâncias paradas, tipos antigos
-- **EBS**: Volumes órfãos não anexados
-- **EIP**: Elastic IPs não associados ($3.60/mês)
-- **NAT Gateway**: Alertas de custo (~$32/mês)
-- **S3**: Versionamento, lifecycle, encryption
-- **RDS**: Multi-AZ em dev, dimensionamento
-- **DynamoDB**: Billing mode
-- **ELB/ALB**: Load balancers sem targets
-- **CloudWatch**: Log groups sem retenção
-- **ECR**: Imagens sem tag
-- **IAM**: Access keys inativas
-
-## Configuration
-
-```bash
-# Credenciais AWS (obrigatório)
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_REGION=us-east-1
-
-# Amazon Q Business (opcional)
-Q_BUSINESS_APPLICATION_ID=seu-app-id
-
-# OpenAI ChatGPT (opcional)
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o  # opcional, default: gpt-4o
-
-# Google Gemini (opcional)
-GEMINI_API_KEY=AIza...
-GEMINI_MODEL=gemini-2.5-flash  # opcional
-
-# Perplexity AI (opcional)
-PERPLEXITY_API_KEY=pplx-...
-PERPLEXITY_MODEL=sonar  # opcional, default: sonar (sonar-pro tem bugs conhecidos)
-```
-
-## AI Providers Directory Structure
-
-```
-src/finops_aws/ai_consultant/
-├── providers/
-│   ├── __init__.py          # Exports públicos
-│   ├── base_provider.py     # BaseAIProvider (ABC)
-│   ├── provider_factory.py  # AIProviderFactory + Registry
-│   ├── amazon_q_provider.py # Amazon Q Business
-│   ├── openai_provider.py   # OpenAI ChatGPT
-│   ├── gemini_provider.py   # Google Gemini
-│   └── perplexity_provider.py # Perplexity AI
-└── ...
-```
-
-## Recent Changes (December 2024)
-
-- **Correções de Prompts e Idioma (Dec 5 - MAIS RECENTE)**:
-  - Prompts atualizados para garantir respostas 100% em Português do Brasil
-  - Relatórios agora são EXTREMAMENTE detalhados com dados, justificativas e cálculos
-  - Cada recomendação inclui: Por que, Como implementar, Preços AWS, ROI esperado, Risco
-  - Perplexity: Modelo padrão alterado de sonar-pro para sonar (sonar-pro tem bugs de resposta incompleta)
-  - Gemini: Funcionando com relatórios de ~8.300 caracteres em ~20s
-  - Perplexity: Funcionando com relatórios de ~9.900 caracteres em ~28s
-
-- **Testes Multi-IA Validados (Dec 5)**:
-  - Perplexity: ✅ Testado com sonar (9.896 chars, 28s, busca online)
-  - Gemini: ✅ Testado com gemini-2.5-flash (8.319 chars, 20s)
-  - OpenAI: ⚠️ Requer créditos em platform.openai.com/account/billing
-  - Amazon Q: ⚠️ Requer Q_BUSINESS_APPLICATION_ID
-
-- **Correções de Provedores (Dec 5)**:
-  - Perplexity: Modelo padrão alterado para "sonar" (sonar-pro retorna respostas incompletas)
-  - Perplexity: Modelos suportados: sonar, sonar-pro, sonar-reasoning
-  - Gemini: Configurações de segurança ajustadas (BLOCK_NONE)
-  - Gemini: Suporte dual para GEMINI_API_KEY e GOOGLE_API_KEY
-  - Gemini: Tratamento robusto de respostas bloqueadas
-
-- **Suporte Multi-IA (Dec 5)**:
-  - Implementado Strategy Pattern para AI providers
-  - Adicionado OpenAI ChatGPT (GPT-4o)
-  - Adicionado Google Gemini (2.5)
-  - Adicionado Perplexity AI (com busca online)
-  - Factory + Registry para seleção dinâmica
-  - Documentação AI_PROVIDERS_GUIDE.md
-
-- **Documentação Atualizada (Dec 5)**:
-  - TECHNICAL_GUIDE.md com arquitetura completa
-  - PROMPTS_AMAZON_Q.md com exemplos de resposta
-  - USER_MANUAL.md simplificado
-  - HEAD_FIRST_FINOPS.md para executivos
-  - ARCHITECTURE_AND_PATTERNS.md com Design Patterns
-  - ROADMAP.md com status atual
-
-- **Refatoração Arquitetural (Dec 5)**:
-  - Strategy Pattern para 6 analyzers
-  - Factory + Registry Pattern
-  - Template Method em BaseAnalyzer
-  - Hierarquia de exceções tipadas (15 tipos)
-
-- **Integrações AWS (Dec 5)**:
-  - Compute Optimizer
-  - Cost Explorer RI/SP
-  - Trusted Advisor
-  - Amazon Q Business
