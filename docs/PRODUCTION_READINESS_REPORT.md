@@ -2,8 +2,8 @@
 
 ## FinOps AWS Enterprise Solution
 
-**Data:** Dezembro 2024  
-**Versão:** 2.1  
+**Data:** Dezembro 2025  
+**Versão:** 2.1 (React Dashboard + 5 IA Providers + Notificações em Tempo Real)  
 **Avaliador:** QA Enterprise Team + 10 Especialistas Mundiais
 
 ---

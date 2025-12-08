@@ -1,6 +1,8 @@
 # Amazon Q Business - Prompts FinOps AWS
 
-## Versão 2.0 - Dezembro 2024
+## Versão 2.1 - Dezembro 2025
+
+**Status**: Consultor Financeiro Multi-IA (5 Provedores: Amazon Q, OpenAI, Gemini, Perplexity, StackSpot)
 
 ---
 

@@ -2,8 +2,8 @@
 
 ## Metodologia Random Forest Expert Analysis
 
-**Data:** Dezembro 2024  
-**Projeto:** FinOps AWS Enterprise Solution  
+**Data:** Dezembro 2025  
+**Projeto:** FinOps AWS Enterprise Solution (React Dashboard + 5 IA Providers)  
 **Metodologia:** Random Forest com 10 Especialistas Simulados  
 **Score Final:** 9.7/10
 
