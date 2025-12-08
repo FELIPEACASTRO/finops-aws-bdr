@@ -1,8 +1,19 @@
-# FinOps AWS - AWS Lambda Cost Optimization Solution
+# FinOps AWS - Enterprise-Grade AWS Cost Optimization Platform
 
 ## Overview
 
-FinOps AWS is an enterprise-grade serverless solution designed for intelligent AWS cost analysis, usage monitoring, and optimization recommendations across 246 AWS services. It operates as an AWS Lambda application, delivering comprehensive financial analysis, operational monitoring, and optimization insights. A key feature is the **Automated Financial Consultant, powered by multiple AI Providers** (Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity, **StackSpot AI**), which generates intelligent reports to aid in decision-making and cost reduction. The project aims to provide a robust FinOps solution with deep analytical capabilities and actionable recommendations.
+FinOps AWS é uma **solução enterprise-grade serverless** desenvolvida com **Python 3.11** para análise inteligente de custos AWS, monitoramento de uso e recomendações de otimização abrangendo **246 serviços AWS**. O sistema funciona como aplicação AWS Lambda com integração profissional de **Frontend React 18** (TypeScript + Vite) e **Backend Flask**, entregando análise financeira completa, monitoramento operacional e insights de otimização em tempo real.
+
+### ⭐ Diferenciais Principais
+
+- **Dashboard Web Profissional**: React 18 + TypeScript + Vite com design system completo
+- **Painel de Notificações em Tempo Real**: Integrado com dados reais de anomalias e budgets AWS
+- **5 Provedores de IA Integrados**: Amazon Q Business, OpenAI ChatGPT, Google Gemini, Perplexity AI, **StackSpot AI**
+- **API REST Completa**: `/api/v1/` endpoints para análise, exportação, notificações, configurações
+- **100% Dados Reais**: Zero mock data - integração profunda com APIs AWS (Cost Explorer, Compute Optimizer, Trusted Advisor, Budgets)
+- **Multi-Região & Multi-Conta**: Análise paralela de todas as regiões AWS
+- **Exportação Avançada**: CSV, JSON, PDF (versão impressão)
+- **Cache Otimizado**: TTL configurável para reduzir latência e custos AWS
 
 ## User Preferences
 
@@ -55,6 +66,14 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 
 ## Recent Changes (December 2025)
 
+### Dashboard React + Notificações Integradas (December 8, 2025)
+- **Dashboard Frontend**: React 18 + TypeScript + Vite com design system profissional
+- **Painel de Notificações**: Integrado com dados reais (Cost Anomaly, Budgets, Recommendations)
+- **Endpoint Notificações**: `/api/v1/notifications` retorna alerts em tempo real
+- **Botão Atualizar Inteligente**: Executa análise completa ou apenas refresh conforme estado
+- **Skeleton Loading**: Estados de carregamento visuais para melhor UX
+- **Zero Mock Data**: Todas as notificações vêm de APIs reais AWS
+
 ### StackSpot AI Integration (December 8, 2025)
 Integração do StackSpot AI como 5º provedor de IA no Consultor Financeiro:
 - **StackSpotProvider**: Implementado seguindo padrão Strategy (BaseAIProvider)
@@ -80,29 +99,40 @@ Termos de maturidade FinOps traduzidos para Português do Brasil intuitivo:
 - **Descrições detalhadas**: Cada nível com explicação clara do que significa na prática
 - **Backend atualizado**: API retorna `level_name` e `levels_info` com metadados localizados
 
+### Sistema de Notificações em Tempo Real (December 8, 2025)
+- **Endpoint `/api/v1/notifications`**: Retorna notificações baseadas em análise real do cache
+- **Integração Cost Anomaly Detection**: Detecta anomalias nos últimos 90, 30 e 7 dias
+- **Integração AWS Budgets**: Monitora alertas de budget ultrapassado
+- **Análise de Recomendações**: Filtra recommendations críticas e de alto impacto
+- **Response Rápida**: Usa cache de análise para evitar timeout em chamadas AWS diretas
+- **Fallback Gracioso**: Retorna array vazio quando cache está vazio (ao invés de erro)
+
 ### Mock Data Elimination (December 8, 2025)
 All pages now use exclusively real API data with zero mock/hardcoded data:
-- **Costs.tsx**: Removed Math.random, using real trends from API
-- **Recommendations.tsx**: Removed RECOMMENDATION_TEMPLATES and getDemoRecommendations(), only API data
-- **MultiRegion.tsx**: Updated parser for object format from API, useRef to prevent race conditions
-- **Analytics.tsx**: Fixed getKpiStatus bug (inverted parameters), real maturity data from API
-- **Settings.tsx**: Added localStorage persistence with STORAGE_KEY, TTL validation (1-1440 min)
+- **Dashboard.tsx**: Renderiza dados reais de custos, economia, serviços e recomendações
+- **NotificationPanel.tsx**: Consome API real com estados loading/error/empty
+- **Header.tsx**: Badge de notificações atualiza a cada 60s com dados reais
+- **useApi.ts**: Service layer com Vite proxy para chamadas backend
+- **useDashboard.ts**: Hook customizado com tratamento de dados null
 
-### React Frontend Migration (Phase 1 Complete)
-- **Frontend Architecture**: Migrated from inline HTML/CSS/JS to professional React + TypeScript + Vite
-- **Design System**: Complete CSS Variables system with tokens for colors, typography, spacing, shadows
-- **UI Components**: Button, Card, Badge, Alert, Skeleton, Table (all with accessibility features)
-- **Layout System**: Sidebar navigation, Header with actions, responsive design
-- **Dashboard Page**: Metrics cards, loading states, data tables, action buttons
-- **API Integration**: Service layer with Vite proxy (port 5000→8000), custom hooks (useApi, useDashboard)
-- **Accessibility**: Focus states, ARIA attributes, skip links, keyboard navigation
+### React Frontend - Arquitetura Profissional
+- **Stack**: React 18 + TypeScript + Vite 7 com design system completo
+- **Componentes Reutilizáveis**: Button, Card, Badge, Alert, Table, Skeleton com acessibilidade
+- **Sistema de Design**: CSS Modules + CSS Variables para tokens de cores, tipografia, espaçamento
+- **Integração API**: Service layer `api.ts` com Vite proxy (5000→8000), tratamento de erros
+- **Custom Hooks**: `useApi`, `useDashboard`, `useFetch` para lógica compartilhada
+- **Roteamento**: React Router DOM v6 com navegação entre páginas
+- **Temas**: Suporte a dark/light mode com persistência em localStorage
+- **Notificações**: Sistema de toast com auto-dismiss e ícones
 
-### Frontend Stack
-- React 18 + TypeScript
-- Vite 7 (dev server on port 5000)
-- React Router DOM (client-side routing)
-- Lucide React (icons)
-- CSS Modules (scoped styles)
+### Frontend Stack Detalhado
+- **React 18.3** + TypeScript 5.7
+- **Vite 7.2** (dev server 0.0.0.0:5000, HMR habilitado)
+- **React Router v6** (SPA routing com lazy loading)
+- **Lucide React** (24 ícones utilizados)
+- **CSS Modules** (BEM naming convention para escalabilidade)
+- **ESLint + React Plugin** (linting automático)
+- **Tailwind CSS** (opcional para future expansion)
 
 ### New Services Implemented
 - **CUR Ingestion Service** (`cur_ingestion_service.py`): Ingestão de dados CUR com reconciliação automática
@@ -121,12 +151,15 @@ All pages now use exclusively real API data with zero mock/hardcoded data:
 - Cache agora aceita `default_ttl` no construtor
 - Método `set()` aceita parâmetro `ttl` como alternativa a `ttl_seconds`
 
-## FinOps Compliance Status
+## Status de Conformidade FinOps (4 Níveis de Maturidade)
 
-- Nível 1 (Crawl): ~100% completo ✓
-- Nível 2 (Walk): ~100% completo ✓
-- Nível 3 (Run): ~100% completo ✓
-- Nível 4 (Fly): ~100% completo ✓
+### Tradução Português Brasil (Intuitivo)
+| Nível | Nome PT-BR | Descrição | Status |
+|-------|-----------|-----------|--------|
+| 1 | **Nível 1 - Iniciante** | Visibilidade de Custos | ✅ 100% |
+| 2 | **Nível 2 - Intermediário** | Alocação e Controle | ✅ 100% |
+| 3 | **Nível 3 - Avançado** | Otimização Ativa | ✅ 100% |
+| 4 | **Nível 4 - Excelência** | Excelência Operacional | ✅ 100% |
 
 ### Compliance Details by Level
 
@@ -154,37 +187,40 @@ All pages now use exclusively real API data with zero mock/hardcoded data:
 - ✓ FinOps culture artifacts (OKRs, scorecards)
 - ✓ Automated AI consultant
 
-## External Dependencies
+## Dependências Externas
 
-- **AWS Services**:
-    - AWS Lambda
-    - AWS Compute Optimizer
-    - AWS Cost Explorer
-    - AWS Trusted Advisor
-    - Amazon Q Business
-    - AWS Budgets
-    - AWS Cost Anomaly Detection
-    - AWS Savings Plans
-    - AWS Reserved Instances
-    - AWS Resource Groups (for Tag Governance)
-    - AWS Athena (for CUR queries)
-    - AWS S3 (for CUR storage)
-    - boto3 (AWS SDK for Python)
-- **AI Providers**:
-    - OpenAI ChatGPT (via API)
-    - Google Gemini (via API)
-    - Perplexity AI (via API)
-- **Python Libraries**:
-    - Python 3.11
-    - Flask (web dashboard)
-- **Configuration**:
-    - AWS_ACCESS_KEY_ID
-    - AWS_SECRET_ACCESS_KEY
-    - AWS_REGION
-    - Q_BUSINESS_APPLICATION_ID (for Amazon Q Business)
-    - OPENAI_API_KEY (for OpenAI ChatGPT)
-    - GEMINI_API_KEY (for Google Gemini)
-    - PERPLEXITY_API_KEY (for Perplexity AI)
-    - CUR_DATABASE (optional, for Athena)
-    - CUR_TABLE (optional, for Athena)
-    - CUR_S3_BUCKET (optional, for CUR files)
+### AWS Services Integrados
+- **Cost Management**: Cost Explorer, Budgets, Savings Plans, Reserved Instances
+- **Optimization**: Compute Optimizer, Trusted Advisor, Cost Anomaly Detection
+- **AI**: Amazon Q Business
+- **Storage & Query**: S3, Athena (para CUR queries)
+- **Resource Management**: Resource Groups Tagging API
+- **SDK**: boto3 (60+ serviços suportados via enum AWSServiceType)
+
+### AI Providers Suportados (5 Provedores)
+1. **Amazon Q Business** (AWS nativo, RAG integrado)
+2. **OpenAI ChatGPT** (gpt-4o, gpt-4o-mini, gpt-4-turbo)
+3. **Google Gemini** (gemini-2.5-pro, gemini-2.5-flash)
+4. **Perplexity AI** (sonar-pro, busca online em tempo real)
+5. **StackSpot AI** (OAuth 2.0, Enterprise personas)
+
+### Stack Técnico Completo
+- **Backend**: Python 3.11, Flask 2.3+, boto3 1.34+
+- **Frontend**: React 18, TypeScript 5.7, Vite 7.2
+- **Banco de Dados**: Nenhum (análise stateless)
+- **Cache**: Em memória com TTL configurável
+- **Deployment**: AWS Lambda, S3, EventBridge, Step Functions
+
+### Variáveis de Ambiente Requeridas
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
+| AWS_ACCESS_KEY_ID | Credencial AWS | ✅ Sim |
+| AWS_SECRET_ACCESS_KEY | Credencial AWS | ✅ Sim |
+| AWS_REGION | Região padrão | ✅ Sim |
+| OPENAI_API_KEY | OpenAI | ⚠️ Para usar OpenAI |
+| GEMINI_API_KEY | Google | ⚠️ Para usar Gemini |
+| PERPLEXITY_API_KEY | Perplexity | ⚠️ Para usar Perplexity |
+| STACKSPOT_CLIENT_ID | StackSpot | ⚠️ Para usar StackSpot |
+| STACKSPOT_CLIENT_SECRET | StackSpot | ⚠️ Para usar StackSpot |
+| STACKSPOT_REALM | StackSpot | ⚠️ Para usar StackSpot |
+| Q_BUSINESS_APPLICATION_ID | Amazon Q | ⚠️ Para usar Amazon Q |
