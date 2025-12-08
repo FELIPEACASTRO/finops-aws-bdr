@@ -99,8 +99,8 @@ export function Dashboard() {
   return (
     <div className={styles.page}>
       <Header
-        title="Dashboard"
-        subtitle="Análise Inteligente de Custos AWS - Otimize seus gastos em nuvem"
+        title="FinOps AWS Dashboard v2.1"
+        subtitle="Análise Inteligente de Custos AWS • 5 Provedores IA • Notificações em Tempo Real • 100% Dados Reais"
         onRefresh={handleRefresh}
         isLoading={isLoading}
       />
