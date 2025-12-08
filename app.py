@@ -6898,6 +6898,40 @@ def clear_cache():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@app.route('/api/v1/notifications')
+def get_notifications():
+    """
+    Retorna notificações REAIS baseadas em dados AWS.
+    
+    Fontes:
+    - AWS Cost Anomaly Detection (anomalias)
+    - AWS Budgets (alertas de orçamento)
+    - Recomendações do sistema
+    """
+    try:
+        from src.finops_aws.services.notifications_service import NotificationsService
+        
+        notifications_service = NotificationsService()
+        
+        analysis = get_aws_analysis()
+        recommendations = analysis.get('recommendations', [])
+        
+        notifications = notifications_service.get_all_notifications(recommendations)
+        
+        return jsonify({
+            'status': 'success',
+            'notifications': notifications,
+            'count': len(notifications),
+            'sources': ['Cost Anomaly Detection', 'AWS Budgets', 'FinOps Analyzer']
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error', 
+            'message': str(e),
+            'notifications': []
+        }), 500
+
+
 @app.route('/api/v1/costs')
 def get_costs_data():
     """Retorna dados de custos com filtros de período e categoria."""
