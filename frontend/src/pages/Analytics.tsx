@@ -41,19 +41,72 @@ interface MaturityLevel {
   status: 'completed' | 'in_progress' | 'pending';
 }
 
+interface TrendData {
+  period: string;
+  label: string;
+  value: number;
+}
+
 export function Analytics() {
-  const { get, loading } = useFetch();
+  const { get } = useFetch();
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [overallScore, setOverallScore] = useState(0);
   const [maturityLevel, setMaturityLevel] = useState('CRAWL');
+  const [trendData, setTrendData] = useState<TrendData[]>([]);
+  const [trendLoading, setTrendLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, []);
+    if (dataLoaded) return;
+    
+    const loadData = async () => {
+      await Promise.all([
+        fetchAnalytics(),
+        fetchTrendData(),
+      ]);
+      setDataLoaded(true);
+    };
+    loadData();
+  }, [dataLoaded]);
+
+  const fetchTrendData = async () => {
+    setTrendLoading(true);
+    console.log('Buscando dados de tendência...');
+    try {
+      const periods = [
+        { period: '7d', label: '7 dias' },
+        { period: '30d', label: '30 dias' },
+        { period: '90d', label: '90 dias' },
+        { period: '1y', label: '1 ano' },
+      ];
+      
+      const results: TrendData[] = [];
+      for (const p of periods) {
+        const response = await get<any>(`/api/v1/costs?period=${p.period}&category=all`);
+        if (response?.status === 'success' && response?.data) {
+          results.push({
+            period: p.period,
+            label: p.label,
+            value: response.data.total || 0,
+          });
+        }
+      }
+      
+      console.log('Tendências carregadas:', results);
+      setTrendData(results);
+    } catch (err) {
+      console.error('Erro ao carregar tendências:', err);
+    } finally {
+      setTrendLoading(false);
+    }
+  };
 
   const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
     console.log('Buscando analytics do endpoint real...');
+    try {
     const response = await get<any>('/api/v1/analytics');
     
     if (response?.status === 'success' && response?.data) {
@@ -170,7 +223,14 @@ export function Analytics() {
       setOverallScore(Math.round(maturity.overall_score || 0));
       setMaturityLevel(maturity.level || 'CRAWL');
     }
+    } catch (err) {
+      console.error('Erro ao carregar analytics:', err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
   };
+
+  const isLoading = analyticsLoading || trendLoading;
 
   const getStatusColor = (status: string): 'success' | 'warning' | 'error' => {
     switch (status) {
@@ -203,8 +263,8 @@ export function Analytics() {
       <Header
         title="Analytics"
         subtitle="Métricas FinOps, KPIs e Maturidade"
-        onRefresh={fetchAnalytics}
-        isLoading={loading}
+        onRefresh={() => { setDataLoaded(false); }}
+        isLoading={isLoading}
       />
 
       <div className={styles.scoreCard}>
@@ -234,7 +294,7 @@ export function Analytics() {
                   />
                 </svg>
                 <div className={styles.scoreValue}>
-                  {loading ? <Skeleton width="60px" height="40px" /> : `${overallScore}%`}
+                  {isLoading ? <Skeleton width="60px" height="40px" /> : `${overallScore}%`}
                 </div>
               </div>
               <div className={styles.scoreInfo}>
@@ -286,7 +346,7 @@ export function Analytics() {
 
         <TabPanel id="kpis">
           <div className={styles.kpiGrid}>
-            {loading ? (
+            {isLoading ? (
               [...Array(6)].map((_, i) => (
                 <Card key={i}>
                   <CardContent>
@@ -330,14 +390,59 @@ export function Analytics() {
 
         <TabPanel id="trends">
           <Card>
-            <CardHeader title="Evolução de Custos" subtitle="Últimos 12 meses" />
+            <CardHeader title="Evolução de Custos" subtitle="Comparativo por período" />
             <CardContent>
               <div className={styles.trendChart}>
-                <div className={styles.chartPlaceholder}>
-                  <BarChart3 size={64} />
-                  <p>Gráfico de tendências</p>
-                  <span>Os dados de histórico estarão disponíveis após a coleta contínua</span>
-                </div>
+                {trendLoading ? (
+                  <Skeleton height="200px" />
+                ) : trendData.length > 0 ? (
+                  <div className={styles.barChart}>
+                    {(() => {
+                      const maxValue = Math.max(...trendData.map(d => d.value), 1);
+                      return trendData.map((item) => (
+                        <div key={item.period} className={styles.barItem}>
+                          <div className={styles.barLabel}>{item.label}</div>
+                          <div className={styles.barContainer}>
+                            <div 
+                              className={styles.bar}
+                              style={{ 
+                                width: `${(item.value / maxValue) * 100}%`,
+                                background: item.period === '1y' 
+                                  ? 'var(--color-primary-400)' 
+                                  : item.period === '90d'
+                                    ? 'var(--color-info-400)'
+                                    : item.period === '30d'
+                                      ? 'var(--color-warning-400)'
+                                      : 'var(--color-success-400)'
+                              }}
+                            />
+                          </div>
+                          <div className={styles.barValue}>${item.value.toFixed(2)}</div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                ) : (
+                  <div className={styles.chartPlaceholder}>
+                    <BarChart3 size={64} />
+                    <p>Gráfico de tendências</p>
+                    <span>Os dados de histórico estarão disponíveis após a coleta contínua</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader title="Resumo de Custos" subtitle="Visão consolidada" />
+            <CardContent>
+              <div className={styles.summaryGrid}>
+                {trendData.map((item) => (
+                  <div key={item.period} className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>{item.label}</span>
+                    <span className={styles.summaryValue}>${item.value.toFixed(2)}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
