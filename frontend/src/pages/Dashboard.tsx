@@ -1,4 +1,5 @@
-import { DollarSign, TrendingDown, Server, Lightbulb, Play, FileDown, Printer, Globe } from 'lucide-react';
+import { useState } from 'react';
+import { DollarSign, TrendingDown, Server, Lightbulb, Play, FileDown, Printer, Globe, Check } from 'lucide-react';
 import { Header } from '../components/layout';
 import { Card, CardHeader, CardContent, Button, Badge, Table, TableHead, TableBody, TableRow, TableCell, TableHeaderCell, TableEmptyState, Alert, SkeletonCard } from '../components/ui';
 import { useDashboard } from '../hooks';
@@ -39,6 +40,9 @@ function MetricCard({ title, value, subtitle, icon, trend, loading }: MetricCard
 
 export function Dashboard() {
   const { stats, services, recommendations, isLoading, error, refresh, runAnalysis } = useDashboard();
+  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
+  const [analysisType, setAnalysisType] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -48,11 +52,37 @@ export function Dashboard() {
     }).format(value);
   };
 
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
   const handleExport = async (format: 'csv' | 'json' | 'html') => {
+    console.log('Exportando formato:', format);
+    setExportingFormat(format);
     try {
       await api.exportReport(format);
+      console.log('Exportação concluída:', format);
+      showSuccess(`Exportação ${format.toUpperCase()} iniciada com sucesso!`);
     } catch (err) {
       console.error('Erro ao exportar:', err);
+      alert(`Erro ao exportar ${format}: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
+    } finally {
+      setExportingFormat(null);
+    }
+  };
+
+  const handleAnalysis = async (type: 'full' | 'costs_only' | 'recommendations_only') => {
+    console.log('Iniciando análise:', type);
+    setAnalysisType(type);
+    try {
+      await runAnalysis(type);
+      console.log('Análise concluída:', type);
+      showSuccess('Análise concluída com sucesso!');
+    } catch (err) {
+      console.error('Erro na análise:', err);
+    } finally {
+      setAnalysisType(null);
     }
   };
 
@@ -75,6 +105,12 @@ export function Dashboard() {
         {stats && !error && (
           <Alert variant="success" dismissible>
             Dados carregados: {formatCurrency(stats.totalCost)} em {stats.servicesAnalyzed} serviços
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert variant="info" dismissible icon={<Check size={16} />}>
+            {successMessage}
           </Alert>
         )}
 
@@ -120,23 +156,26 @@ export function Dashboard() {
               <div className={styles.actionRow}>
                 <Button
                   variant="primary"
-                  onClick={() => runAnalysis('full')}
-                  loading={isLoading}
+                  onClick={() => handleAnalysis('full')}
+                  loading={analysisType === 'full' || isLoading}
+                  disabled={!!analysisType || isLoading}
                   icon={<Play size={16} />}
                 >
                   Análise Completa
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => runAnalysis('costs_only')}
-                  disabled={isLoading}
+                  onClick={() => handleAnalysis('costs_only')}
+                  loading={analysisType === 'costs_only'}
+                  disabled={!!analysisType || isLoading}
                 >
                   Apenas Custos
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => runAnalysis('recommendations_only')}
-                  disabled={isLoading}
+                  onClick={() => handleAnalysis('recommendations_only')}
+                  loading={analysisType === 'recommendations_only'}
+                  disabled={!!analysisType || isLoading}
                 >
                   Apenas Recomendações
                 </Button>
@@ -145,6 +184,8 @@ export function Dashboard() {
                 <Button
                   variant="success"
                   onClick={() => handleExport('csv')}
+                  loading={exportingFormat === 'csv'}
+                  disabled={!!exportingFormat}
                   icon={<FileDown size={16} />}
                 >
                   Exportar CSV
@@ -152,6 +193,8 @@ export function Dashboard() {
                 <Button
                   variant="ghost"
                   onClick={() => handleExport('json')}
+                  loading={exportingFormat === 'json'}
+                  disabled={!!exportingFormat}
                   icon={<FileDown size={16} />}
                   style={{ background: 'var(--color-accent-purple)' }}
                 >
@@ -160,6 +203,8 @@ export function Dashboard() {
                 <Button
                   variant="warning"
                   onClick={() => handleExport('html')}
+                  loading={exportingFormat === 'html'}
+                  disabled={!!exportingFormat}
                   icon={<Printer size={16} />}
                 >
                   Versão Impressão

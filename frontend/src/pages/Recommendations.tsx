@@ -207,28 +207,30 @@ const getDemoRecommendations = (): Recommendation[] => {
 
 export function Recommendations() {
   const { get, loading } = useFetch();
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(getDemoRecommendations());
   const [filter, setFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
+    if (dataLoaded) return;
+    
     const loadData = async () => {
       try {
         const response = await get<any>('/api/v1/reports/latest');
         if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
           const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
           setRecommendations(recs);
-        } else {
-          setRecommendations(getDemoRecommendations());
         }
+        setDataLoaded(true);
       } catch {
-        setRecommendations(getDemoRecommendations());
+        setDataLoaded(true);
       }
     };
     loadData();
-  }, [get]);
+  }, [get, dataLoaded]);
 
   const fetchRecommendations = async () => {
     const response = await get<any>('/api/v1/reports/latest');
