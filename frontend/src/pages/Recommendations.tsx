@@ -61,78 +61,6 @@ interface Recommendation {
   };
 }
 
-const RECOMMENDATION_TEMPLATES: Record<string, Partial<Recommendation>> = {
-  'EC2_STOPPED': {
-    title: 'Instância EC2 Parada',
-    whyItMatters: 'Instâncias EC2 paradas ainda geram custos de armazenamento EBS. Se não estiver sendo utilizada, é recomendado criar uma AMI (backup) e terminar a instância para eliminar custos desnecessários.',
-    riskLevel: 'Baixo',
-    timeToImplement: '15-30 minutos',
-    prerequisites: ['Criar AMI da instância para backup', 'Verificar se não há dados importantes não salvos', 'Confirmar que a instância não será necessária em breve'],
-    technicalDetails: 'Volumes EBS continuam sendo cobrados mesmo com a instância parada. O custo é baseado no tamanho do volume (aproximadamente $0.10/GB/mês para gp3).',
-    businessImpact: 'Elimina custos recorrentes de armazenamento sem impacto operacional, já que a instância não está em uso.',
-    documentationLink: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html',
-  },
-  'EBS_ORPHAN': {
-    title: 'Volume EBS Órfão',
-    whyItMatters: 'Volumes EBS não anexados a nenhuma instância representam custo sem benefício. Geralmente são resquícios de instâncias terminadas ou testes anteriores.',
-    riskLevel: 'Médio',
-    timeToImplement: '10-20 minutos',
-    prerequisites: ['Verificar se o volume contém dados importantes', 'Criar snapshot do volume se necessário', 'Documentar o conteúdo antes de deletar'],
-    technicalDetails: 'Volumes EBS são cobrados por GB provisionado, independente de uso. gp3: $0.08/GB/mês, io1: $0.125/GB/mês + IOPS.',
-    businessImpact: 'Elimina custos fixos mensais sem impacto na operação, já que o volume não está sendo utilizado.',
-    documentationLink: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-deleting-volume.html',
-  },
-  'EIP_UNUSED': {
-    title: 'Elastic IP Não Utilizado',
-    whyItMatters: 'A AWS cobra $3.60/mês por Elastic IPs não associados a instâncias em execução. Isso é uma política para incentivar a liberação de IPs não utilizados.',
-    riskLevel: 'Baixo',
-    timeToImplement: '5 minutos',
-    prerequisites: ['Confirmar que o IP não será necessário', 'Verificar se não há DNS apontando para o IP', 'Documentar o IP se for importante'],
-    technicalDetails: 'Elastic IPs são gratuitos quando associados a uma instância em execução. A cobrança ocorre apenas quando o IP está alocado mas não em uso.',
-    businessImpact: 'Economia imediata de $3.60/mês por IP liberado, sem impacto operacional.',
-    documentationLink: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html',
-  },
-  'EBS_OLD_SNAPSHOTS': {
-    title: 'Snapshots EBS Antigos',
-    whyItMatters: 'Snapshots antigos podem não ser mais necessários e representam custos acumulados. É importante manter uma política de retenção para evitar acúmulo.',
-    riskLevel: 'Médio',
-    timeToImplement: '30-60 minutos',
-    prerequisites: ['Identificar snapshots críticos vs. descartáveis', 'Verificar se existem AMIs dependentes', 'Implementar política de ciclo de vida'],
-    technicalDetails: 'Snapshots são cobrados por GB armazenado ($0.05/GB/mês). O custo incremental (apenas blocos alterados) pode ser significativo ao longo do tempo.',
-    businessImpact: 'Reduz custos de armazenamento S3 e melhora a governança de dados da organização.',
-    documentationLink: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-deleting-snapshot.html',
-  },
-  'NAT_GATEWAY_COST': {
-    title: 'NAT Gateway Ativo',
-    whyItMatters: 'NAT Gateways têm custo fixo (~$32/mês) mais custo de transferência de dados. Em ambientes de desenvolvimento, considere alternativas como NAT Instance.',
-    riskLevel: 'Alto',
-    timeToImplement: '2-4 horas',
-    prerequisites: ['Mapear todo o tráfego que passa pelo NAT', 'Avaliar alternativas (NAT Instance, VPC Endpoints)', 'Planejar janela de manutenção'],
-    technicalDetails: 'NAT Gateway: $0.045/hora (~$32/mês) + $0.045/GB processado. NAT Instance t3.micro: ~$8/mês mas requer gerenciamento.',
-    businessImpact: 'Pode reduzir custos significativamente em ambientes de dev/test, mas requer análise cuidadosa de trade-offs.',
-    documentationLink: 'https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html',
-  },
-  'LAMBDA_HIGH_MEMORY': {
-    title: 'Lambda com Alta Memória',
-    whyItMatters: 'Funções Lambda com memória acima do necessário geram custos extras. O custo é proporcional à memória alocada, não à memória utilizada.',
-    riskLevel: 'Baixo',
-    timeToImplement: '30-60 minutos',
-    prerequisites: ['Analisar métricas de uso de memória no CloudWatch', 'Realizar testes de performance com diferentes configurações', 'Monitorar após ajustes'],
-    technicalDetails: 'Lambda cobra por GB-segundo. 1024MB custa 2x mais que 512MB. Use AWS Lambda Power Tuning para encontrar a configuração ideal.',
-    businessImpact: 'Pode reduzir custos de Lambda em 20-50% sem impacto na performance se a memória estiver superdimensionada.',
-    documentationLink: 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-memory.html',
-  },
-  'S3_VERSIONING': {
-    title: 'Bucket S3 sem Versionamento',
-    whyItMatters: 'Versionamento protege contra exclusões acidentais e permite recuperar versões anteriores. É uma best practice de segurança e compliance.',
-    riskLevel: 'Informativo',
-    timeToImplement: '5 minutos',
-    prerequisites: ['Avaliar impacto no custo de armazenamento', 'Configurar regras de ciclo de vida para versões antigas', 'Documentar política de retenção'],
-    technicalDetails: 'Versionamento aumenta custos de armazenamento (cada versão é cobrada). Configure Lifecycle Rules para expirar versões antigas automaticamente.',
-    businessImpact: 'Melhora a resiliência e governança de dados, com custo adicional controlável via Lifecycle Rules.',
-    documentationLink: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html',
-  },
-};
 
 const CATEGORY_INFO: Record<string, { icon: any; color: string; label: string }> = {
   compute: { icon: Zap, color: 'var(--color-primary-400)', label: 'Computação' },
@@ -142,10 +70,9 @@ const CATEGORY_INFO: Record<string, { icon: any; color: string; label: string }>
   optimization: { icon: TrendingDown, color: 'var(--color-success-400)', label: 'Otimização' },
 };
 
-const enrichRecommendation = (rec: any, index: number): Recommendation => {
+const mapApiRecommendation = (rec: any, index: number): Recommendation => {
   const type = rec.type || 'GENERAL';
-  const template = RECOMMENDATION_TEMPLATES[type] || {};
-  const estimatedSavings = rec.savings || rec.estimated_savings || Math.round(Math.random() * 100);
+  const estimatedSavings = rec.savings || rec.estimated_savings || 0;
   
   const categoryMap: Record<string, string> = {
     'EC2_STOPPED': 'compute',
@@ -158,51 +85,42 @@ const enrichRecommendation = (rec: any, index: number): Recommendation => {
     'S3_LIFECYCLE': 'storage',
   };
 
+  const effortLevels: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
+  
   return {
-    id: `rec-${index}`,
-    title: template.title || rec.title || rec.description?.substring(0, 50) || 'Recomendação',
+    id: rec.id || `rec-${index}`,
+    title: rec.title || rec.description?.substring(0, 50) || 'Recomendação',
     description: rec.description || rec.recommendation || 'Sem descrição',
-    category: categoryMap[type] || rec.category || 'optimization',
-    priority: rec.priority || rec.impact === 'high' ? 'high' : rec.impact === 'medium' ? 'medium' : 'low',
+    category: rec.category || categoryMap[type] || 'optimization',
+    priority: rec.priority || (rec.impact === 'high' ? 'high' : rec.impact === 'medium' ? 'medium' : 'low'),
     estimatedSavings,
-    effort: rec.effort || (['low', 'medium', 'high'][index % 3] as 'low' | 'medium' | 'high'),
-    status: 'pending' as const,
+    effort: rec.effort || effortLevels[index % 3],
+    status: rec.status || 'pending',
     service: rec.service || 'AWS',
-    impact: rec.impact || 'Redução de custos e melhoria de performance',
+    impact: rec.impact || 'Redução de custos',
     type,
     resource: rec.resource || 'N/A',
-    whyItMatters: template.whyItMatters || 'Esta recomendação pode ajudar a reduzir custos e melhorar a eficiência da sua infraestrutura AWS.',
-    riskLevel: template.riskLevel || 'Baixo',
-    timeToImplement: template.timeToImplement || '15-30 minutos',
-    affectedResources: rec.resource ? [rec.resource] : ['Recursos identificados na análise'],
-    technicalDetails: template.technicalDetails || 'Consulte a documentação AWS para mais detalhes técnicos.',
-    businessImpact: template.businessImpact || 'Potencial redução de custos operacionais sem impacto na disponibilidade.',
-    prerequisites: template.prerequisites || ['Revisar o recurso afetado', 'Planejar a implementação', 'Testar em ambiente de desenvolvimento'],
-    documentationLink: template.documentationLink || 'https://docs.aws.amazon.com/',
-    savingsBreakdown: {
+    whyItMatters: rec.why_it_matters || rec.whyItMatters || 'Esta recomendação pode ajudar a reduzir custos.',
+    riskLevel: rec.risk_level || rec.riskLevel || 'Baixo',
+    timeToImplement: rec.time_to_implement || rec.timeToImplement || '15-30 minutos',
+    affectedResources: rec.affected_resources || rec.affectedResources || (rec.resource ? [rec.resource] : []),
+    technicalDetails: rec.technical_details || rec.technicalDetails || 'Consulte a documentação AWS.',
+    businessImpact: rec.business_impact || rec.businessImpact || 'Potencial redução de custos.',
+    prerequisites: rec.prerequisites || ['Revisar o recurso', 'Planejar implementação'],
+    documentationLink: rec.documentation_link || rec.documentationLink || 'https://docs.aws.amazon.com/',
+    savingsBreakdown: rec.savings_breakdown || {
       monthly: estimatedSavings,
       yearly: estimatedSavings * 12,
       threeYear: estimatedSavings * 36,
     },
-    steps: rec.steps || template.prerequisites || [
+    steps: rec.steps || [
       'Analisar o recurso identificado',
       'Criar backup se necessário',
       'Executar a ação recomendada',
-      'Validar que a mudança foi aplicada',
-      'Monitorar o impacto nos custos',
+      'Validar a mudança',
+      'Monitorar impacto nos custos',
     ],
   };
-};
-
-const getDemoRecommendations = (): Recommendation[] => {
-  const demoData = [
-    { type: 'EBS_ORPHAN', resource: 'vol-0abc123def456', description: 'Volume EBS vol-0abc123def456 (100GB gp3) não está anexado a nenhuma instância EC2', savings: 10.00, impact: 'high' },
-    { type: 'EC2_STOPPED', resource: 'i-0def789ghi012', description: 'Instância EC2 i-0def789ghi012 (t3.large) está parada há mais de 30 dias', savings: 8.50, impact: 'medium' },
-    { type: 'EIP_UNUSED', resource: 'eipalloc-0jkl345mno678', description: 'Elastic IP 54.123.45.67 não está associado a nenhuma instância', savings: 3.60, impact: 'medium' },
-    { type: 'EBS_OLD_SNAPSHOTS', resource: 'Multiple (15 snapshots)', description: '15 snapshots EBS com mais de 1 ano de idade', savings: 7.50, impact: 'low' },
-    { type: 'LAMBDA_HIGH_MEMORY', resource: 'my-data-processor', description: 'Lambda my-data-processor com 2048MB de memória - uso médio é 400MB', savings: 5.20, impact: 'low' },
-  ];
-  return demoData.map(enrichRecommendation);
 };
 
 export function Recommendations() {
@@ -223,17 +141,17 @@ export function Recommendations() {
       try {
         const response = await get<any>('/api/v1/reports/latest');
         if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
-          const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
+          const recs: Recommendation[] = response.report.details.recommendations.map(mapApiRecommendation);
           console.log(`Recomendações carregadas: ${recs.length} da API`);
           setRecommendations(recs);
         } else {
-          console.log('Nenhuma recomendação da API, usando dados de exemplo');
-          setRecommendations(getDemoRecommendations());
+          console.log('Nenhuma recomendação da API');
+          setRecommendations([]);
         }
         setDataLoaded(true);
       } catch (err) {
         console.error('Erro ao carregar recomendações:', err);
-        setRecommendations(getDemoRecommendations());
+        setRecommendations([]);
         setDataLoaded(true);
       } finally {
         setInitialLoading(false);
@@ -246,12 +164,12 @@ export function Recommendations() {
     console.log('Atualizando recomendações...');
     const response = await get<any>('/api/v1/reports/latest');
     if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
-      const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
+      const recs: Recommendation[] = response.report.details.recommendations.map(mapApiRecommendation);
       console.log(`Recomendações atualizadas: ${recs.length}`);
       setRecommendations(recs);
     } else {
       console.log('Nenhuma recomendação encontrada');
-      setRecommendations(getDemoRecommendations());
+      setRecommendations([]);
     }
   };
   

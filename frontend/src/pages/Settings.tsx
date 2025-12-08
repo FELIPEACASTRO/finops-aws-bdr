@@ -28,10 +28,48 @@ import {
 import { useFetch } from '../hooks/useFetch';
 import styles from './Settings.module.css';
 
+const STORAGE_KEY = 'finops_settings';
+
+const getDefaultSettings = () => ({
+  theme: 'dark',
+  region: 'us-east-1',
+  notifications: 'all',
+  aiProvider: 'perplexity',
+  cacheEnabled: 'enabled',
+  cacheTTL: '15',
+});
+
+const validateTTL = (value: string): boolean => {
+  const num = parseInt(value);
+  return !isNaN(num) && num >= 1 && num <= 1440;
+};
+
+const loadFromLocalStorage = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return { ...getDefaultSettings(), ...JSON.parse(stored) };
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar localStorage:', e);
+  }
+  return getDefaultSettings();
+};
+
+const saveToLocalStorage = (settings: Record<string, any>) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    console.log('Configurações salvas no localStorage');
+  } catch (e) {
+    console.warn('Erro ao salvar localStorage:', e);
+  }
+};
+
 export function Settings() {
   const { get, put, loading } = useFetch();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [theme, setTheme] = useState('dark');
   const [region, setRegion] = useState('us-east-1');
   const [notifications, setNotifications] = useState('all');
@@ -40,25 +78,65 @@ export function Settings() {
   const [cacheTTL, setCacheTTL] = useState('15');
 
   useEffect(() => {
+    const localSettings = loadFromLocalStorage();
+    setTheme(localSettings.theme);
+    setRegion(localSettings.region);
+    setNotifications(localSettings.notifications);
+    setAiProvider(localSettings.aiProvider);
+    setCacheEnabled(localSettings.cacheEnabled);
+    setCacheTTL(localSettings.cacheTTL);
+    
     loadSettings();
   }, []);
 
   const loadSettings = async () => {
-    console.log('Carregando configurações...');
+    console.log('Carregando configurações da API...');
     const response = await get<any>('/api/v1/settings');
     if (response?.status === 'success' && response?.settings) {
       const settings = response.settings;
-      console.log('Configurações carregadas:', settings);
-      setTheme(settings.theme || 'dark');
-      setRegion(settings.region || 'us-east-1');
-      setCacheEnabled(settings.cache?.enabled ? 'enabled' : 'disabled');
-      setCacheTTL(String(settings.cache?.ttl_minutes || 15));
+      console.log('Configurações carregadas da API:', settings);
+      const newTheme = settings.theme || 'dark';
+      const newRegion = settings.region || 'us-east-1';
+      const newCacheEnabled = settings.cache?.enabled ? 'enabled' : 'disabled';
+      const newCacheTTL = String(settings.cache?.ttl_minutes || 15);
+      
+      setTheme(newTheme);
+      setRegion(newRegion);
+      setCacheEnabled(newCacheEnabled);
+      setCacheTTL(newCacheTTL);
+      
+      saveToLocalStorage({
+        theme: newTheme,
+        region: newRegion,
+        notifications,
+        aiProvider,
+        cacheEnabled: newCacheEnabled,
+        cacheTTL: newCacheTTL,
+      });
     }
   };
 
   const handleSave = async () => {
+    setValidationError(null);
+    
+    if (!validateTTL(cacheTTL)) {
+      setValidationError('TTL deve ser entre 1 e 1440 minutos');
+      return;
+    }
+    
     setSaving(true);
     console.log('Salvando configurações...');
+    
+    const settingsToSave = {
+      theme,
+      region,
+      notifications,
+      aiProvider,
+      cacheEnabled,
+      cacheTTL,
+    };
+    
+    saveToLocalStorage(settingsToSave);
     
     try {
       const response = await put<any>('/api/v1/settings', {
@@ -71,12 +149,15 @@ export function Settings() {
       });
       
       if (response?.status === 'success') {
-        console.log('Configurações salvas com sucesso');
+        console.log('Configurações salvas com sucesso na API');
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }
     } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
+      console.error('Erro ao salvar configurações na API:', error);
+      console.log('Configurações mantidas no localStorage');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } finally {
       setSaving(false);
     }
@@ -100,6 +181,12 @@ export function Settings() {
         <Alert variant="success" className={styles.alert}>
           <CheckCircle size={16} />
           Configurações salvas com sucesso!
+        </Alert>
+      )}
+
+      {validationError && (
+        <Alert variant="error" className={styles.alert}>
+          {validationError}
         </Alert>
       )}
 
