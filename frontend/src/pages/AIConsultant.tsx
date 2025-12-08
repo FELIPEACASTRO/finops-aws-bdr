@@ -37,13 +37,36 @@ const personas = [
   { value: 'ANALYST', label: 'Analista', description: 'Detalhes completos e métricas' },
 ];
 
-const suggestedQuestions = [
-  'Quais são os principais drivers de custo na minha conta AWS?',
-  'Como posso otimizar meus custos com EC2?',
-  'Devo usar Reserved Instances ou Savings Plans?',
-  'Quais recursos estão subutilizados?',
-  'Como melhorar minha cobertura de tags?',
-];
+const suggestedQuestionsByPersona: Record<string, string[]> = {
+  EXECUTIVE: [
+    'Qual é o resumo executivo dos nossos gastos AWS este mês?',
+    'Qual o ROI das otimizações implementadas?',
+    'Como estamos comparados ao orçamento anual?',
+    'Quais são os riscos financeiros na nossa infraestrutura?',
+    'Qual a tendência de custos para o próximo trimestre?',
+  ],
+  CTO: [
+    'Qual arquitetura seria mais custo-efetiva para nossos workloads?',
+    'Devemos migrar para containers ou serverless?',
+    'Como otimizar custos sem impactar performance?',
+    'Quais serviços AWS deveríamos considerar adotar?',
+    'Qual estratégia de multi-region é mais econômica?',
+  ],
+  DEVOPS: [
+    'Quais instâncias EC2 podem ser automatizadas para desligar?',
+    'Como implementar rightsizing automatizado?',
+    'Quais recursos órfãos devo remover?',
+    'Como otimizar custos de CI/CD pipelines?',
+    'Quais políticas de lifecycle devo aplicar no S3?',
+  ],
+  ANALYST: [
+    'Quais são os principais drivers de custo por serviço?',
+    'Qual a taxa de utilização de Reserved Instances?',
+    'Como está a cobertura de Savings Plans?',
+    'Quais recursos estão subutilizados (< 10%)?',
+    'Qual o breakdown de custos por tag de projeto?',
+  ],
+};
 
 export function AIConsultant() {
   const { post, loading } = useFetch();
@@ -128,9 +151,9 @@ export function AIConsultant() {
             <CardHeader title="Perguntas Sugeridas" />
             <CardContent>
               <div className={styles.suggestions}>
-                {suggestedQuestions.map((question, i) => (
+                {(suggestedQuestionsByPersona[persona] || suggestedQuestionsByPersona.ANALYST).map((question, i) => (
                   <button
-                    key={i}
+                    key={`${persona}-${i}`}
                     className={styles.suggestionBtn}
                     onClick={() => useSuggestion(question)}
                   >
