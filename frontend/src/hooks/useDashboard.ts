@@ -19,7 +19,14 @@ export function useDashboard(): UseDashboardResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const parseReport = useCallback((data: { report: AnalysisReport }) => {
+  const parseReport = useCallback((data: { report: AnalysisReport | null }) => {
+    if (!data.report) {
+      setStats(null);
+      setServices([]);
+      setRecommendations([]);
+      return;
+    }
+    
     const report = data.report;
     const details = report.details || {};
     const costData = details.costs || { total: 0, byService: {}, period: { start: '', end: '' } };
