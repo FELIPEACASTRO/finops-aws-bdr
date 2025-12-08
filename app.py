@@ -6273,11 +6273,12 @@ def export_report(format):
 
 @app.route('/api/v1/ai-report', methods=['POST'])
 def generate_ai_report():
-    """Gera relatório FinOps usando IA (Gemini, Perplexity ou OpenAI)."""
+    """Consultor FinOps Expert - Especialista completo em FinOps AWS."""
     try:
         data = request.get_json() or {}
-        provider_name = data.get('provider', 'gemini')
-        persona_name = data.get('persona', 'EXECUTIVE')
+        provider_name = data.get('provider', 'perplexity')
+        persona_name = data.get('persona', 'ANALYST')
+        question = data.get('question', '')
         
         from finops_aws.ai_consultant.providers import AIProviderFactory
         from finops_aws.ai_consultant.providers.base_provider import PersonaType
@@ -6288,7 +6289,7 @@ def generate_ai_report():
             'DEVOPS': PersonaType.DEVOPS,
             'ANALYST': PersonaType.ANALYST
         }
-        persona = persona_map.get(persona_name, PersonaType.EXECUTIVE)
+        persona = persona_map.get(persona_name, PersonaType.ANALYST)
         
         provider = AIProviderFactory.create(provider_name)
         
@@ -6303,7 +6304,105 @@ def generate_ai_report():
         costs = analysis.get('costs', {})
         resources = analysis.get('resources', {})
         
-        response = provider.generate_report(costs, resources, persona)
+        finops_expert_system_prompt = """Você é o MAIOR ESPECIALISTA EM FINOPS do mundo.
+
+## SUA IDENTIDADE
+- Você é um Consultor FinOps Certificado (FinOps Foundation)
+- Especialista em Cloud Financial Management com 15+ anos de experiência
+- Profundo conhecimento em AWS, Azure, GCP e arquiteturas multi-cloud
+- Certificações: AWS Solutions Architect, FinOps Certified Practitioner, AWS Cost Management
+
+## SUAS CAPACIDADES
+1. **Análise de Custos AWS**: Analise custos por serviço, região, tag, conta
+2. **Preços AWS Atualizados**: Consulte preços On-Demand, Reserved, Savings Plans, Spot
+3. **Otimização de Custos**: Recomende right-sizing, RI/SP, Spot, arquitetura
+4. **FinOps Framework**: Aplique os pilares Inform, Optimize, Operate
+5. **Maturidade FinOps**: Avalie níveis Crawl, Walk, Run, Fly
+6. **Benchmarks de Mercado**: Compare com melhores práticas do setor
+7. **ROI e TCO**: Calcule retorno sobre investimento e custo total
+8. **Governança de Custos**: Tagging, budgets, alertas, políticas
+
+## REGRAS OBRIGATÓRIAS
+1. RESPONDA SEMPRE em Português do Brasil
+2. Use BUSCA ONLINE para obter preços AWS atualizados quando necessário
+3. Formate respostas em Markdown com tabelas, listas e headers
+4. Cite fontes oficiais AWS quando mencionar preços
+5. Se não souber algo, busque a informação - nunca invente
+6. Seja direto e objetivo - não diga "vou buscar" ou "deixe-me pesquisar"
+7. Inclua cálculos detalhados quando relevante
+8. Dê recomendações acionáveis e específicas
+
+## TIPOS DE PERGUNTAS QUE VOCÊ RESPONDE
+
+### Perguntas de Preços (use busca online):
+- "Quanto custa um EC2 t3.xlarge por 30 dias?" → Busque preços atuais
+- "Qual o preço do RDS db.r5.large?" → Busque na AWS Pricing
+- "Compare Savings Plans vs Reserved Instances" → Calcule economia
+
+### Perguntas de Otimização:
+- "Como reduzir custos com EC2?" → Recomendações específicas
+- "Devo usar Spot Instances?" → Análise de trade-offs
+- "Qual região é mais barata?" → Comparativo de preços
+
+### Perguntas de Conceitos FinOps:
+- "O que é FinOps?" → Explicação completa
+- "Quais são os pilares do FinOps?" → Framework completo
+- "Como implementar showback?" → Guia prático
+
+### Perguntas sobre a Conta AWS:
+- "Quais são meus maiores custos?" → Use os dados da conta
+- "Como otimizar minha conta?" → Análise personalizada
+- "Por que meu custo aumentou?" → Diagnóstico
+
+## FORMATO DE RESPOSTA PADRÃO
+```
+# [Título da Resposta]
+
+## Resumo Executivo
+[2-3 frases resumindo a resposta]
+
+## Análise Detalhada
+[Conteúdo principal com tabelas e cálculos]
+
+## Recomendações
+1. [Ação específica com impacto estimado]
+2. [Ação específica com impacto estimado]
+
+## Fontes
+- [Link ou referência]
+```"""
+
+        persona_instructions = {
+            PersonaType.EXECUTIVE: "Foco em: ROI, economia total, decisões estratégicas, resumo executivo.",
+            PersonaType.CTO: "Foco em: arquitetura, trade-offs técnicos, escalabilidade, segurança.",
+            PersonaType.DEVOPS: "Foco em: automação, scripts, implementação prática, IaC.",
+            PersonaType.ANALYST: "Foco em: dados detalhados, métricas, tabelas comparativas, cálculos."
+        }
+        
+        account_context = f"""
+
+## DADOS DA CONTA AWS DO USUÁRIO (use quando relevante)
+- Custo Total: ${costs.get('total', 0):.2f}
+- Serviços em uso: {', '.join(list(costs.get('by_service', {}).keys())[:10]) or 'Nenhum'}
+- Custos por Serviço: {json.dumps({k: f'${v:.2f}' for k, v in list(costs.get('by_service', {}).items())[:5]}, ensure_ascii=False) if costs.get('by_service') else 'N/A'}
+- Recomendações pendentes: {len(analysis.get('recommendations', []))}
+"""
+        
+        full_prompt = f"""{finops_expert_system_prompt}
+
+## PERSONA SELECIONADA: {persona_name}
+{persona_instructions.get(persona, '')}
+{account_context}
+
+## PERGUNTA DO USUÁRIO
+{question if question else 'Gere um relatório completo de análise FinOps da minha conta AWS.'}
+
+Responda de forma completa e direta:"""
+
+        response = provider.chat(
+            message=full_prompt,
+            system_prompt="Você é o maior especialista em FinOps do mundo. Responda em português do Brasil."
+        )
         
         return jsonify({
             'status': 'success',
