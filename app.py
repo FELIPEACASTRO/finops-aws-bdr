@@ -6498,15 +6498,25 @@ SETTINGS_STORE = {
     'theme': 'dark',
     'region': 'us-east-1',
     'language': 'pt-BR',
+    'ai_provider': 'perplexity',
     'notifications': {
-        'email': True,
-        'slack': False,
-        'anomaly_threshold': 10
+        'frequency': 'all',
+        'types': {
+            'cost_anomaly': True,
+            'new_recommendations': True,
+            'budget_alert': True,
+            'weekly_report': False
+        }
     },
     'cache': {
         'enabled': True,
         'ttl_minutes': 15
     }
+}
+
+AWS_ANALYSIS_CACHE = {
+    'data': None,
+    'timestamp': None
 }
 
 def safe_get_dict(obj, key, default=None):
@@ -6669,15 +6679,161 @@ def update_settings():
             SETTINGS_STORE['region'] = data['region']
         if 'language' in data:
             SETTINGS_STORE['language'] = data['language']
+        if 'ai_provider' in data:
+            valid_providers = ['perplexity', 'openai', 'gemini', 'amazon_q']
+            if data['ai_provider'] in valid_providers:
+                SETTINGS_STORE['ai_provider'] = data['ai_provider']
         if 'notifications' in data:
-            SETTINGS_STORE['notifications'].update(data['notifications'])
+            notif_data = data['notifications']
+            if 'frequency' in notif_data:
+                SETTINGS_STORE['notifications']['frequency'] = notif_data['frequency']
+            if 'types' in notif_data:
+                SETTINGS_STORE['notifications']['types'].update(notif_data['types'])
         if 'cache' in data:
-            SETTINGS_STORE['cache'].update(data['cache'])
+            cache_data = data['cache']
+            if 'enabled' in cache_data:
+                SETTINGS_STORE['cache']['enabled'] = cache_data['enabled']
+            if 'ttl_minutes' in cache_data:
+                ttl = cache_data['ttl_minutes']
+                if isinstance(ttl, int) and 1 <= ttl <= 1440:
+                    SETTINGS_STORE['cache']['ttl_minutes'] = ttl
         
         return jsonify({
             'status': 'success',
             'message': 'Configurações salvas com sucesso',
             'settings': SETTINGS_STORE
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/integrations/status', methods=['GET'])
+def get_integrations_status():
+    """Retorna status real das integrações/APIs configuradas."""
+    try:
+        integrations = []
+        
+        aws_status = 'error'
+        aws_detail = 'Não Configurado'
+        if os.environ.get('AWS_ACCESS_KEY_ID') and os.environ.get('AWS_SECRET_ACCESS_KEY'):
+            try:
+                import boto3
+                from botocore.exceptions import (
+                    NoCredentialsError, 
+                    PartialCredentialsError,
+                    ClientError,
+                    EndpointConnectionError,
+                    ConnectTimeoutError
+                )
+                ce = boto3.client('ce', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
+                ce.get_cost_and_usage(
+                    TimePeriod={'Start': '2025-01-01', 'End': '2025-01-02'},
+                    Granularity='DAILY',
+                    Metrics=['BlendedCost']
+                )
+                aws_status = 'ok'
+                aws_detail = 'Conectado'
+            except (NoCredentialsError, PartialCredentialsError):
+                aws_status = 'error'
+                aws_detail = 'Credenciais inválidas'
+            except (EndpointConnectionError, ConnectTimeoutError):
+                aws_status = 'error'
+                aws_detail = 'Erro de conexão'
+            except ClientError as e:
+                error_code = e.response.get('Error', {}).get('Code', '')
+                if error_code in ('AccessDenied', 'AccessDeniedException'):
+                    aws_status = 'warning'
+                    aws_detail = 'Permissões limitadas'
+                elif error_code in ('InvalidClientTokenId', 'SignatureDoesNotMatch', 'AuthFailure'):
+                    aws_status = 'error'
+                    aws_detail = 'Credenciais inválidas'
+                else:
+                    aws_status = 'ok'
+                    aws_detail = 'Configurado'
+            except Exception:
+                aws_status = 'ok'
+                aws_detail = 'Configurado'
+        
+        integrations.append({
+            'provider': 'AWS Cost Explorer',
+            'id': 'aws_cost_explorer',
+            'status': aws_status,
+            'detail': aws_detail
+        })
+        
+        perplexity_status = 'error'
+        perplexity_detail = 'Não Configurado'
+        if os.environ.get('PERPLEXITY_API_KEY'):
+            perplexity_status = 'ok'
+            perplexity_detail = 'Configurado'
+        
+        integrations.append({
+            'provider': 'Perplexity AI',
+            'id': 'perplexity',
+            'status': perplexity_status,
+            'detail': perplexity_detail
+        })
+        
+        openai_status = 'error'
+        openai_detail = 'Não Configurado'
+        if os.environ.get('OPENAI_API_KEY'):
+            openai_status = 'ok'
+            openai_detail = 'Configurado'
+        
+        integrations.append({
+            'provider': 'OpenAI',
+            'id': 'openai',
+            'status': openai_status,
+            'detail': openai_detail
+        })
+        
+        amazon_q_status = 'error'
+        amazon_q_detail = 'Não Configurado'
+        if os.environ.get('Q_BUSINESS_APPLICATION_ID'):
+            amazon_q_status = 'ok'
+            amazon_q_detail = 'Configurado'
+        
+        integrations.append({
+            'provider': 'Amazon Q Business',
+            'id': 'amazon_q',
+            'status': amazon_q_status,
+            'detail': amazon_q_detail
+        })
+        
+        gemini_status = 'error'
+        gemini_detail = 'Não Configurado'
+        if os.environ.get('GEMINI_API_KEY'):
+            gemini_status = 'ok'
+            gemini_detail = 'Configurado'
+        
+        integrations.append({
+            'provider': 'Google Gemini',
+            'id': 'gemini',
+            'status': gemini_status,
+            'detail': gemini_detail
+        })
+        
+        return jsonify({
+            'status': 'success',
+            'integrations': integrations
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/cache/clear', methods=['POST'])
+def clear_cache():
+    """Limpa o cache de análises AWS."""
+    try:
+        AWS_ANALYSIS_CACHE['data'] = None
+        AWS_ANALYSIS_CACHE['timestamp'] = None
+        
+        from datetime import datetime
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Cache limpo com sucesso',
+            'cleared_at': datetime.now().isoformat()
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500

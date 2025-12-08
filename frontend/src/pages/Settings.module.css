@@ -114,6 +114,13 @@
   line-height: 1.6;
 }
 
+.cacheSuccess {
+  font-size: var(--font-size-sm);
+  color: var(--color-success-400);
+  font-weight: var(--font-weight-medium);
+  margin-left: var(--spacing-3);
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

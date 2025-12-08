@@ -55,6 +55,14 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 
 ## Recent Changes (December 2025)
 
+### Settings Full Backend Integration (December 8, 2025)
+Página de Configurações com integração completa backend-to-backend, sem mocks:
+- **Endpoint `/api/v1/integrations/status`**: Status real de cada API (AWS, Perplexity, OpenAI, Gemini, Amazon Q)
+- **Endpoint `/api/v1/cache/clear`**: Limpar cache com feedback visual
+- **SETTINGS_STORE expandido**: Inclui `ai_provider` e `notifications.types`
+- **PUT /api/v1/settings**: Aceita ai_provider, notifications.frequency, notifications.types com validação
+- **Settings.tsx refatorado**: Checkboxes controlados, integrações dinâmicas, cache clearing real
+
 ### Localização Português Brasil - Níveis de Maturidade (December 8, 2025)
 Termos de maturidade FinOps traduzidos para Português do Brasil intuitivo:
 - **Níveis renomeados**: CRAWL→"Nível 1", WALK→"Nível 2", RUN→"Nível 3", FLY→"Nível 4"

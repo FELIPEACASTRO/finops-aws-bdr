@@ -28,65 +28,45 @@ import {
 import { useFetch } from '../hooks/useFetch';
 import styles from './Settings.module.css';
 
-const STORAGE_KEY = 'finops_settings';
+interface Integration {
+  provider: string;
+  id: string;
+  status: 'ok' | 'warning' | 'error';
+  detail: string;
+}
 
-const getDefaultSettings = () => ({
-  theme: 'dark',
-  region: 'us-east-1',
-  notifications: 'all',
-  aiProvider: 'perplexity',
-  cacheEnabled: 'enabled',
-  cacheTTL: '15',
-});
-
-const validateTTL = (value: string): boolean => {
-  const num = parseInt(value);
-  return !isNaN(num) && num >= 1 && num <= 1440;
-};
-
-const loadFromLocalStorage = () => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return { ...getDefaultSettings(), ...JSON.parse(stored) };
-    }
-  } catch (e) {
-    console.warn('Erro ao carregar localStorage:', e);
-  }
-  return getDefaultSettings();
-};
-
-const saveToLocalStorage = (settings: Record<string, any>) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    console.log('Configurações salvas no localStorage');
-  } catch (e) {
-    console.warn('Erro ao salvar localStorage:', e);
-  }
-};
+interface NotificationTypes {
+  cost_anomaly: boolean;
+  new_recommendations: boolean;
+  budget_alert: boolean;
+  weekly_report: boolean;
+}
 
 export function Settings() {
-  const { get, put, loading } = useFetch();
+  const { get, put, post, loading } = useFetch();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [theme, setTheme] = useState('dark');
   const [region, setRegion] = useState('us-east-1');
-  const [notifications, setNotifications] = useState('all');
+  const [notificationFrequency, setNotificationFrequency] = useState('all');
+  const [notificationTypes, setNotificationTypes] = useState<NotificationTypes>({
+    cost_anomaly: true,
+    new_recommendations: true,
+    budget_alert: true,
+    weekly_report: false,
+  });
   const [aiProvider, setAiProvider] = useState('perplexity');
   const [cacheEnabled, setCacheEnabled] = useState('enabled');
   const [cacheTTL, setCacheTTL] = useState('15');
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [integrationsLoading, setIntegrationsLoading] = useState(true);
 
   useEffect(() => {
-    const localSettings = loadFromLocalStorage();
-    setTheme(localSettings.theme);
-    setRegion(localSettings.region);
-    setNotifications(localSettings.notifications);
-    setAiProvider(localSettings.aiProvider);
-    setCacheEnabled(localSettings.cacheEnabled);
-    setCacheTTL(localSettings.cacheTTL);
-    
     loadSettings();
+    loadIntegrations();
   }, []);
 
   const loadSettings = async () => {
@@ -95,31 +75,44 @@ export function Settings() {
     if (response?.status === 'success' && response?.settings) {
       const settings = response.settings;
       console.log('Configurações carregadas da API:', settings);
-      const newTheme = settings.theme || 'dark';
-      const newRegion = settings.region || 'us-east-1';
-      const newCacheEnabled = settings.cache?.enabled ? 'enabled' : 'disabled';
-      const newCacheTTL = String(settings.cache?.ttl_minutes || 15);
-      
-      setTheme(newTheme);
-      setRegion(newRegion);
-      setCacheEnabled(newCacheEnabled);
-      setCacheTTL(newCacheTTL);
-      
-      saveToLocalStorage({
-        theme: newTheme,
-        region: newRegion,
-        notifications,
-        aiProvider,
-        cacheEnabled: newCacheEnabled,
-        cacheTTL: newCacheTTL,
-      });
+      setTheme(settings.theme || 'dark');
+      setRegion(settings.region || 'us-east-1');
+      setAiProvider(settings.ai_provider || 'perplexity');
+      setCacheEnabled(settings.cache?.enabled ? 'enabled' : 'disabled');
+      setCacheTTL(String(settings.cache?.ttl_minutes || 15));
+      setNotificationFrequency(settings.notifications?.frequency || 'all');
+      if (settings.notifications?.types) {
+        setNotificationTypes({
+          cost_anomaly: settings.notifications.types.cost_anomaly ?? true,
+          new_recommendations: settings.notifications.types.new_recommendations ?? true,
+          budget_alert: settings.notifications.types.budget_alert ?? true,
+          weekly_report: settings.notifications.types.weekly_report ?? false,
+        });
+      }
+    }
+  };
+
+  const loadIntegrations = async () => {
+    setIntegrationsLoading(true);
+    console.log('Carregando status das integrações...');
+    try {
+      const response = await get<any>('/api/v1/integrations/status');
+      if (response?.status === 'success' && response?.integrations) {
+        console.log('Integrações carregadas:', response.integrations);
+        setIntegrations(response.integrations);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar integrações:', error);
+    } finally {
+      setIntegrationsLoading(false);
     }
   };
 
   const handleSave = async () => {
     setValidationError(null);
     
-    if (!validateTTL(cacheTTL)) {
+    const ttlNum = parseInt(cacheTTL);
+    if (isNaN(ttlNum) || ttlNum < 1 || ttlNum > 1440) {
       setValidationError('TTL deve ser entre 1 e 1440 minutos');
       return;
     }
@@ -127,24 +120,18 @@ export function Settings() {
     setSaving(true);
     console.log('Salvando configurações...');
     
-    const settingsToSave = {
-      theme,
-      region,
-      notifications,
-      aiProvider,
-      cacheEnabled,
-      cacheTTL,
-    };
-    
-    saveToLocalStorage(settingsToSave);
-    
     try {
       const response = await put<any>('/api/v1/settings', {
         theme,
         region,
+        ai_provider: aiProvider,
+        notifications: {
+          frequency: notificationFrequency,
+          types: notificationTypes
+        },
         cache: {
           enabled: cacheEnabled === 'enabled',
-          ttl_minutes: parseInt(cacheTTL)
+          ttl_minutes: ttlNum
         }
       });
       
@@ -155,17 +142,45 @@ export function Settings() {
       }
     } catch (error) {
       console.error('Erro ao salvar configurações na API:', error);
-      console.log('Configurações mantidas no localStorage');
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setValidationError('Erro ao salvar configurações. Tente novamente.');
     } finally {
       setSaving(false);
     }
   };
 
   const handleClearCache = async () => {
+    setClearingCache(true);
     console.log('Limpando cache...');
-    alert('Cache limpo com sucesso!');
+    try {
+      const response = await post<any>('/api/v1/cache/clear', {});
+      if (response?.status === 'success') {
+        console.log('Cache limpo:', response.cleared_at);
+        setCacheCleared(true);
+        setTimeout(() => setCacheCleared(false), 3000);
+      }
+    } catch (error) {
+      console.error('Erro ao limpar cache:', error);
+    } finally {
+      setClearingCache(false);
+    }
+  };
+
+  const handleNotificationTypeChange = (type: keyof NotificationTypes) => {
+    setNotificationTypes(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'ok':
+        return <Badge variant="success" size="sm">Conectado</Badge>;
+      case 'warning':
+        return <Badge variant="warning" size="sm">Limitado</Badge>;
+      default:
+        return <Badge variant="warning" size="sm">Não Configurado</Badge>;
+    }
   };
 
   return (
@@ -297,24 +312,22 @@ export function Settings() {
 
               <div className={styles.apiStatus}>
                 <h4>Status das APIs</h4>
-                <div className={styles.statusList}>
-                  <div className={styles.statusItem}>
-                    <span>AWS Cost Explorer</span>
-                    <Badge variant="success" size="sm">Conectado</Badge>
+                {integrationsLoading ? (
+                  <div className={styles.statusList}>
+                    <Skeleton height="40px" />
+                    <Skeleton height="40px" />
+                    <Skeleton height="40px" />
                   </div>
-                  <div className={styles.statusItem}>
-                    <span>Perplexity AI</span>
-                    <Badge variant="success" size="sm">Configurado</Badge>
+                ) : (
+                  <div className={styles.statusList}>
+                    {integrations.map((integration) => (
+                      <div key={integration.id} className={styles.statusItem}>
+                        <span>{integration.provider}</span>
+                        {getStatusBadge(integration.status)}
+                      </div>
+                    ))}
                   </div>
-                  <div className={styles.statusItem}>
-                    <span>Amazon Q Business</span>
-                    <Badge variant="warning" size="sm">Não Configurado</Badge>
-                  </div>
-                  <div className={styles.statusItem}>
-                    <span>OpenAI</span>
-                    <Badge variant="warning" size="sm">Não Configurado</Badge>
-                  </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -331,10 +344,10 @@ export function Settings() {
               <div className={styles.formGroup}>
                 <Select
                   label="Frequência"
-                  value={notifications}
+                  value={notificationFrequency}
                   onChange={(value) => {
-                    console.log('Notificações alteradas para:', value);
-                    setNotifications(value);
+                    console.log('Frequência de notificações alterada para:', value);
+                    setNotificationFrequency(value);
                   }}
                   options={[
                     { value: 'all', label: 'Todas as notificações' },
@@ -349,19 +362,35 @@ export function Settings() {
                 <h4>Tipos de Alerta</h4>
                 <div className={styles.checkList}>
                   <label className={styles.checkItem}>
-                    <input type="checkbox" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      checked={notificationTypes.cost_anomaly}
+                      onChange={() => handleNotificationTypeChange('cost_anomaly')}
+                    />
                     <span>Anomalias de custo detectadas</span>
                   </label>
                   <label className={styles.checkItem}>
-                    <input type="checkbox" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      checked={notificationTypes.new_recommendations}
+                      onChange={() => handleNotificationTypeChange('new_recommendations')}
+                    />
                     <span>Novas recomendações de otimização</span>
                   </label>
                   <label className={styles.checkItem}>
-                    <input type="checkbox" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      checked={notificationTypes.budget_alert}
+                      onChange={() => handleNotificationTypeChange('budget_alert')}
+                    />
                     <span>Orçamento próximo do limite</span>
                   </label>
                   <label className={styles.checkItem}>
-                    <input type="checkbox" />
+                    <input 
+                      type="checkbox" 
+                      checked={notificationTypes.weekly_report}
+                      onChange={() => handleNotificationTypeChange('weekly_report')}
+                    />
                     <span>Relatórios semanais</span>
                   </label>
                 </div>
@@ -423,9 +452,13 @@ export function Settings() {
                   size="sm"
                   icon={<RefreshCw size={16} />}
                   onClick={handleClearCache}
+                  loading={clearingCache}
                 >
-                  Limpar Cache
+                  {clearingCache ? 'Limpando...' : 'Limpar Cache'}
                 </Button>
+                {cacheCleared && (
+                  <span className={styles.cacheSuccess}>Cache limpo com sucesso!</span>
+                )}
               </div>
             </CardContent>
           </Card>
