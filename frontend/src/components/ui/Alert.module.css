@@ -1,0 +1,117 @@
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid;
+  animation: fadeInUp var(--transition-normal) ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Variants */
+.success {
+  background: rgba(16, 185, 129, 0.1);
+  border-left-color: var(--color-success-500);
+}
+
+.success .icon {
+  color: var(--color-success-400);
+}
+
+.warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: var(--color-warning-500);
+}
+
+.warning .icon {
+  color: var(--color-warning-400);
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.1);
+  border-left-color: var(--color-error-500);
+}
+
+.error .icon {
+  color: var(--color-error-400);
+}
+
+.info {
+  background: rgba(59, 130, 246, 0.1);
+  border-left-color: var(--color-primary-500);
+}
+
+.info .icon {
+  color: var(--color-primary-400);
+}
+
+/* Icon */
+.icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-1) 0;
+}
+
+.message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+/* Dismiss */
+.dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dismiss:hover {
+  background: var(--color-neutral-700);
+  color: var(--color-text-primary);
+}
+
+.dismiss:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}

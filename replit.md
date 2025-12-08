@@ -55,6 +55,22 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 
 ## Recent Changes (December 2025)
 
+### React Frontend Migration (Phase 1 Complete)
+- **Frontend Architecture**: Migrated from inline HTML/CSS/JS to professional React + TypeScript + Vite
+- **Design System**: Complete CSS Variables system with tokens for colors, typography, spacing, shadows
+- **UI Components**: Button, Card, Badge, Alert, Skeleton, Table (all with accessibility features)
+- **Layout System**: Sidebar navigation, Header with actions, responsive design
+- **Dashboard Page**: Metrics cards, loading states, data tables, action buttons
+- **API Integration**: Service layer with Vite proxy (port 5000→8000), custom hooks (useApi, useDashboard)
+- **Accessibility**: Focus states, ARIA attributes, skip links, keyboard navigation
+
+### Frontend Stack
+- React 18 + TypeScript
+- Vite 7 (dev server on port 5000)
+- React Router DOM (client-side routing)
+- Lucide React (icons)
+- CSS Modules (scoped styles)
+
 ### New Services Implemented
 - **CUR Ingestion Service** (`cur_ingestion_service.py`): Ingestão de dados CUR com reconciliação automática
 - **Cost Allocation Service** (`cost_allocation_service.py`): Engine de alocação com scorecard por nível de maturidade
