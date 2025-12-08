@@ -15,21 +15,33 @@
   margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Skip Link for Accessibility */
+/* Skip Link for Accessibility - WCAG 2.1 compliant */
 .skipLink {
   position: absolute;
-  top: -40px;
-  left: 0;
-  padding: var(--spacing-2) var(--spacing-4);
+  top: -50px;
+  left: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
   background: var(--color-primary-500);
   color: white;
   text-decoration: none;
   z-index: 9999;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
   transition: top var(--transition-fast);
+  box-shadow: var(--shadow-lg);
 }
 
 .skipLink:focus {
-  top: 0;
+  top: var(--spacing-4);
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
+}
+
+.skipLink:focus-visible {
+  top: var(--spacing-4);
+  outline: 3px solid var(--color-primary-300);
+  outline-offset: 2px;
 }
 
 /* Responsive */
