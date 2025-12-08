@@ -4,23 +4,24 @@
   right: 0;
   width: 380px;
   max-height: 480px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  backdrop-filter: none;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-primary);
-  background: var(--bg-secondary);
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 16px);
+  border-bottom: 1px solid var(--color-border, #334155);
+  background: var(--color-neutral-800, #1e293b);
 }
 
 .title {
@@ -77,14 +78,15 @@
 .content {
   flex: 1;
   overflow-y: auto;
+  background: var(--color-surface, #1e293b);
 }
 
 .empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-2xl);
-  color: var(--text-tertiary);
+  padding: var(--spacing-2xl, 24px);
+  color: var(--color-text-secondary, #94a3b8);
 }
 
 .list {
@@ -96,16 +98,17 @@
 .item {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-secondary);
+  gap: var(--spacing-md, 12px);
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 16px);
+  border-bottom: 1px solid var(--color-border, #334155);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background var(--transition-fast, 0.15s);
   position: relative;
+  background: var(--color-surface, #1e293b);
 }
 
 .item:hover {
-  background: var(--bg-secondary);
+  background: var(--color-neutral-700, #334155);
 }
 
 .item:last-child {
@@ -113,11 +116,12 @@
 }
 
 .unread {
-  background: var(--bg-secondary);
+  background: var(--color-neutral-800, #1e293b);
 }
 
 .read {
   opacity: 0.7;
+  background: var(--color-surface, #1e293b);
 }
 
 .icon {
@@ -182,9 +186,9 @@
 }
 
 .footer {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-primary);
-  background: var(--bg-secondary);
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 16px);
+  border-top: 1px solid var(--color-border, #334155);
+  background: var(--color-neutral-800, #1e293b);
   text-align: center;
 }
 
