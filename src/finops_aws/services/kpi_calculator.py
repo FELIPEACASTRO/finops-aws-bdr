@@ -246,7 +246,8 @@ class KPICalculator:
         savings_captured: float = 0.0,
         transactions_count: int = 0,
         customers_count: int = 0,
-        revenue: float = 0.0
+        revenue: float = 0.0,
+        tag_coverage_percent: float = 0.0
     ) -> KPIResult:
         """
         Calcula todos os KPIs FinOps
@@ -359,7 +360,7 @@ class KPICalculator:
             cost_growth_mom=round(cost_growth_mom, 2),
             cost_growth_yoy=round(cost_growth_yoy, 2),
             economic_health_index=economic_health_index,
-            tag_coverage_percent=0.0,
+            tag_coverage_percent=tag_coverage_percent,
             savings_captured=savings_captured,
             savings_potential=savings_potential
         )

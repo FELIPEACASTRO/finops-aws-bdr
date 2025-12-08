@@ -62,7 +62,7 @@ def get_analyzers_analysis(region: str) -> tuple[List[Dict], Dict[str, Any]]:
         result = factory.analyze_all(region)
         
         recommendations = [rec.to_dict() for rec in result.recommendations]
-        resources = result.resources
+        resources: Dict[str, Any] = dict(result.resources)
         resources['_services_analyzed_list'] = result.services_analyzed
         resources['_services_analyzed_count'] = len(result.services_analyzed)
         
@@ -224,6 +224,9 @@ def get_dashboard_analysis(
     except Exception as e:
         logger.error(f"Erro na análise de Anomalias: {e}")
     
+    sp_data = None
+    ri_data = None
+    
     try:
         sp_data = get_savings_plans_analysis()
         if sp_data and 'error' not in sp_data:
@@ -245,12 +248,13 @@ def get_dashboard_analysis(
         logger.error(f"Erro na análise de Reserved Instances: {e}")
     
     try:
-        commitments_data = get_commitments_summary()
+        commitments_data = get_commitments_summary(sp_data=sp_data, ri_data=ri_data)
         if commitments_data:
             result['finops']['commitments'] = commitments_data.get('summary', {})
     except Exception as e:
         logger.error(f"Erro no resumo de Commitments: {e}")
     
+    tag_data: Optional[Dict[str, Any]] = None
     try:
         tag_data = get_tag_governance_analysis()
         if tag_data and 'error' not in tag_data:
@@ -266,13 +270,18 @@ def get_dashboard_analysis(
             r.get('savings', 0) for r in result['recommendations'] 
             if 'idle' in r.get('type', '').lower() or 'unused' in r.get('type', '').lower()
         )
-        shadow_cost = tag_data.get('costs', {}).get('total_cost', 0) if 'tag_data' in dir() else 0
+        shadow_cost = tag_data.get('costs', {}).get('total_cost', 0) if tag_data else 0
         savings_potential = sum(r.get('savings', 0) for r in result['recommendations'])
+        
+        tag_coverage_percent = 0.0
+        if tag_data and 'coverage' in tag_data:
+            tag_coverage_percent = tag_data['coverage'].get('compliance_percent', 0.0)
         
         kpis_data = get_finops_kpis(
             idle_cost=idle_cost,
             shadow_cost=shadow_cost,
-            savings_potential=savings_potential
+            savings_potential=savings_potential,
+            tag_coverage_percent=tag_coverage_percent
         )
         if kpis_data and 'error' not in kpis_data:
             result['finops']['kpis'] = kpis_data

@@ -627,7 +627,8 @@ def get_finops_kpis(
     savings_captured: float = 0.0,
     transactions_count: int = 0,
     customers_count: int = 0,
-    revenue: float = 0.0
+    revenue: float = 0.0,
+    tag_coverage_percent: float = 0.0
 ) -> Dict[str, Any]:
     """
     Calcula todos os KPIs FinOps.
@@ -640,6 +641,7 @@ def get_finops_kpis(
         transactions_count: Número de transações (para unit economics)
         customers_count: Número de clientes (para unit economics)
         revenue: Receita do período (para margem)
+        tag_coverage_percent: Percentual de cobertura de tags
         
     Returns:
         Dict com todos os KPIs calculados
@@ -655,7 +657,8 @@ def get_finops_kpis(
             savings_captured=savings_captured,
             transactions_count=transactions_count,
             customers_count=customers_count,
-            revenue=revenue
+            revenue=revenue,
+            tag_coverage_percent=tag_coverage_percent
         )
         
         return result.to_dict()
@@ -665,15 +668,24 @@ def get_finops_kpis(
         return {'error': str(e), 'kpis': {}}
 
 
-def get_commitments_summary() -> Dict[str, Any]:
+def get_commitments_summary(
+    sp_data: Optional[Dict[str, Any]] = None,
+    ri_data: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """
     Obtém resumo consolidado de commitments (RI + SP).
+    
+    Otimizado para evitar chamadas AWS duplicadas - aceita dados pré-obtidos.
+    
+    Args:
+        sp_data: Dados de Savings Plans já obtidos (opcional)
+        ri_data: Dados de Reserved Instances já obtidos (opcional)
     
     Returns:
         Dict com resumo de todos os commitments
     """
-    sp_analysis = get_savings_plans_analysis()
-    ri_analysis = get_reserved_instances_analysis()
+    sp_analysis = sp_data if sp_data else get_savings_plans_analysis()
+    ri_analysis = ri_data if ri_data else get_reserved_instances_analysis()
     
     total_sp = len(sp_analysis.get('savings_plans', []))
     total_ri = len(ri_analysis.get('reserved_instances', []))
