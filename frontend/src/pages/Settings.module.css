@@ -1,0 +1,133 @@
+.page {
+  padding: var(--spacing-6);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.alert {
+  margin-bottom: var(--spacing-6);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-4);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-2);
+}
+
+.apiStatus {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.apiStatus h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-md);
+}
+
+.statusItem span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.notificationTypes {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.notificationTypes h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.checkList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  cursor: pointer;
+}
+
+.checkItem input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary-500);
+}
+
+.checkItem span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.cacheInfo {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.cacheInfo p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--spacing-4);
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}

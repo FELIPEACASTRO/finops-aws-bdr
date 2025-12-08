@@ -1,0 +1,72 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.selectWrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.select {
+  appearance: none;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  padding-right: var(--spacing-10);
+  transition: all var(--transition-fast);
+}
+
+.select.sm {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.select.md {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-base);
+}
+
+.select.lg {
+  padding: var(--spacing-4) var(--spacing-5);
+  font-size: var(--font-size-lg);
+}
+
+.select:hover:not(:disabled) {
+  border-color: var(--color-primary-400);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-400-alpha);
+}
+
+.select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  position: absolute;
+  right: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.disabled .icon {
+  opacity: 0.5;
+}

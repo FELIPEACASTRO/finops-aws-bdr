@@ -1,0 +1,132 @@
+.page {
+  padding: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-elevated) 100%);
+}
+
+.summaryCard > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.metricLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.metricValue {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.metricValue.positive {
+  color: var(--color-success-400);
+}
+
+.metricValue.negative {
+  color: var(--color-danger-400);
+}
+
+.metricIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-500-alpha);
+  border-radius: var(--radius-lg);
+  color: var(--color-primary-400);
+}
+
+.tableLoading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.serviceName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.percentageText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-left: var(--spacing-2);
+}
+
+.trendUp {
+  color: var(--color-danger-400);
+}
+
+.trendDown {
+  color: var(--color-success-400);
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.categoryInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.categoryName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.categoryValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--spacing-4);
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+}

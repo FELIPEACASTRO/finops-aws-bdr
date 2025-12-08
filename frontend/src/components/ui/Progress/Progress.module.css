@@ -1,0 +1,62 @@
+.wrapper {
+  width: 100%;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.percentage {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.track {
+  width: 100%;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.track.sm {
+  height: 4px;
+}
+
+.track.md {
+  height: 8px;
+}
+
+.track.lg {
+  height: 12px;
+}
+
+.bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal) ease-out;
+}
+
+.bar.primary {
+  background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));
+}
+
+.bar.success {
+  background: linear-gradient(90deg, var(--color-success-500), var(--color-success-400));
+}
+
+.bar.warning {
+  background: linear-gradient(90deg, var(--color-warning-500), var(--color-warning-400));
+}
+
+.bar.danger {
+  background: linear-gradient(90deg, var(--color-danger-500), var(--color-danger-400));
+}

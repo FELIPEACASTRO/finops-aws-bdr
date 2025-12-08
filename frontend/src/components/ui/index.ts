@@ -19,3 +19,9 @@ export {
   TableEmptyState,
   type TableProps,
 } from './Table';
+export { Tabs, TabList, Tab, TabPanel } from './Tabs/Tabs';
+export { Progress } from './Progress/Progress';
+export { Select } from './Select/Select';
+export { Modal } from './Modal/Modal';
+export { Input } from './Input/Input';
+export { Textarea } from './Textarea/Textarea';

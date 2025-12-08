@@ -1,0 +1,199 @@
+.page {
+  padding: var(--spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.summaryCard > div {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.summaryIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+}
+
+.summaryInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.summaryValue {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.recCard {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.recCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.recHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-3);
+  gap: var(--spacing-4);
+}
+
+.recTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-primary-400);
+}
+
+.recTitle h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.recBadges {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.recDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-4);
+  line-height: 1.6;
+}
+
+.recMeta {
+  display: flex;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.recSavings,
+.recEffort {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.recSavings {
+  color: var(--color-success-400);
+}
+
+.recActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+
+.empty h3 {
+  margin: var(--spacing-4) 0 var(--spacing-2);
+  color: var(--color-text-secondary);
+}
+
+.empty p {
+  color: var(--color-text-tertiary);
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.modalSection h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modalSection p {
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+.savings {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success-400);
+}
+
+.stepsList {
+  padding-left: var(--spacing-5);
+  color: var(--color-text-primary);
+}
+
+.stepsList li {
+  margin-bottom: var(--spacing-2);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--spacing-4);
+  }
+
+  .recHeader {
+    flex-direction: column;
+  }
+
+  .recMeta {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .recActions {
+    flex-direction: column;
+  }
+}
