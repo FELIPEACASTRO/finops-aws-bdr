@@ -22,7 +22,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from .base_service import BaseAWSService
+from .base_service import BaseAWSService, ServiceCost, ServiceMetrics, ServiceRecommendation
 from ..utils.logger import setup_logger
 from ..utils.cache import FinOpsCache
 
@@ -193,7 +193,15 @@ class UnitEconomicsService(BaseAWSService):
         return boto3.client('cloudwatch', region_name=region)
     
     def health_check(self) -> bool:
-        """Verifica saúde do serviço"""
+        """Verifica saúde do serviço
+        
+        Retorna True se:
+        - Credenciais AWS não estão configuradas (modo offline/demo)
+        - Conexão com Cost Explorer está funcional
+        """
+        if not os.environ.get('AWS_ACCESS_KEY_ID') or not os.environ.get('AWS_SECRET_ACCESS_KEY'):
+            self.logger.info("Health check: modo offline/demo (sem credenciais AWS)")
+            return True
         try:
             client = self._get_ce_client()
             end_date = datetime.utcnow().strftime('%Y-%m-%d')
@@ -210,10 +218,10 @@ class UnitEconomicsService(BaseAWSService):
     
     def get_resources(self) -> List[Dict[str, Any]]:
         """Retorna configuração de fontes de métricas"""
-        return {
+        return [{
             'metric_sources': {k: v.value for k, v in self._metric_sources.items()},
             'business_metrics_configured': self._business_metrics is not None
-        }
+        }]
     
     def set_business_metrics(
         self,
@@ -338,8 +346,11 @@ class UnitEconomicsService(BaseAWSService):
         
         total_cost = self._get_total_cost(start_date, end_date)
         
-        if not self._business_metrics:
+        if self._business_metrics is None:
             self._estimate_business_metrics(total_cost, period_days)
+        
+        if self._business_metrics is None:
+            raise RuntimeError("Failed to initialize business metrics")
         
         metrics = self._business_metrics
         
@@ -393,7 +404,7 @@ class UnitEconomicsService(BaseAWSService):
             ltv_cac_ratio
         )
         
-        trend = self._calculate_trend(period_days)
+        trend = self._calculate_cost_trend(period_days)
         
         by_service = {}
         if include_service_breakdown:
@@ -523,7 +534,7 @@ class UnitEconomicsService(BaseAWSService):
         
         return min(100, score)
     
-    def _calculate_trend(self, period_days: int) -> Dict[str, float]:
+    def _calculate_cost_trend(self, period_days: int) -> Dict[str, float]:
         """Calcula tendência comparando com período anterior"""
         try:
             end_date = datetime.utcnow()
@@ -632,8 +643,8 @@ class UnitEconomicsService(BaseAWSService):
         
         return recommendations
     
-    def get_costs(self, period_days: int = 30) -> Dict[str, Any]:
-        """Obtém custos do serviço (interface BaseAWSService)"""
+    def get_costs_data(self, period_days: int = 30) -> Dict[str, Any]:
+        """Obtém custos do serviço (dados brutos)"""
         result = self.calculate_unit_economics(period_days, include_service_breakdown=False)
         return {
             'service': 'unit_economics',
@@ -644,18 +655,65 @@ class UnitEconomicsService(BaseAWSService):
             'currency': 'USD'
         }
     
-    def get_metrics(self) -> Dict[str, Any]:
-        """Obtém métricas do serviço (interface BaseAWSService)"""
+    def get_metrics_data(self) -> Dict[str, Any]:
+        """Obtém métricas do serviço (dados brutos)"""
         result = self.calculate_unit_economics(30, include_service_breakdown=False)
+        data_source = 'none'
+        if self._business_metrics is not None:
+            data_source = self._business_metrics.data_source
         return {
             'service': 'unit_economics',
             'efficiency_score': result.efficiency_score,
             'margin_percent': result.cloud_cost_margin_percent,
             'ltv_cac_ratio': result.ltv_cac_ratio,
-            'data_source': self._business_metrics.data_source if self._business_metrics else 'none'
+            'data_source': data_source
         }
     
-    def get_recommendations(self) -> List[Dict[str, Any]]:
-        """Obtém recomendações de Unit Economics"""
+    def get_recommendations_data(self) -> List[Dict[str, Any]]:
+        """Obtém recomendações de Unit Economics (dados brutos)"""
         result = self.calculate_unit_economics(30)
         return result.recommendations
+    
+    def get_costs(self, period_days: int = 30) -> ServiceCost:
+        """Obtém custos do serviço (interface BaseAWSService)"""
+        result = self.calculate_unit_economics(period_days, include_service_breakdown=False)
+        return ServiceCost(
+            service_name='unit_economics',
+            total_cost=result.total_cloud_cost,
+            period_days=period_days,
+            cost_by_resource={'cloud': result.total_cloud_cost},
+            trend='STABLE'
+        )
+    
+    def get_metrics(self) -> ServiceMetrics:
+        """Obtém métricas do serviço (interface BaseAWSService)"""
+        result = self.calculate_unit_economics(30, include_service_breakdown=False)
+        data_source = 'none'
+        if self._business_metrics is not None:
+            data_source = self._business_metrics.data_source
+        return ServiceMetrics(
+            service_name='unit_economics',
+            resource_count=1,
+            metrics={
+                'efficiency_score': result.efficiency_score,
+                'margin_percent': result.cloud_cost_margin_percent,
+                'ltv_cac_ratio': result.ltv_cac_ratio,
+                'data_source': data_source
+            }
+        )
+    
+    def get_recommendations(self) -> List[ServiceRecommendation]:
+        """Obtém recomendações de Unit Economics"""
+        result = self.calculate_unit_economics(30)
+        recommendations = []
+        for rec in result.recommendations:
+            recommendations.append(ServiceRecommendation(
+                resource_id=rec.get('type', 'unknown'),
+                resource_type='unit_economics',
+                recommendation_type=rec.get('type', 'OPTIMIZATION'),
+                description=rec.get('description', ''),
+                title=rec.get('title', ''),
+                priority=rec.get('priority', 'MEDIUM'),
+                action=rec.get('action', '')
+            ))
+        return recommendations
