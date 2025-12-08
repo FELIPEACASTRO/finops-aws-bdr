@@ -46,81 +46,129 @@ export function Analytics() {
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [maturityLevels, setMaturityLevels] = useState<MaturityLevel[]>([]);
   const [overallScore, setOverallScore] = useState(0);
+  const [maturityLevel, setMaturityLevel] = useState('CRAWL');
 
   useEffect(() => {
     fetchAnalytics();
   }, []);
 
   const fetchAnalytics = async () => {
-    const response = await get<any>('/api/v1/reports/latest');
-    if (response?.report?.details) {
-      const details = response.report.details;
+    console.log('Buscando analytics do endpoint real...');
+    const response = await get<any>('/api/v1/analytics');
+    
+    if (response?.status === 'success' && response?.data) {
+      const { maturity, kpis: kpiData, trends } = response.data;
+      console.log('Analytics recebido:', { maturity, kpis: kpiData });
       
+      const getKpiStatus = (value: number, target: number, higherIsBetter: boolean = true): 'good' | 'warning' | 'critical' => {
+        const ratio = value / Math.max(target, 1);
+        if (higherIsBetter) {
+          if (ratio >= 0.8) return 'good';
+          if (ratio >= 0.5) return 'warning';
+          return 'critical';
+        } else {
+          if (ratio <= 1.2) return 'good';
+          if (ratio <= 1.5) return 'warning';
+          return 'critical';
+        }
+      };
+
       setKpis([
         {
           id: 'cost_per_service',
           name: 'Custo Médio por Serviço',
-          value: (details.costs?.total || 0) / Math.max(details.services_analyzed || 1, 1),
+          value: kpiData.avg_cost_per_service || 0,
           target: 0.5,
           unit: 'USD',
-          trend: -12,
-          status: 'good',
+          trend: trends.cost_trend || 0,
+          status: getKpiStatus(kpiData.avg_cost_per_service || 0, 0.5, false),
         },
         {
           id: 'recommendations_implemented',
           name: 'Recomendações Implementadas',
-          value: 0,
-          target: (details.recommendations?.length || 0),
+          value: kpiData.implementation_rate || 0,
+          target: kpiData.recommendations_total || 11,
           unit: '%',
           trend: 0,
-          status: 'warning',
+          status: getKpiStatus(kpiData.implementation_rate || 0, 50),
         },
         {
           id: 'tag_coverage',
           name: 'Cobertura de Tags',
-          value: details.kpis?.tag_coverage || 0,
+          value: kpiData.tag_coverage || 0,
           target: 80,
           unit: '%',
           trend: 5,
-          status: details.kpis?.tag_coverage > 50 ? 'good' : 'critical',
+          status: getKpiStatus(kpiData.tag_coverage || 0, 80),
         },
         {
           id: 'cost_optimization',
           name: 'Otimização de Custos',
-          value: 15,
+          value: kpiData.cost_optimization_rate || 0,
           target: 30,
           unit: '%',
           trend: 8,
-          status: 'warning',
+          status: getKpiStatus(kpiData.cost_optimization_rate || 0, 30),
         },
         {
           id: 'ri_utilization',
           name: 'Utilização de RIs',
-          value: 0,
+          value: kpiData.ri_utilization || 0,
           target: 80,
           unit: '%',
           trend: 0,
-          status: 'critical',
+          status: getKpiStatus(kpiData.ri_utilization || 0, 80),
         },
         {
           id: 'sp_coverage',
           name: 'Cobertura Savings Plans',
-          value: 0,
+          value: kpiData.sp_coverage || 0,
           target: 70,
           unit: '%',
           trend: 0,
-          status: 'critical',
+          status: getKpiStatus(kpiData.sp_coverage || 0, 70),
         },
       ]);
 
+      const getMaturityStatus = (score: number): 'completed' | 'in_progress' | 'pending' => {
+        if (score >= 80) return 'completed';
+        if (score >= 30) return 'in_progress';
+        return 'pending';
+      };
+
       setMaturityLevels([
-        { level: 'CRAWL', name: 'Visibilidade', score: 100, maxScore: 100, status: 'completed' },
-        { level: 'WALK', name: 'Alocação', score: 100, maxScore: 100, status: 'completed' },
-        { level: 'RUN', name: 'Otimização', score: 100, maxScore: 100, status: 'completed' },
-        { level: 'FLY', name: 'Operações', score: 100, maxScore: 100, status: 'completed' },
+        { 
+          level: 'CRAWL', 
+          name: 'Visibilidade', 
+          score: maturity.crawl || 0, 
+          maxScore: 100, 
+          status: getMaturityStatus(maturity.crawl || 0)
+        },
+        { 
+          level: 'WALK', 
+          name: 'Alocação', 
+          score: maturity.walk || 0, 
+          maxScore: 100, 
+          status: getMaturityStatus(maturity.walk || 0)
+        },
+        { 
+          level: 'RUN', 
+          name: 'Otimização', 
+          score: maturity.run || 0, 
+          maxScore: 100, 
+          status: getMaturityStatus(maturity.run || 0)
+        },
+        { 
+          level: 'FLY', 
+          name: 'Operações', 
+          score: maturity.fly || 0, 
+          maxScore: 100, 
+          status: getMaturityStatus(maturity.fly || 0)
+        },
       ]);
 
-      setOverallScore(100);
+      setOverallScore(Math.round(maturity.overall_score || 0));
+      setMaturityLevel(maturity.level || 'CRAWL');
     }
   };
 
@@ -134,6 +182,19 @@ export function Analytics() {
         return 'warning';
       default:
         return 'error';
+    }
+  };
+
+  const getMaturityDescription = () => {
+    switch (maturityLevel) {
+      case 'FLY':
+        return 'Sua organização está no nível máximo de maturidade FinOps';
+      case 'RUN':
+        return 'Sua organização está otimizando custos ativamente';
+      case 'WALK':
+        return 'Sua organização está desenvolvendo práticas de alocação';
+      default:
+        return 'Sua organização está construindo visibilidade de custos';
     }
   };
 
@@ -165,7 +226,7 @@ export function Analytics() {
                     cy="50"
                     r="45"
                     fill="none"
-                    stroke="var(--color-success-400)"
+                    stroke={overallScore >= 60 ? "var(--color-success-400)" : overallScore >= 30 ? "var(--color-warning-400)" : "var(--color-error-400)"}
                     strokeWidth="10"
                     strokeDasharray={`${overallScore * 2.83} 283`}
                     strokeLinecap="round"
@@ -178,9 +239,13 @@ export function Analytics() {
               </div>
               <div className={styles.scoreInfo}>
                 <h2>Maturidade FinOps</h2>
-                <p>Sua organização está no nível máximo de maturidade FinOps</p>
-                <Badge variant="success" size="sm" icon={<Award size={14} />}>
-                  Nível FLY
+                <p>{getMaturityDescription()}</p>
+                <Badge 
+                  variant={overallScore >= 60 ? 'success' : overallScore >= 30 ? 'warning' : 'error'} 
+                  size="sm" 
+                  icon={<Award size={14} />}
+                >
+                  Nível {maturityLevel}
                 </Badge>
               </div>
             </div>
@@ -194,12 +259,12 @@ export function Analytics() {
                 <div className={styles.levelHeader}>
                   <span className={styles.levelName}>{level.level}</span>
                   <Badge variant={getStatusColor(level.status)} size="sm">
-                    {level.status === 'completed' ? '100%' : `${Math.round((level.score / level.maxScore) * 100)}%`}
+                    {Math.round(level.score)}%
                   </Badge>
                 </div>
                 <span className={styles.levelTitle}>{level.name}</span>
                 <Progress
-                  value={(level.score / level.maxScore) * 100}
+                  value={level.score}
                   size="sm"
                   variant={getStatusColor(level.status) === 'error' ? 'danger' : getStatusColor(level.status) === 'warning' ? 'warning' : 'success'}
                 />
@@ -252,7 +317,7 @@ export function Analytics() {
                       </span>
                     </div>
                     <Progress
-                      value={kpi.target > 0 ? (kpi.value / kpi.target) * 100 : 0}
+                      value={Math.min((kpi.value / Math.max(kpi.target, 1)) * 100, 100)}
                       size="sm"
                       variant={getStatusColor(kpi.status) === 'error' ? 'danger' : getStatusColor(kpi.status) === 'warning' ? 'warning' : 'success'}
                     />

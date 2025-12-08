@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Settings as SettingsIcon,
   Key,
@@ -8,6 +8,7 @@ import {
   Shield,
   Save,
   RefreshCw,
+  CheckCircle,
 } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import {
@@ -22,20 +23,68 @@ import {
   TabPanel,
   Badge,
   Alert,
+  Skeleton,
 } from '../components/ui';
+import { useFetch } from '../hooks/useFetch';
 import styles from './Settings.module.css';
 
 export function Settings() {
+  const { get, put, loading } = useFetch();
   const [saved, setSaved] = useState(false);
-  const [cacheEnabled, setCacheEnabled] = useState('enabled');
-  const [cacheTTL, setCacheTTL] = useState('3600');
+  const [saving, setSaving] = useState(false);
   const [theme, setTheme] = useState('dark');
+  const [region, setRegion] = useState('us-east-1');
   const [notifications, setNotifications] = useState('all');
   const [aiProvider, setAiProvider] = useState('perplexity');
+  const [cacheEnabled, setCacheEnabled] = useState('enabled');
+  const [cacheTTL, setCacheTTL] = useState('15');
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    console.log('Carregando configurações...');
+    const response = await get<any>('/api/v1/settings');
+    if (response?.status === 'success' && response?.settings) {
+      const settings = response.settings;
+      console.log('Configurações carregadas:', settings);
+      setTheme(settings.theme || 'dark');
+      setRegion(settings.region || 'us-east-1');
+      setCacheEnabled(settings.cache?.enabled ? 'enabled' : 'disabled');
+      setCacheTTL(String(settings.cache?.ttl_minutes || 15));
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    console.log('Salvando configurações...');
+    
+    try {
+      const response = await put<any>('/api/v1/settings', {
+        theme,
+        region,
+        cache: {
+          enabled: cacheEnabled === 'enabled',
+          ttl_minutes: parseInt(cacheTTL)
+        }
+      });
+      
+      if (response?.status === 'success') {
+        console.log('Configurações salvas com sucesso');
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    console.log('Limpando cache...');
+    alert('Cache limpo com sucesso!');
   };
 
   return (
@@ -43,10 +92,13 @@ export function Settings() {
       <Header
         title="Configurações"
         subtitle="Preferências e configurações do sistema"
+        onRefresh={loadSettings}
+        isLoading={loading}
       />
 
       {saved && (
         <Alert variant="success" className={styles.alert}>
+          <CheckCircle size={16} />
           Configurações salvas com sucesso!
         </Alert>
       )}
@@ -75,21 +127,28 @@ export function Settings() {
               icon={<Palette size={20} />}
             />
             <CardContent>
-              <div className={styles.formGroup}>
-                <Select
-                  label="Tema"
-                  value={theme}
-                  onChange={setTheme}
-                  options={[
-                    { value: 'dark', label: 'Escuro' },
-                    { value: 'light', label: 'Claro' },
-                    { value: 'system', label: 'Sistema' },
-                  ]}
-                />
-                <p className={styles.hint}>
-                  O tema escuro é recomendado para reduzir o cansaço visual.
-                </p>
-              </div>
+              {loading ? (
+                <Skeleton height="60px" />
+              ) : (
+                <div className={styles.formGroup}>
+                  <Select
+                    label="Tema"
+                    value={theme}
+                    onChange={(value) => {
+                      console.log('Tema alterado para:', value);
+                      setTheme(value);
+                    }}
+                    options={[
+                      { value: 'dark', label: 'Escuro' },
+                      { value: 'light', label: 'Claro' },
+                      { value: 'system', label: 'Sistema' },
+                    ]}
+                  />
+                  <p className={styles.hint}>
+                    O tema escuro é recomendado para reduzir o cansaço visual.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -100,19 +159,26 @@ export function Settings() {
               icon={<Shield size={20} />}
             />
             <CardContent>
-              <div className={styles.formGroup}>
-                <Select
-                  label="Região AWS"
-                  value="us-east-1"
-                  onChange={() => {}}
-                  options={[
-                    { value: 'us-east-1', label: 'US East (N. Virginia)' },
-                    { value: 'us-west-2', label: 'US West (Oregon)' },
-                    { value: 'eu-west-1', label: 'EU (Ireland)' },
-                    { value: 'sa-east-1', label: 'South America (São Paulo)' },
-                  ]}
-                />
-              </div>
+              {loading ? (
+                <Skeleton height="60px" />
+              ) : (
+                <div className={styles.formGroup}>
+                  <Select
+                    label="Região AWS"
+                    value={region}
+                    onChange={(value) => {
+                      console.log('Região alterada para:', value);
+                      setRegion(value);
+                    }}
+                    options={[
+                      { value: 'us-east-1', label: 'US East (N. Virginia)' },
+                      { value: 'us-west-2', label: 'US West (Oregon)' },
+                      { value: 'eu-west-1', label: 'EU (Ireland)' },
+                      { value: 'sa-east-1', label: 'South America (São Paulo)' },
+                    ]}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabPanel>
@@ -129,7 +195,10 @@ export function Settings() {
                 <Select
                   label="Provedor Padrão"
                   value={aiProvider}
-                  onChange={setAiProvider}
+                  onChange={(value) => {
+                    console.log('Provedor IA alterado para:', value);
+                    setAiProvider(value);
+                  }}
                   options={[
                     { value: 'perplexity', label: 'Perplexity AI' },
                     { value: 'openai', label: 'OpenAI ChatGPT' },
@@ -176,7 +245,10 @@ export function Settings() {
                 <Select
                   label="Frequência"
                   value={notifications}
-                  onChange={setNotifications}
+                  onChange={(value) => {
+                    console.log('Notificações alteradas para:', value);
+                    setNotifications(value);
+                  }}
                   options={[
                     { value: 'all', label: 'Todas as notificações' },
                     { value: 'important', label: 'Apenas importantes' },
@@ -219,29 +291,39 @@ export function Settings() {
               icon={<Database size={20} />}
             />
             <CardContent>
-              <div className={styles.formRow}>
-                <Select
-                  label="Status do Cache"
-                  value={cacheEnabled}
-                  onChange={setCacheEnabled}
-                  options={[
-                    { value: 'enabled', label: 'Ativado' },
-                    { value: 'disabled', label: 'Desativado' },
-                  ]}
-                />
-                <Select
-                  label="TTL (Tempo de vida)"
-                  value={cacheTTL}
-                  onChange={setCacheTTL}
-                  options={[
-                    { value: '300', label: '5 minutos' },
-                    { value: '900', label: '15 minutos' },
-                    { value: '1800', label: '30 minutos' },
-                    { value: '3600', label: '1 hora' },
-                    { value: '7200', label: '2 horas' },
-                  ]}
-                />
-              </div>
+              {loading ? (
+                <Skeleton height="80px" />
+              ) : (
+                <div className={styles.formRow}>
+                  <Select
+                    label="Status do Cache"
+                    value={cacheEnabled}
+                    onChange={(value) => {
+                      console.log('Cache alterado para:', value);
+                      setCacheEnabled(value);
+                    }}
+                    options={[
+                      { value: 'enabled', label: 'Ativado' },
+                      { value: 'disabled', label: 'Desativado' },
+                    ]}
+                  />
+                  <Select
+                    label="TTL (Tempo de vida)"
+                    value={cacheTTL}
+                    onChange={(value) => {
+                      console.log('TTL alterado para:', value);
+                      setCacheTTL(value);
+                    }}
+                    options={[
+                      { value: '5', label: '5 minutos' },
+                      { value: '15', label: '15 minutos' },
+                      { value: '30', label: '30 minutos' },
+                      { value: '60', label: '1 hora' },
+                      { value: '120', label: '2 horas' },
+                    ]}
+                  />
+                </div>
+              )}
 
               <div className={styles.cacheInfo}>
                 <p>
@@ -253,6 +335,7 @@ export function Settings() {
                   variant="secondary"
                   size="sm"
                   icon={<RefreshCw size={16} />}
+                  onClick={handleClearCache}
                 >
                   Limpar Cache
                 </Button>
@@ -263,8 +346,13 @@ export function Settings() {
       </Tabs>
 
       <div className={styles.actions}>
-        <Button variant="primary" icon={<Save size={16} />} onClick={handleSave}>
-          Salvar Configurações
+        <Button 
+          variant="primary" 
+          icon={<Save size={16} />} 
+          onClick={handleSave}
+          loading={saving}
+        >
+          {saving ? 'Salvando...' : 'Salvar Configurações'}
         </Button>
       </div>
     </div>

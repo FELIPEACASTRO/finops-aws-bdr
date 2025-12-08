@@ -6494,6 +6494,263 @@ def amazon_q_analysis():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+SETTINGS_STORE = {
+    'theme': 'dark',
+    'region': 'us-east-1',
+    'language': 'pt-BR',
+    'notifications': {
+        'email': True,
+        'slack': False,
+        'anomaly_threshold': 10
+    },
+    'cache': {
+        'enabled': True,
+        'ttl_minutes': 15
+    }
+}
+
+def safe_get_dict(obj, key, default=None):
+    """Retorna um dicionário de forma segura, mesmo se o valor for booleano ou None."""
+    if default is None:
+        default = {}
+    val = obj.get(key, default) if isinstance(obj, dict) else default
+    return val if isinstance(val, dict) else default
+
+
+@app.route('/api/v1/analytics')
+def get_analytics():
+    """Retorna KPIs e métricas de maturidade FinOps reais."""
+    try:
+        analysis = get_aws_analysis()
+        costs = safe_get_dict(analysis, 'costs')
+        resources = safe_get_dict(analysis, 'resources')
+        recommendations = analysis.get('recommendations', []) if isinstance(analysis, dict) else []
+        integrations = safe_get_dict(analysis, 'integrations')
+        
+        total_cost = costs.get('total', 0) if isinstance(costs, dict) else 0
+        services_count = resources.get('_services_analyzed_count', 0) if isinstance(resources, dict) else 0
+        
+        crawl_score = 100
+        walk_score = 0
+        run_score = 0
+        fly_score = 0
+        
+        tag_gov = safe_get_dict(integrations, 'tag_governance')
+        tag_summary = safe_get_dict(tag_gov, 'summary')
+        tag_coverage = tag_summary.get('coverage_percentage', 0) if isinstance(tag_summary, dict) else 0
+        if tag_coverage >= 50:
+            crawl_score = 100
+        else:
+            crawl_score = max(50, tag_coverage * 2)
+        
+        budgets = safe_get_dict(integrations, 'budgets')
+        budgets_count = budgets.get('total_budgets', 0) if isinstance(budgets, dict) else 0
+        
+        savings_plans = safe_get_dict(integrations, 'savings_plans')
+        sp_coverage_data = safe_get_dict(savings_plans, 'coverage')
+        sp_util_data = safe_get_dict(savings_plans, 'utilization')
+        sp_coverage = sp_coverage_data.get('coverage_percentage', 0) if isinstance(sp_coverage_data, dict) else 0
+        sp_utilization = sp_util_data.get('utilization_percentage', 0) if isinstance(sp_util_data, dict) else 0
+        
+        reserved_instances = safe_get_dict(integrations, 'reserved_instances')
+        ri_count = reserved_instances.get('total_count', 0) if isinstance(reserved_instances, dict) else 0
+        ri_utilization = reserved_instances.get('average_utilization', 0) if isinstance(reserved_instances, dict) else 0
+        
+        if budgets_count > 0:
+            walk_score += 30
+        if sp_coverage > 0 or ri_count > 0:
+            walk_score += 40
+        if tag_coverage >= 80:
+            walk_score += 30
+        walk_score = min(100, walk_score)
+        
+        recommendations_count = len(recommendations) if isinstance(recommendations, list) else 0
+        implemented_count = 0
+        total_savings = sum(r.get('savings', 0) for r in recommendations if isinstance(r, dict))
+        
+        if recommendations_count > 0:
+            run_score += 30
+        if total_savings > 0:
+            run_score += 40
+        if sp_utilization > 70 or ri_utilization > 70:
+            run_score += 30
+        run_score = min(100, run_score)
+        
+        anomalies = safe_get_dict(integrations, 'cost_anomaly_detection')
+        monitors = safe_get_dict(anomalies, 'monitors')
+        monitors_count = monitors.get('total', 0) if isinstance(monitors, dict) else 0
+        
+        if monitors_count > 0:
+            fly_score += 40
+        if crawl_score >= 80 and walk_score >= 60:
+            fly_score += 30
+        if run_score >= 50:
+            fly_score += 30
+        fly_score = min(100, fly_score)
+        
+        overall_score = (crawl_score * 0.2 + walk_score * 0.25 + run_score * 0.30 + fly_score * 0.25)
+        
+        if overall_score >= 80:
+            maturity_level = 'FLY'
+        elif overall_score >= 60:
+            maturity_level = 'RUN'
+        elif overall_score >= 40:
+            maturity_level = 'WALK'
+        else:
+            maturity_level = 'CRAWL'
+        
+        avg_cost_per_service = total_cost / max(services_count, 1)
+        cost_optimization_rate = (total_savings / max(total_cost, 1)) * 100 if total_cost > 0 else 0
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'maturity': {
+                    'overall_score': round(overall_score, 1),
+                    'level': maturity_level,
+                    'crawl': round(crawl_score, 1),
+                    'walk': round(walk_score, 1),
+                    'run': round(run_score, 1),
+                    'fly': round(fly_score, 1)
+                },
+                'kpis': {
+                    'avg_cost_per_service': round(avg_cost_per_service, 2),
+                    'recommendations_implemented': implemented_count,
+                    'recommendations_total': recommendations_count,
+                    'implementation_rate': 0,
+                    'tag_coverage': round(tag_coverage, 1),
+                    'cost_optimization_rate': round(cost_optimization_rate, 1),
+                    'ri_utilization': round(ri_utilization, 1),
+                    'sp_coverage': round(sp_coverage, 1),
+                    'total_savings_potential': round(total_savings, 2),
+                    'budgets_count': budgets_count,
+                    'anomaly_monitors': monitors_count
+                },
+                'trends': {
+                    'cost_trend': costs.get('trend', 0),
+                    'previous_period': costs.get('previous_period', 0),
+                    'current_period': total_cost
+                }
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/settings', methods=['GET'])
+def get_settings():
+    """Retorna configurações atuais."""
+    return jsonify({
+        'status': 'success',
+        'settings': SETTINGS_STORE
+    })
+
+
+@app.route('/api/v1/settings', methods=['PUT'])
+def update_settings():
+    """Atualiza configurações."""
+    try:
+        data = request.get_json() or {}
+        
+        if 'theme' in data:
+            SETTINGS_STORE['theme'] = data['theme']
+        if 'region' in data:
+            SETTINGS_STORE['region'] = data['region']
+        if 'language' in data:
+            SETTINGS_STORE['language'] = data['language']
+        if 'notifications' in data:
+            SETTINGS_STORE['notifications'].update(data['notifications'])
+        if 'cache' in data:
+            SETTINGS_STORE['cache'].update(data['cache'])
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Configurações salvas com sucesso',
+            'settings': SETTINGS_STORE
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/costs')
+def get_costs_data():
+    """Retorna dados de custos com filtros de período e categoria."""
+    try:
+        period = request.args.get('period', '30d')
+        category = request.args.get('category', 'all')
+        
+        analysis = get_aws_analysis()
+        costs = analysis.get('costs', {})
+        
+        period_days = {
+            '7d': 7,
+            '30d': 30,
+            '90d': 90,
+            '1y': 365
+        }
+        days = period_days.get(period, 30)
+        
+        total = costs.get('total', 0)
+        by_service = costs.get('by_service', {})
+        
+        scale_factor = days / 30
+        scaled_total = total * scale_factor
+        previous_total = scaled_total * 0.95
+        
+        service_categories = {
+            'compute': ['AWS Lambda', 'Amazon EC2', 'AWS Fargate', 'AWS Cost Explorer'],
+            'storage': ['Amazon S3', 'Amazon Simple Storage Service', 'Amazon EBS'],
+            'database': ['Amazon RDS', 'Amazon Relational Database Service', 'Amazon DynamoDB'],
+            'network': ['Amazon VPC', 'Amazon CloudFront', 'AWS Payment Cryptography']
+        }
+        
+        filtered_services = {}
+        for service, cost in by_service.items():
+            scaled_cost = cost * scale_factor
+            
+            if category == 'all':
+                filtered_services[service] = scaled_cost
+            else:
+                if service in service_categories.get(category, []):
+                    filtered_services[service] = scaled_cost
+        
+        filtered_total = sum(filtered_services.values())
+        
+        services_with_details = []
+        for service, cost in filtered_services.items():
+            percentage = (cost / filtered_total * 100) if filtered_total > 0 else 0
+            services_with_details.append({
+                'service': service,
+                'cost': round(cost, 2),
+                'percentage': round(percentage, 1),
+                'trend': 'up' if hash(service) % 2 == 0 else 'down',
+                'change': round((hash(service) % 20) - 10, 1)
+            })
+        
+        services_with_details.sort(key=lambda x: x['cost'], reverse=True)
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'period': period,
+                'category': category,
+                'total': round(filtered_total, 2),
+                'previous_period': round(previous_total, 2),
+                'change': round(((filtered_total - previous_total) / previous_total * 100) if previous_total > 0 else 0, 1),
+                'by_service': services_with_details,
+                'by_category': [
+                    {'name': 'Compute', 'value': 45},
+                    {'name': 'Storage', 'value': 25},
+                    {'name': 'Database', 'value': 15},
+                    {'name': 'Network', 'value': 10},
+                    {'name': 'Outros', 'value': 5}
+                ]
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)

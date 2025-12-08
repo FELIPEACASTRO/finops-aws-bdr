@@ -50,34 +50,95 @@ const regionNames: Record<string, string> = {
 };
 
 export function MultiRegion() {
-  const { get, loading } = useFetch();
+  const { get } = useFetch();
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const [activeRegions, setActiveRegions] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    fetchMultiRegion();
-  }, []);
+    if (!dataLoaded) {
+      fetchMultiRegion();
+    }
+  }, [dataLoaded]);
 
   const fetchMultiRegion = async () => {
-    const response = await get<any>('/api/v1/multi-region');
-    if (response?.regions) {
-      const regionsData: RegionData[] = Object.entries(response.regions).map(
-        ([region, data]: [string, any]) => ({
-          region,
-          name: regionNames[region] || region,
-          cost: data.costs?.total || 0,
-          resources: data.resources_count || 0,
-          services: Object.keys(data.costs?.by_service || {}).length,
-          trend: Math.round((Math.random() - 0.5) * 20),
-          status: (data.resources_count > 0 ? 'active' : 'inactive') as 'active' | 'inactive',
-        })
-      );
+    console.log('Buscando dados multi-region...');
+    setLoading(true);
+    try {
+      const response = await get<any>('/api/v1/multi-region');
+      console.log('Multi-region response:', response);
+      
+      const rawData = response?.data || response;
+      const regionsSource = rawData?.regions || rawData;
+      const costsByRegion = rawData?.costs_by_region || {};
+      
+      let regionsData: RegionData[] = [];
+      
+      if (Array.isArray(regionsSource)) {
+        console.log('Formato array detectado:', regionsSource.length, 'regiões');
+        regionsData = regionsSource.map((item: any) => {
+          const regionCode = item.region || item.name || 'unknown';
+          const cost = item.cost || item.costs?.total || item.total_cost || 0;
+          const resourceCount = item.resources || item.resource_count || 0;
+          const serviceCount = item.services || item.service_count || 0;
+          const trend = item.trend || 0;
+          
+          return {
+            region: regionCode,
+            name: regionNames[regionCode] || regionCode,
+            cost: typeof cost === 'number' ? cost : parseFloat(cost) || 0,
+            resources: typeof resourceCount === 'number' ? resourceCount : 
+              (typeof resourceCount === 'object' ? Object.values(resourceCount).reduce((s: number, v: any) => s + (Number(v) || 0), 0) : 0),
+            services: serviceCount,
+            trend: trend,
+            status: (cost > 0 || resourceCount > 0 ? 'active' : 'inactive') as 'active' | 'inactive',
+          };
+        });
+      } else if (regionsSource && typeof regionsSource === 'object') {
+        console.log('Formato objeto detectado:', Object.keys(regionsSource).length, 'regiões');
+        regionsData = Object.entries(regionsSource).map(
+          ([region, data]: [string, any]) => {
+            const costFromData = typeof data.costs === 'number' ? data.costs : (data.costs?.total || 0);
+            const costFromByRegion = costsByRegion[region] || 0;
+            const cost = costFromData || costFromByRegion;
+            
+            const resourcesObj = data.resources || {};
+            const resources = typeof resourcesObj === 'number' ? resourcesObj :
+              Object.values(resourcesObj).reduce((sum: number, val: any) => sum + (typeof val === 'number' ? val : 0), 0);
+            
+            const trend = data.trend || 0;
+            
+            return {
+              region,
+              name: regionNames[region] || region,
+              cost,
+              resources,
+              services: Object.keys(data.costs?.by_service || {}).length || (cost > 0 ? 1 : 0),
+              trend,
+              status: (resources > 0 || cost > 0 ? 'active' : 'inactive') as 'active' | 'inactive',
+            };
+          }
+        );
+      } else {
+        console.log('Nenhuma região encontrada na resposta:', rawData);
+        setLoading(false);
+        setDataLoaded(true);
+        return;
+      }
 
       const sorted = regionsData.sort((a, b) => b.cost - a.cost);
       setRegions(sorted);
       setTotalCost(sorted.reduce((acc, r) => acc + r.cost, 0));
       setActiveRegions(sorted.filter((r) => r.status === 'active').length);
+      setDataLoaded(true);
+      console.log(`Multi-region carregado: ${sorted.length} regiões, total: $${sorted.reduce((acc, r) => acc + r.cost, 0).toFixed(2)}`);
+    } catch (err) {
+      console.error('Erro ao buscar multi-region:', err);
+      setDataLoaded(true);
+    } finally {
+      setLoading(false);
     }
   };
 

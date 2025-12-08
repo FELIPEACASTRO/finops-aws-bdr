@@ -207,40 +207,55 @@ const getDemoRecommendations = (): Recommendation[] => {
 
 export function Recommendations() {
   const { get, loading } = useFetch();
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(getDemoRecommendations());
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [filter, setFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     if (dataLoaded) return;
     
     const loadData = async () => {
+      console.log('Carregando recomendações da API...');
       try {
         const response = await get<any>('/api/v1/reports/latest');
         if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
           const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
+          console.log(`Recomendações carregadas: ${recs.length} da API`);
           setRecommendations(recs);
+        } else {
+          console.log('Nenhuma recomendação da API, usando dados de exemplo');
+          setRecommendations(getDemoRecommendations());
         }
         setDataLoaded(true);
-      } catch {
+      } catch (err) {
+        console.error('Erro ao carregar recomendações:', err);
+        setRecommendations(getDemoRecommendations());
         setDataLoaded(true);
+      } finally {
+        setInitialLoading(false);
       }
     };
     loadData();
   }, [get, dataLoaded]);
 
   const fetchRecommendations = async () => {
+    console.log('Atualizando recomendações...');
     const response = await get<any>('/api/v1/reports/latest');
     if (response?.report?.details?.recommendations && response.report.details.recommendations.length > 0) {
       const recs: Recommendation[] = response.report.details.recommendations.map(enrichRecommendation);
+      console.log(`Recomendações atualizadas: ${recs.length}`);
       setRecommendations(recs);
     } else {
+      console.log('Nenhuma recomendação encontrada');
       setRecommendations(getDemoRecommendations());
     }
   };
+  
+  const isLoading = loading || initialLoading;
 
   const getPriorityInfo = (priority: string) => {
     switch (priority) {
@@ -303,7 +318,7 @@ export function Recommendations() {
         title="Recomendações de Otimização"
         subtitle="Análise detalhada com ações práticas para reduzir custos AWS"
         onRefresh={fetchRecommendations}
-        isLoading={loading}
+        isLoading={isLoading}
       />
 
       <div className={styles.introCard}>
