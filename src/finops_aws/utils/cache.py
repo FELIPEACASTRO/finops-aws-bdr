@@ -34,8 +34,8 @@ class FinOpsCache:
     Usa padrão Singleton para garantir instância única.
     
     Exemplo de uso:
-        cache = FinOpsCache()
-        cache.set('budgets', budgets_data, ttl_seconds=300)
+        cache = FinOpsCache(default_ttl=300)
+        cache.set('budgets', budgets_data, ttl=300)
         cached_data = cache.get('budgets')
     """
     
@@ -43,13 +43,15 @@ class FinOpsCache:
     _lock = threading.Lock()
     _cache: Dict[str, CacheEntry] = {}
     _stats: Dict[str, int] = {'hits': 0, 'misses': 0}
+    _default_ttl: int = 300
     
-    def __new__(cls) -> 'FinOpsCache':
+    def __new__(cls, default_ttl: int = 300) -> 'FinOpsCache':
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
                 cls._cache = {}
                 cls._stats = {'hits': 0, 'misses': 0}
+            cls._default_ttl = default_ttl
         return cls._instance
     
     def get(self, key: str) -> Optional[Any]:
@@ -76,16 +78,18 @@ class FinOpsCache:
         self._stats['hits'] += 1
         return entry.value
     
-    def set(self, key: str, value: Any, ttl_seconds: int = 300) -> None:
+    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None, ttl: Optional[int] = None) -> None:
         """
         Armazena valor no cache com TTL.
         
         Args:
             key: Chave do cache
             value: Valor a armazenar
-            ttl_seconds: Tempo de vida em segundos (padrão: 5 minutos)
+            ttl_seconds: Tempo de vida em segundos (alias para ttl)
+            ttl: Tempo de vida em segundos (padrão: default_ttl da instância)
         """
-        self._cache[key] = CacheEntry(value, ttl_seconds)
+        actual_ttl = ttl or ttl_seconds or self._default_ttl
+        self._cache[key] = CacheEntry(value, actual_ttl)
     
     def delete(self, key: str) -> bool:
         """
