@@ -26,6 +26,28 @@ The system comprises a Web Dashboard interacting with an API Layer, which in tur
 - **Exception Hierarchy**: A robust hierarchy of 15 typed exceptions for error handling.
 - **AI Consultant Personas**: Supports various output personas (EXECUTIVE, CTO, DEVOPS, ANALYST) for tailored report generation.
 - **UI/UX**: The solution integrates with a web dashboard for visualization and interaction.
+- **FinOps Cache**: Sistema de cache com TTL configurável para reduzir chamadas AWS repetidas.
+- **KPI Calculator**: 21 KPIs FinOps calculados automaticamente, incluindo tag_coverage integrado.
+
+## Recent Changes (December 2025)
+
+- **Performance Optimization**: Refatorado get_commitments_summary() para aceitar parâmetros sp_data e ri_data, evitando duplicação de chamadas AWS.
+- **Cache System**: Implementado FinOpsCache com TTL configurável (padrão 5 minutos) e estatísticas de hit/miss.
+- **Tag Coverage Integration**: tag_coverage_percent agora é automaticamente calculado e integrado nos KPIs via TagGovernanceService.
+- **Type Safety**: Corrigidos todos os erros de tipagem LSP, incluindo problemas de Dict[str, int] vs List[str] nos analyzer resources.
+
+## FinOps Compliance Status
+
+- Nível 1 (Crawl): ~80% completo
+- Nível 2 (Walk): ~65% completo
+- Nível 3 (Run): ~15% completo
+- Nível 4 (Fly): ~5% completo
+
+### Next Steps for Higher Compliance
+
+- Ingestão CUR real via S3/Athena
+- Unit Economics com dados reais de transações/clientes
+- Campos CUR adicionais para análise granular
 
 ## External Dependencies
 
