@@ -86,12 +86,22 @@ export function Dashboard() {
     }
   };
 
+  const handleRefresh = async () => {
+    if (stats === null) {
+      // Se não há dados, executar análise completa
+      await handleAnalysis('full');
+    } else {
+      // Se já há dados, apenas atualizar
+      await refresh();
+    }
+  };
+
   return (
     <div className={styles.page}>
       <Header
         title="Dashboard"
         subtitle="Análise Inteligente de Custos AWS - Otimize seus gastos em nuvem"
-        onRefresh={refresh}
+        onRefresh={handleRefresh}
         isLoading={isLoading}
       />
 
