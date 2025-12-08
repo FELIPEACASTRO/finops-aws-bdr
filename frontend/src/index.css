@@ -157,6 +157,51 @@
 }
 
 /* ========================================
+   Light Theme
+   ======================================== */
+
+[data-theme="light"] {
+  /* Semantic Colors - Light Theme */
+  --color-background: #f8fafc;
+  --color-background-elevated: #ffffff;
+  --color-background-hover: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-hover: var(--color-primary-500);
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  
+  /* Shadows - Light Theme */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+}
+
+/* System preference detection */
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    --color-background: #f8fafc;
+    --color-background-elevated: #ffffff;
+    --color-background-hover: #f1f5f9;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-border-hover: var(--color-primary-500);
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  }
+}
+
+/* ========================================
    Base Styles / Reset
    ======================================== */
 

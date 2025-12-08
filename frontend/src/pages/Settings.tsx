@@ -26,6 +26,7 @@ import {
   Skeleton,
 } from '../components/ui';
 import { useFetch } from '../hooks/useFetch';
+import { useTheme } from '../contexts/ThemeContext';
 import styles from './Settings.module.css';
 
 interface Integration {
@@ -44,12 +45,12 @@ interface NotificationTypes {
 
 export function Settings() {
   const { get, put, post, loading } = useFetch();
+  const { theme, setTheme } = useTheme();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
   const [cacheCleared, setCacheCleared] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [theme, setTheme] = useState('dark');
   const [region, setRegion] = useState('us-east-1');
   const [notificationFrequency, setNotificationFrequency] = useState('all');
   const [notificationTypes, setNotificationTypes] = useState<NotificationTypes>({
@@ -75,7 +76,6 @@ export function Settings() {
     if (response?.status === 'success' && response?.settings) {
       const settings = response.settings;
       console.log('Configurações carregadas da API:', settings);
-      setTheme(settings.theme || 'dark');
       setRegion(settings.region || 'us-east-1');
       setAiProvider(settings.ai_provider || 'perplexity');
       setCacheEnabled(settings.cache?.enabled ? 'enabled' : 'disabled');
@@ -238,7 +238,7 @@ export function Settings() {
                     value={theme}
                     onChange={(value) => {
                       console.log('Tema alterado para:', value);
-                      setTheme(value);
+                      setTheme(value as 'dark' | 'light' | 'system');
                     }}
                     options={[
                       { value: 'dark', label: 'Escuro' },
