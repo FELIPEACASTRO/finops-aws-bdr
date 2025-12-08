@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { RefreshCw, Bell, Download, Menu } from 'lucide-react';
 import { Button } from '../ui';
+import { NotificationPanel } from './NotificationPanel';
 import styles from './Header.module.css';
 
 interface Breadcrumb {
@@ -28,6 +30,7 @@ export function Header({
   onMenuClick,
   showMobileMenu = false,
 }: HeaderProps) {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   return (
     <header className={styles.header}>
       <div className={styles.left}>
@@ -98,15 +101,22 @@ export function Header({
           </Button>
         )}
 
-        <button
-          className={styles.notificationButton}
-          aria-label="Notificações"
-        >
-          <Bell size={20} />
-          <span className={styles.notificationBadge} aria-label="3 notificações">
-            3
-          </span>
-        </button>
+        <div className={styles.notificationWrapper}>
+          <button
+            className={styles.notificationButton}
+            aria-label="Notificações"
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
+          >
+            <Bell size={20} />
+            <span className={styles.notificationBadge} aria-label="3 notificações">
+              3
+            </span>
+          </button>
+          <NotificationPanel 
+            isOpen={notificationsOpen}
+            onClose={() => setNotificationsOpen(false)}
+          />
+        </div>
       </div>
     </header>
   );

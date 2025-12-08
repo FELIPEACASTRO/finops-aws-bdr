@@ -109,6 +109,11 @@
   margin: 0;
 }
 
+/* Notification Wrapper */
+.notificationWrapper {
+  position: relative;
+}
+
 /* Notification Button */
 .notificationButton {
   position: relative;
