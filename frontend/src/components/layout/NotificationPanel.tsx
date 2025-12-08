@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, AlertTriangle, Lightbulb, TrendingUp, FileText, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, AlertTriangle, Lightbulb, TrendingUp, FileText, Check, ExternalLink } from 'lucide-react';
 import styles from './NotificationPanel.module.css';
 
 interface Notification {
@@ -9,6 +10,7 @@ interface Notification {
   message: string;
   timestamp: string;
   read: boolean;
+  link: string;
 }
 
 interface NotificationPanelProps {
@@ -32,6 +34,7 @@ const NOTIFICATION_COLORS = {
 
 export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
@@ -40,6 +43,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
       message: 'Aumento de 45% nos custos de EC2 na região us-east-1 nas últimas 24h.',
       timestamp: '2 min atrás',
       read: false,
+      link: '/costs',
     },
     {
       id: '2',
@@ -48,6 +52,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
       message: '3 instâncias EC2 identificadas para rightsizing. Economia potencial: $847/mês.',
       timestamp: '15 min atrás',
       read: false,
+      link: '/recommendations',
     },
     {
       id: '3',
@@ -56,6 +61,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
       message: 'Orçamento mensal atingiu 85% do limite. Projeção: ultrapassar em 5 dias.',
       timestamp: '1 hora atrás',
       read: false,
+      link: '/analytics',
     },
   ]);
 
@@ -94,10 +100,12 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
     };
   }, [isOpen, onClose]);
 
-  const markAsRead = (id: string) => {
+  const handleNotificationClick = (notification: Notification) => {
     setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
+      n.id === notification.id ? { ...n, read: true } : n
     ));
+    onClose();
+    navigate(notification.link);
   };
 
   const markAllAsRead = () => {
@@ -144,7 +152,10 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
               <li 
                 key={notification.id}
                 className={`${styles.item} ${notification.read ? styles.read : styles.unread}`}
-                onClick={() => markAsRead(notification.id)}
+                onClick={() => handleNotificationClick(notification)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
               >
                 <div 
                   className={styles.icon}
@@ -156,6 +167,9 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
                   <span className={styles.itemTitle}>{notification.title}</span>
                   <p className={styles.message}>{notification.message}</p>
                   <span className={styles.timestamp}>{notification.timestamp}</span>
+                </div>
+                <div className={styles.actionIcon}>
+                  <ExternalLink size={14} />
                 </div>
                 {!notification.read && <div className={styles.unreadDot} />}
               </li>

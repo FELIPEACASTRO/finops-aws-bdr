@@ -156,11 +156,25 @@
   color: var(--text-tertiary);
 }
 
+.actionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  margin-left: auto;
+  padding-right: var(--spacing-sm);
+}
+
+.item:hover .actionIcon {
+  opacity: 1;
+}
+
 .unreadDot {
   position: absolute;
-  top: 50%;
+  top: var(--spacing-md);
   right: var(--spacing-md);
-  transform: translateY(-50%);
   width: 8px;
   height: 8px;
   background: var(--primary-500);
