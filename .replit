@@ -59,14 +59,13 @@ localPort = 41427
 externalPort = 3000
 
 [[ports]]
-localPort = 46415
+localPort = 45129
 externalPort = 3001
 
 [deployment]
-deploymentTarget = "vm"
-run = ["bash", "-c", """
-cd frontend && npm run build && PORT=5000 python -m http.server 5000 --directory dist &
-PORT=8000 python app.py"""]
+deploymentTarget = "autoscale"
+run = ["gunicorn", "--bind=0.0.0.0:5000", "--workers=2", "--reuse-port", "app:app"]
+build = ["bash", "-c", "cd frontend && npm run build"]
 
 [userenv]
 

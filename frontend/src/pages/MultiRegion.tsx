@@ -22,7 +22,6 @@ import {
   TableCell,
   TableHeaderCell,
 } from '../components/ui';
-import { useFetch } from '../hooks/useFetch';
 import styles from './MultiRegion.module.css';
 
 interface RegionData {
@@ -50,7 +49,6 @@ const regionNames: Record<string, string> = {
 };
 
 export function MultiRegion() {
-  const { get } = useFetch();
   const [regions, setRegions] = useState<RegionData[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const [activeRegions, setActiveRegions] = useState(0);
