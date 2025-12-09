@@ -53,9 +53,24 @@ export async function generateAIReport(provider: string, persona: string) {
   return handleResponse(response);
 }
 
-export async function fetchMultiRegionAnalysis() {
+export async function fetchMultiRegionAnalysis(): Promise<unknown> {
+  // Simple fetch - backend has cache so this should be fast
+  console.log('Multi-region: buscando dados...');
   const response = await fetch(`${API_BASE}/v1/multi-region`);
-  return handleResponse(response);
+  const data = await response.json();
+  
+  if (response.status === 202 && data.status === 'loading') {
+    // First time loading - return loading status
+    console.log('Multi-region: dados sendo carregados pela primeira vez');
+    return data;
+  }
+  
+  if (!response.ok) {
+    throw new APIError(data.message || `Erro HTTP ${response.status}`, response.status);
+  }
+  
+  console.log('Multi-region: dados recebidos com sucesso');
+  return data;
 }
 
 export async function exportReport(format: 'csv' | 'json' | 'html') {

@@ -24,6 +24,17 @@ _analysis_cache = {
     'ttl_seconds': 300  # Cache por 5 minutos
 }
 
+# Cache para multi-region com TTL longo
+_multi_region_cache = {
+    'data': None,
+    'timestamp': None,
+    'ttl_seconds': 600,  # Cache por 10 minutos
+    'is_loading': False
+}
+
+import threading
+_multi_region_lock = threading.Lock()
+
 def get_cached_analysis():
     """Retorna análise do cache ou executa nova se expirado."""
     now = datetime.now()
@@ -54,6 +65,10 @@ def add_header(response):
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
+    # CORS headers for direct frontend access (bypassing proxy for long APIs)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     return response
 
 
@@ -6429,17 +6444,11 @@ Responda de forma completa e direta:"""
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-@app.route('/api/v1/multi-region')
-def multi_region_analysis():
-    """Analisa todas as regiões AWS."""
+def _fetch_multi_region_data():
+    """Busca dados multi-region em background."""
+    global _multi_region_cache
     try:
         from src.finops_aws.dashboard import get_all_regions_analysis, get_region_costs
-        
-        if not os.environ.get('AWS_ACCESS_KEY_ID'):
-            return jsonify({
-                'status': 'error',
-                'message': 'Credenciais AWS não configuradas'
-            }), 400
         
         multi_region_data = get_all_regions_analysis(max_workers=3)
         
@@ -6449,12 +6458,75 @@ def multi_region_analysis():
         except Exception:
             multi_region_data['costs_by_region'] = {}
         
-        return jsonify({
-            'status': 'success',
-            'data': multi_region_data
-        })
+        with _multi_region_lock:
+            _multi_region_cache['data'] = multi_region_data
+            _multi_region_cache['timestamp'] = datetime.now()
+            _multi_region_cache['is_loading'] = False
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        with _multi_region_lock:
+            _multi_region_cache['is_loading'] = False
+        print(f"Erro ao carregar multi-region: {e}")
+
+
+@app.route('/api/v1/multi-region')
+def multi_region_analysis():
+    """Analisa todas as regiões AWS com cache inteligente."""
+    global _multi_region_cache
+    
+    if not os.environ.get('AWS_ACCESS_KEY_ID'):
+        return jsonify({
+            'status': 'error',
+            'message': 'Credenciais AWS não configuradas'
+        }), 400
+    
+    now = datetime.now()
+    
+    with _multi_region_lock:
+        has_cache = _multi_region_cache['data'] is not None
+        is_stale = True
+        if has_cache and _multi_region_cache['timestamp']:
+            age = (now - _multi_region_cache['timestamp']).total_seconds()
+            is_stale = age > _multi_region_cache['ttl_seconds']
+        
+        is_loading = _multi_region_cache['is_loading']
+        
+        # Se não está carregando e (não tem cache ou cache velho), iniciar background load
+        if not is_loading and (not has_cache or is_stale):
+            _multi_region_cache['is_loading'] = True
+            thread = threading.Thread(target=_fetch_multi_region_data, daemon=True)
+            thread.start()
+        
+        # Se tem cache, retorna imediatamente
+        if has_cache:
+            cache_age = (now - _multi_region_cache['timestamp']).total_seconds() if _multi_region_cache['timestamp'] else 0
+            return jsonify({
+                'status': 'success',
+                'data': _multi_region_cache['data'],
+                'cache_age_seconds': int(cache_age),
+                'is_refreshing': is_loading or (not is_loading and is_stale)
+            })
+        
+        # Não tem cache, precisa aguardar carregamento
+        if is_loading:
+            return jsonify({
+                'status': 'loading',
+                'message': 'Análise multi-região em andamento. Aguarde...'
+            }), 202
+    
+    # Fallback: buscar dados sincronamente (primeira vez)
+    _fetch_multi_region_data()
+    
+    with _multi_region_lock:
+        if _multi_region_cache['data']:
+            return jsonify({
+                'status': 'success',
+                'data': _multi_region_cache['data']
+            })
+    
+    return jsonify({
+        'status': 'error',
+        'message': 'Não foi possível obter dados multi-região'
+    }), 500
 
 
 @app.route('/api/v1/amazon-q', methods=['POST'])
