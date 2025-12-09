@@ -6305,8 +6305,8 @@ def generate_ai_report():
         persona_name = data.get('persona', 'ANALYST')
         question = data.get('question', '')
         
-        from finops_aws.ai_consultant.providers import AIProviderFactory
-        from finops_aws.ai_consultant.providers.base_provider import PersonaType
+        from src.finops_aws.ai_consultant.providers import AIProviderFactory
+        from src.finops_aws.ai_consultant.providers.base_provider import PersonaType
         
         persona_map = {
             'EXECUTIVE': PersonaType.EXECUTIVE,
@@ -6325,7 +6325,11 @@ def generate_ai_report():
                 'message': f'Provedor {provider_name} indisponível: {health.get("details", {}).get("error", "Erro desconhecido")}'
             }), 400
         
-        analysis = get_aws_analysis()
+        # Usa cache se disponível, senão usa dados vazios (não executa análise completa)
+        if _analysis_cache['data'] is not None:
+            analysis = _analysis_cache['data']
+        else:
+            analysis = {'costs': {}, 'resources': {}, 'recommendations': []}
         costs = analysis.get('costs', {})
         resources = analysis.get('resources', {})
         
