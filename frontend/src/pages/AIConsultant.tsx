@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Bot,
   Send,
@@ -69,10 +69,27 @@ const suggestedQuestionsByPersona: Record<string, string[]> = {
 };
 
 export function AIConsultant() {
-  const { post, loading } = useFetch();
+  const { get, post, loading } = useFetch();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [persona, setPersona] = useState('ANALYST');
+  const [provider, setProvider] = useState('perplexity');
+
+  useEffect(() => {
+    // Carregar provedor das configurações
+    const loadProvider = async () => {
+      try {
+        const response = await get<any>('/api/v1/settings');
+        if (response?.status === 'success' && response?.settings?.ai_provider) {
+          console.log('Provedor de IA carregado:', response.settings.ai_provider);
+          setProvider(response.settings.ai_provider);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar provedor:', error);
+      }
+    };
+    loadProvider();
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -90,7 +107,7 @@ export function AIConsultant() {
     const response = await post<any>('/api/v1/ai-report', {
       question: input.trim(),
       persona: persona,
-      provider: 'perplexity',
+      provider: provider,
     });
 
     const assistantMessage: Message = {
