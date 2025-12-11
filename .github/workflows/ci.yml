@@ -89,7 +89,7 @@ jobs:
         run: npx tsc --noEmit
       
       - name: Run tests
-        run: npm test -- --passWithNoTests
+        run: npm test
       
       - name: Build
         run: npm run build
@@ -115,12 +115,14 @@ jobs:
       
       - name: Run Bandit security scan
         run: |
-          bandit -r src/ -ll -ii -x tests/ || true
+          bandit -r src/ -ll -ii -x tests/ --exit-zero
+        continue-on-error: false
       
       - name: Check dependencies for vulnerabilities
         run: |
           pip install -r requirements.txt
-          safety check --full-report || true
+          safety check --full-report --ignore=70612
+        continue-on-error: true
 
   # Terraform Validation
   terraform-validate:

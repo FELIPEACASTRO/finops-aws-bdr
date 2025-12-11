@@ -15,6 +15,14 @@ from typing import Dict, Any, Optional, Callable
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
+# JWT import - optional dependency
+try:
+    import jwt
+    JWT_AVAILABLE = True
+except ImportError:
+    jwt = None
+    JWT_AVAILABLE = False
+
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
@@ -110,7 +118,7 @@ def rate_limited(f: Callable) -> Callable:
 
 # JWT Authentication (optional - enabled via environment variable)
 JWT_SECRET = os.getenv('JWT_SECRET')
-JWT_ENABLED = JWT_SECRET is not None and len(JWT_SECRET) > 0
+JWT_ENABLED = JWT_SECRET is not None and len(JWT_SECRET) > 0 and JWT_AVAILABLE
 
 
 def jwt_required(f: Callable) -> Callable:
@@ -120,13 +128,16 @@ def jwt_required(f: Callable) -> Callable:
         if not JWT_ENABLED:
             return f(*args, **kwargs)
         
+        if not JWT_AVAILABLE:
+            logger.warning("JWT authentication enabled but PyJWT not installed")
+            return f(*args, **kwargs)
+        
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({'error': 'Missing or invalid authorization header'}), 401
         
         token = auth_header.split(' ')[1]
         try:
-            import jwt
             payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
             request.user = payload
         except jwt.ExpiredSignatureError:
