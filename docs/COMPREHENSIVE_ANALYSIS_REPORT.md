@@ -407,7 +407,7 @@ tests/e2e/test_resilience_stress.py - 1 skipped
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                              ║
 ║  9. CORRIGIR DEPRECATIONS (1 dia)                                            ║
-║     □ datetime.utcnow() → datetime.now(datetime.UTC)                         ║
+║     □ datetime.utcnow() → datetime.now(datetime.timezone.utc)                ║
 ║                                                                              ║
 ║  10. CONFIGURAR TERRAFORM BACKEND (1 dia)                                    ║
 ║      □ S3 backend com DynamoDB locking                                       ║
