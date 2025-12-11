@@ -4,7 +4,7 @@ Valida mapper → workers → aggregator → relatório
 """
 import json
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch, MagicMock
 import os
 
@@ -198,7 +198,7 @@ class TestPerformance:
                     'metrics': {'resources_analyzed': 5, 'anomalies_detected': 0, 'optimizations_found': 0}
                 }
             ],
-            'start_time': datetime.utcnow().isoformat()
+            'start_time': datetime.now(timezone.utc).isoformat()
         }
         
         with patch('finops_aws.lambda_aggregator.boto3'):

@@ -4,7 +4,7 @@ REST API para invocar análises e consultar relatórios
 """
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Tuple
 import logging
 import boto3
@@ -66,7 +66,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return handle_list_reports(event)
         
         elif path == '/v1/health' and http_method == 'GET':
-            return response(200, {'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+            return response(200, {'status': 'healthy', 'timestamp': datetime.now(timezone.utc).isoformat()})
         
         else:
             return response(404, {'error': 'Endpoint not found'})
