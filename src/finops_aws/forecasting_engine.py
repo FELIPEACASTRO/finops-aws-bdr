@@ -4,7 +4,7 @@ Previsões de custos baseadas em ML com detecção de anomalias
 """
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple, Optional, Any
 import logging
 
@@ -219,7 +219,7 @@ class CostForecaster:
             'total_forecast': total_forecast,
             'total_forecast_mean': total_mean,
             'service_forecasts': forecasts,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
 

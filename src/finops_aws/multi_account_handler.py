@@ -4,7 +4,7 @@ Permite análise de múltiplas contas AWS e regiões com assumeRole
 """
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 import boto3
 from botocore.exceptions import ClientError
@@ -119,7 +119,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             'accounts_count': len(accounts),
             'batches_count': len(batches),
             'batches': batches,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
     
     except Exception as e:
